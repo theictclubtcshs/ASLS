@@ -46,10 +46,14 @@
         .header {
             background: #186E00;
             color: white;
-            padding: 40px 30px;
+            padding: 30px 30px;
             text-align: center;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .header::before {
@@ -68,28 +72,73 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Logo Styles */
+        .logo-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            animation: logoPulse 3s infinite ease-in-out;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-container:hover img {
+            transform: rotate(5deg) scale(1.1);
+        }
+
         .header h1 {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             position: relative;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            letter-spacing: 2px;
         }
 
         .header p {
-            font-size: 1.1rem;
+            font-size: 1rem;
             opacity: 0.9;
             position: relative;
+            letter-spacing: 1px;
         }
 
         .date-time {
             background: rgba(255,255,255,0.1);
-            padding: 15px;
+            padding: 15px 20px;
             margin-top: 20px;
-            border-radius: 15px;
-            font-size: 1.2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
             position: relative;
             backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            width: 100%;
         }
 
         .content {
@@ -190,6 +239,9 @@
             margin-bottom: 15px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .stats-grid {
@@ -286,12 +338,30 @@
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
-            margin-left: 10px;
+        }
+
+        /* Loading state for logo */
+        .logo-container.loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
         }
 
         @media (max-width: 480px) {
+            .logo-container {
+                width: 100px;
+                height: 100px;
+            }
+            
             .header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
             
             .menu-btn {
@@ -303,12 +373,21 @@
                 font-size: 1.5rem;
                 margin-right: 15px;
             }
+            
+            .date-time {
+                font-size: 0.9rem;
+                padding: 12px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="menu-container">
         <div class="header">
+            <!-- Logo Container - Replaces ASLS text -->
+            <div class="logo-container" id="logoContainer">
+                <img src="Logo.png" alt="ASLS Logo" id="logo" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%23186E00\' stroke=\'white\' stroke-width=\'5\'/%3E%3Ctext x=\'50\' y=\'65\' font-size=\'40\' text-anchor=\'middle\' fill=\'white\' font-weight=\'bold\'%3EASLS%3C/text%3E%3C/svg%3E';">
+            </div>
             <h1>ASLS</h1>
             <p>Automated Student Log System</p>
             <div class="date-time" id="currentDateTime">
@@ -377,14 +456,34 @@
         // CONFIGURATION - UPDATE THESE!
         // ============================================
         
-        // Your Apps Script Web App URL (from earlier)
+        // Your Apps Script Web App URL
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz5neNE6fQqo2_9ihCqwLV-xeO3i8SzXJOhx6KMdqeHn50dBv_NzRkdfxHz07BNYkqe4g/exec';
         
         // Your GitHub Pages camera page URL
-        const CAMERA_PAGE_URL = 'https://theictclubtcshs.github.io/ASLS/';  // UPDATE THIS!
+        const CAMERA_PAGE_URL = 'https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/';  // UPDATE THIS!
         
         // Your Google Sheet URL (optional - for quick access)
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1of_KiJN3_xQx7sHEoIKi5sHNwnAD-XuSKqux5wyIyqI/edit?gid=2145235329#gid=2145235329';  // UPDATE THIS!
+        const SHEET_URL = 'YOUR_GOOGLE_SHEET_URL';  // UPDATE THIS!
+
+        // ============================================
+        // LOGO HANDLING
+        // ============================================
+        
+        const logo = document.getElementById('logo');
+        const logoContainer = document.getElementById('logoContainer');
+
+        // Handle logo load success
+        logo.onload = function() {
+            console.log('Logo loaded successfully');
+            logoContainer.classList.remove('loading');
+        };
+
+        // Handle logo load error - show fallback
+        logo.onerror = function() {
+            console.log('Logo failed to load, using fallback');
+            logoContainer.classList.remove('loading');
+            // Fallback is handled by the onerror attribute in the img tag
+        };
 
         // ============================================
         // FUNCTIONS
@@ -436,11 +535,9 @@
                 
                 const response = await fetch(APPS_SCRIPT_URL + '?action=getTodayStats', {
                     method: 'GET',
-                    mode: 'no-cors' // Use no-cors for simple requests
+                    mode: 'no-cors'
                 });
                 
-                // Since we're using no-cors, we'll just show placeholder stats
-                // In a real implementation, you'd want to parse the response
                 setTimeout(() => {
                     document.getElementById('loginCount').textContent = '0';
                     document.getElementById('logoutCount').textContent = '0';
@@ -476,14 +573,11 @@
         // Initialize
         window.onload = function() {
             updateDateTime();
-            setInterval(updateDateTime, 1000); // Update every second
+            setInterval(updateDateTime, 1000);
             refreshStats();
-            setInterval(refreshStats, 30000); // Refresh stats every 30 seconds
+            setInterval(refreshStats, 30000);
             
-            // Add keyboard listener
             window.addEventListener('keypress', handleKeyPress);
-            
-            // Focus on window for keyboard shortcuts
             window.focus();
         };
 
