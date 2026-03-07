@@ -1154,44 +1154,64 @@
   }
   
   // FIXED: Apply log - properly calls Apps Script and handles response
-  function applyLog() {
-    if (window.isErrorActive) {
-      return;
+  // FIXED: Apply log with proper data handling
+function applyLog() {
+  if (window.isErrorActive) {
+    return;
+  }
+  
+  let lrn = lrnInput.value.trim();
+  
+  let validationError = validateLRN(lrn);
+  if (validationError) {
+    showErrorOverlay(validationError);
+    lockInput(false);
+    isProcessing = false;
+    return;
+  }
+  
+  if (!capturedImage) {
+    showErrorOverlay('Please capture a photo first');
+    lockInput(false);
+    isProcessing = false;
+    return;
+  }
+  
+  showProcessingOverlay();
+  
+  // Log what we're sending (for debugging)
+  console.log('Sending LRN:', lrn);
+  console.log('Action:', action);
+  console.log('Image data length:', capturedImage.length);
+  
+  // Create form data to send - use URLSearchParams for proper encoding
+  const formData = new URLSearchParams();
+  formData.append('action', 'processTimeLog');
+  formData.append('lrn', lrn);
+  formData.append('imageData', capturedImage);
+  formData.append('logAction', action);
+  
+  // Send to Apps Script with proper headers
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: formData.toString()
+  })
+  .then(response => {
+    // Check if response is OK
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+    return response.text(); // Get as text first to debug
+  })
+  .then(text => {
+    console.log('Raw response:', text.substring(0, 200)); // Log first 200 chars
     
-    let lrn = lrnInput.value.trim();
-    
-    let validationError = validateLRN(lrn);
-    if (validationError) {
-      showErrorOverlay(validationError);
-      lockInput(false);
-      isProcessing = false;
-      return;
-    }
-    
-    if (!capturedImage) {
-      showErrorOverlay('Please capture a photo first');
-      lockInput(false);
-      isProcessing = false;
-      return;
-    }
-    
-    showProcessingOverlay();
-    
-    // Create form data to send
-    const formData = new URLSearchParams();
-    formData.append('action', 'processTimeLog');
-    formData.append('lrn', lrn);
-    formData.append('imageData', capturedImage);
-    formData.append('logAction', action);
-    
-    // Send to Apps Script
-    fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => response.json())  // Parse JSON response
-    .then(result => {
+    // Try to parse as JSON
+    try {
+      const result = JSON.parse(text);
       hideProcessingOverlay();
       
       if (result.success) {
@@ -1204,21 +1224,24 @@
         applyBtn.disabled = true;
         captureBtn.disabled = false;
         
-        // Log the processing time if available
-        if (result.time) {
-          console.log('Processing time:', result.time);
-        }
+        console.log('Processing time:', result.time);
       } else {
         // Show error message
         showErrorOverlay(result.message || 'Unknown error occurred');
-        // Don't reset automatically - wait for user to click OK
       }
-    })
-    .catch(error => {
+    } catch (e) {
+      // If not JSON, show raw response for debugging
+      console.error('Parse error:', e);
       hideProcessingOverlay();
-      showErrorOverlay('Connection error: ' + error.message);
-    });
-  }
+      showErrorOverlay('Server returned invalid response. Check console.');
+    }
+  })
+  .catch(error => {
+    console.error('Fetch error:', error);
+    hideProcessingOverlay();
+    showErrorOverlay('Connection error: ' + error.message);
+  });
+}
   
   // Setup auto-capture
   function setupAutoCapture() {
@@ -1312,6 +1335,7 @@
 </body>
 
 </html>
+
 
 
 
