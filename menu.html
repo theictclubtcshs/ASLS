@@ -22,8 +22,27 @@
             background: linear-gradient(135deg, #FFFFFF 0%, #D0FFBC 100%);
             display: flex;
             align-items: center;
-            justify-content: flex-end; /* move box to the right */
-            padding: 20px;
+            justify-content: space-between;
+            padding: 40px;
+        }
+        .left-hero {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        
+        .hero-text {
+            font-size: 5rem;
+            font-weight: 800;
+            color: #186E00;
+            letter-spacing: -2px;
+        }
+        
+        .hero-sub {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-top: 10px;
         }
 
         .menu-container {
@@ -318,6 +337,15 @@
     </style>
 </head>
 <body>
+
+<div class="left-hero">
+    <div>
+        <div class="hero-text">Hello, Tscier!</div>
+        <div class="hero-sub">Welcome to TCSHS</div>
+    </div>
+</div>
+
+<div class="menu-container">
     <div class="menu-container">
         <div class="header">
             <!-- Logo Container -->
