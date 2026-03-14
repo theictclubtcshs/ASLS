@@ -50,7 +50,6 @@
     }
     
     .action-badge {
-      background: <?php /* This will be set by JavaScript now */ ?>;
       padding: 6px 16px;
       border-radius: 20px;
       font-size: clamp(0.8rem, 2vw, 0.9rem);
@@ -258,6 +257,24 @@
       cursor: not-allowed;
       opacity: 0.7;
       border-color: #ddd;
+    }
+    
+    .input-wrapper input:enabled {
+      background-color: white !important;
+      cursor: text !important;
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .input-wrapper input:enabled:focus {
+      border-color: #27ae60;
+      box-shadow: 0 0 0 3px rgba(39,174,96,0.2);
+    }
+    
+    .input-wrapper input:enabled::placeholder {
+      color: #95a5a6;
+      font-weight: normal;
     }
     
     .capture-btn {
@@ -718,27 +735,6 @@
     .main-content::-webkit-scrollbar-thumb:hover {
       background: #a8a8a8;
     }
-
-        /* Add to your existing CSS */
-    .input-wrapper input:enabled {
-      background-color: white !important;
-      cursor: text !important;
-      border-color: #3498db;
-      box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
-      transition: all 0.3s ease;
-    }
-    
-    .input-wrapper input:enabled:focus {
-      border-color: #27ae60;
-      box-shadow: 0 0 0 3px rgba(39,174,96,0.2);
-    }
-    
-    /* Visual indicator that input is ready for barcode */
-    .input-wrapper input:enabled::placeholder {
-      color: #95a5a6;
-      font-weight: normal;
-    }
-    
   </style>
 </head>
 <body>
@@ -851,7 +847,7 @@
 
   <script>
     // ============================================
-    // STABLE WORKING VERSION - DO NOT MODIFY
+    // STABLE WORKING VERSION - WITH BARCODE FIXES
     // ============================================
     
     // IMPORTANT: Replace with your actual Apps Script Web App URL
@@ -926,8 +922,7 @@
         lrnInput.style.cursor = 'text';
       }
     }
-
-  
+    
     function showProcessingOverlay() {
       if (action === 'Log in') {
         processingIcon.textContent = '🔵';
@@ -964,6 +959,25 @@
       window.isErrorActive = false;
     }
     
+    function resetInputForNextScan() {
+      // Completely reset the input state
+      lrnInput.disabled = false;
+      lrnInput.value = '';
+      lrnInput.style.backgroundColor = 'white';
+      lrnInput.style.cursor = 'text';
+      lrnInput.classList.remove('error');
+      
+      // Force focus
+      setTimeout(() => {
+        lrnInput.focus();
+        lrnInput.click();
+        
+        // Create and dispatch a custom event to wake up any listeners
+        const event = new Event('input', { bubbles: true });
+        lrnInput.dispatchEvent(event);
+      }, 100);
+    }
+    
     function dismissErrorAndReset() {
       hideErrorOverlay();
       
@@ -979,7 +993,7 @@
       
       // Focus the input after reset
       setTimeout(function() {
-        lrnInput.focus();
+        resetInputForNextScan();
       }, 300);
     }
     
@@ -1125,7 +1139,7 @@
       // Try to focus the input
       setTimeout(() => {
         if (!isProcessing && !window.isErrorActive) {
-          lrnInput.focus();
+          resetInputForNextScan();
         }
       }, 200);
       
@@ -1166,24 +1180,157 @@
       setTimeout(() => {
         successOverlay.style.display = 'none';
         
-        // CRITICAL FIX: Ensure input is enabled and focused after success
-        lockInput(false);  // Make sure input is enabled
-        lrnInput.disabled = false;  // Double ensure it's enabled
+        // CRITICAL FIX: Complete reset for next barcode scan
+        // First, ensure everything is reset
+        lockInput(false);
+        lrnInput.disabled = false;
         lrnInput.style.backgroundColor = 'white';
         lrnInput.style.cursor = 'text';
         lrnInput.value = '';  // Clear the input
-        lrnInput.focus();  // Set focus back to input
         
-        // Small delay to ensure focus is set
+        // Force a complete reset of the input state
+        isProcessing = false;
+        window.isErrorActive = false;
+        
+        // Reset camera state
+        resetCamera();
+        
+        // Small delay to ensure DOM updates
         setTimeout(() => {
-          lrnInput.focus();
-        }, 100);
+          resetInputForNextScan();
+          
+          // Double-check that the input is ready for barcode
+          console.log('Input ready for barcode scanner');
+        }, 150);
         
       }, 2000);
     }
     
+    function ensureInputEnabled() {
+      // Watch for any changes to the input's disabled state
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.attributeName === 'disabled') {
+            // If someone tries to disable it, ensure we can re-enable
+            if (!isProcessing && !window.isErrorActive && successOverlay.style.display !== 'flex') {
+              setTimeout(() => {
+                lrnInput.disabled = false;
+                resetInputForNextScan();
+              }, 10);
+            }
+          }
+        });
+      });
+      
+      observer.observe(lrnInput, { attributes: true });
+    }
+    
+    function setupAutoCapture() {
+      let lastLength = 0;
+      let lastValue = '';
+      let scanTimeout = null;
+      
+      // Handle both input and change events
+      lrnInput.addEventListener('input', function(e) {
+        if (this.disabled || isProcessing || window.isErrorActive) {
+          return;
+        }
+        
+        this.classList.remove('error');
+        
+        let lrn = this.value.trim();
+        let currentLength = lrn.length;
+        
+        // Clear any pending scan timeout
+        if (scanTimeout) {
+          clearTimeout(scanTimeout);
+        }
+        
+        // Check if we have exactly 12 digits
+        if (currentLength === 12) {
+          // Validate and trigger capture
+          if (validateLRN(lrn) === null) {
+            // Small delay to ensure it's a complete barcode scan
+            scanTimeout = setTimeout(() => {
+              handleCapture();
+            }, 50);
+          }
+        }
+        
+        lastLength = currentLength;
+        lastValue = lrn;
+      });
+      
+      // Handle paste events specifically
+      lrnInput.addEventListener('paste', function(e) {
+        if (this.disabled || isProcessing || window.isErrorActive) {
+          e.preventDefault();
+          return;
+        }
+        
+        // Get pasted data
+        let pastedText = (e.clipboardData || window.clipboardData).getData('text');
+        let cleanPaste = pastedText.replace(/[^0-9]/g, '').slice(0, 12);
+        
+        if (cleanPaste.length === 12) {
+          // Allow the paste to happen naturally, but ensure we capture
+          setTimeout(() => {
+            if (validateLRN(this.value) === null) {
+              handleCapture();
+            }
+          }, 100);
+        }
+      });
+      
+      // Handle property changes (for barcode scanners that set value directly)
+      let originalDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+      Object.defineProperty(lrnInput, 'value', {
+        get: function() {
+          return originalDescriptor.get.call(this);
+        },
+        set: function(newVal) {
+          originalDescriptor.set.call(this, newVal);
+          
+          // Trigger custom event when value is set programmatically
+          if (!this.disabled && !isProcessing && !window.isErrorActive) {
+            let event = new Event('input', { bubbles: true });
+            this.dispatchEvent(event);
+          }
+        }
+      });
+    }
+    
+    function maintainInputFocus() {
+      setInterval(() => {
+        // Only focus if no overlays are showing and not processing
+        if (!isProcessing && 
+            !window.isErrorActive && 
+            successOverlay.style.display !== 'flex' &&
+            processingOverlay.style.display !== 'flex' &&
+            errorOverlay.style.display !== 'flex' &&
+            document.activeElement !== lrnInput) {
+          
+          // Don't steal focus if user is interacting with other elements
+          if (!capturedImage && !applyBtn.disabled) {
+            lrnInput.focus();
+          }
+        }
+      }, 500); // Check every 500ms
+    }
+    
+    function debugInputState() {
+      console.log({
+        disabled: lrnInput.disabled,
+        value: lrnInput.value,
+        isProcessing: isProcessing,
+        isErrorActive: window.isErrorActive,
+        capturedImage: !!capturedImage,
+        activeElement: document.activeElement === lrnInput
+      });
+    }
+    
     // ============================================
-    // STABLE APPLYLOG FUNCTION - THIS IS THE FIXED VERSION
+    // STABLE APPLYLOG FUNCTION - WITH SUCCESS FIXES
     // ============================================
     function applyLog() {
       if (window.isErrorActive) {
@@ -1271,7 +1418,7 @@
               // CRITICAL FIX: Additional focus after success
               setTimeout(() => {
                 lrnInput.disabled = false;
-                lrnInput.focus();
+                resetInputForNextScan();
               }, 2200); // Slightly after the success message disappears
             } else {
               showErrorOverlay(result.message || 'Unknown error occurred');
@@ -1288,62 +1435,32 @@
       });
     }
     
-    function setupAutoCapture() {
-      let lastLength = 0;
-      let lastValue = '';
-      
-      lrnInput.addEventListener('input', function(e) {
-        if (this.disabled || isProcessing || window.isErrorActive) {
-          return;
-        }
-        
-        this.classList.remove('error');
-        
-        let lrn = this.value.trim();
-        let currentLength = lrn.length;
-        
-        if (currentLength === 12 && lastLength < 12 && lrn !== lastValue) {
-          if (validateLRN(lrn) === null) {
-            handleCapture();
-          }
-        }
-        
-        lastLength = currentLength;
-        lastValue = lrn;
-      });
-    }
-
-        // Function to ensure input is always ready for barcode scanner
-    function maintainInputFocus() {
-      setInterval(() => {
-        // Only focus if no overlays are showing and not processing
-        if (!isProcessing && 
-            !window.isErrorActive && 
-            successOverlay.style.display !== 'flex' &&
-            processingOverlay.style.display !== 'flex' &&
-            errorOverlay.style.display !== 'flex' &&
-            document.activeElement !== lrnInput) {
-          
-          // Don't steal focus if user is interacting with other elements
-          if (!capturedImage && !applyBtn.disabled) {
-            lrnInput.focus();
-          }
-        }
-      }, 500); // Check every 500ms
-    }
-    
     window.onload = function() {
       updateActionUI();
       initCamera();
       
       setTimeout(function() {
-        lrnInput.focus();
+        resetInputForNextScan();
       }, 300);
       
       setupAutoCapture();
-      maintainInputFocus(); // Add this line
+      ensureInputEnabled();
+      maintainInputFocus();
       
-      lrnInput.addEventListener('keypress', function(e) {
+      lrnInput.addEventListener('keydown', function(e) {
+        // Allow backspace, delete, tab, escape, enter and arrows
+        if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Tab' || 
+            e.key === 'Escape' || e.key === 'Enter' || e.key.startsWith('Arrow')) {
+          return;  // Let these keys work normally
+        }
+        
+        // Prevent non-numeric input
+        if (!/^[0-9]$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
+          e.preventDefault();
+        }
+      });
+      
+      lrnInput.addEventListener('keyup', function(e) {
         if (e.key === 'Enter') {
           e.preventDefault();
           
@@ -1354,7 +1471,9 @@
           
           let lrn = this.value.trim();
           if (lrn.length === 12) {
-            handleCapture();
+            if (validateLRN(lrn) === null) {
+              handleCapture();
+            }
           } else {
             showErrorOverlay('LRN must be exactly 12 digits');
           }
@@ -1391,8 +1510,7 @@
     window.applyLog = applyLog;
     window.resetCamera = resetCamera;
     window.dismissErrorAndReset = dismissErrorAndReset;
+    window.debugInputState = debugInputState;
   </script>
 </body>
 </html>
-
-
