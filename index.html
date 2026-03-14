@@ -718,6 +718,27 @@
     .main-content::-webkit-scrollbar-thumb:hover {
       background: #a8a8a8;
     }
+
+        /* Add to your existing CSS */
+    .input-wrapper input:enabled {
+      background-color: white !important;
+      cursor: text !important;
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .input-wrapper input:enabled:focus {
+      border-color: #27ae60;
+      box-shadow: 0 0 0 3px rgba(39,174,96,0.2);
+    }
+    
+    /* Visual indicator that input is ready for barcode */
+    .input-wrapper input:enabled::placeholder {
+      color: #95a5a6;
+      font-weight: normal;
+    }
+    
   </style>
 </head>
 <body>
@@ -905,7 +926,8 @@
         lrnInput.style.cursor = 'text';
       }
     }
-    
+
+  
     function showProcessingOverlay() {
       if (action === 'Log in') {
         processingIcon.textContent = '🔵';
@@ -944,10 +966,18 @@
     
     function dismissErrorAndReset() {
       hideErrorOverlay();
+      
+      // CRITICAL FIX: Ensure input is enabled and focused after error
       lockInput(false);
+      lrnInput.disabled = false;
+      lrnInput.style.backgroundColor = 'white';
+      lrnInput.style.cursor = 'text';
+      
       isProcessing = false;
       resetCamera();
       lrnInput.value = '';
+      
+      // Focus the input after reset
       setTimeout(function() {
         lrnInput.focus();
       }, 300);
@@ -1086,7 +1116,19 @@
       applyBtn.disabled = true;
       resetBtn.style.display = 'none';
       
+      // CRITICAL FIX: Ensure input is enabled when resetting camera
       lockInput(false);
+      lrnInput.disabled = false;
+      lrnInput.style.backgroundColor = 'white';
+      lrnInput.style.cursor = 'text';
+      
+      // Try to focus the input
+      setTimeout(() => {
+        if (!isProcessing && !window.isErrorActive) {
+          lrnInput.focus();
+        }
+      }, 200);
+      
       isProcessing = false;
       
       if (!video.srcObject) {
@@ -1123,6 +1165,20 @@
       
       setTimeout(() => {
         successOverlay.style.display = 'none';
+        
+        // CRITICAL FIX: Ensure input is enabled and focused after success
+        lockInput(false);  // Make sure input is enabled
+        lrnInput.disabled = false;  // Double ensure it's enabled
+        lrnInput.style.backgroundColor = 'white';
+        lrnInput.style.cursor = 'text';
+        lrnInput.value = '';  // Clear the input
+        lrnInput.focus();  // Set focus back to input
+        
+        // Small delay to ensure focus is set
+        setTimeout(() => {
+          lrnInput.focus();
+        }, 100);
+        
       }, 2000);
     }
     
@@ -1211,6 +1267,12 @@
               resetCamera();
               applyBtn.disabled = true;
               captureBtn.disabled = false;
+              
+              // CRITICAL FIX: Additional focus after success
+              setTimeout(() => {
+                lrnInput.disabled = false;
+                lrnInput.focus();
+              }, 2200); // Slightly after the success message disappears
             } else {
               showErrorOverlay(result.message || 'Unknown error occurred');
             }
@@ -1250,6 +1312,25 @@
         lastValue = lrn;
       });
     }
+
+        // Function to ensure input is always ready for barcode scanner
+    function maintainInputFocus() {
+      setInterval(() => {
+        // Only focus if no overlays are showing and not processing
+        if (!isProcessing && 
+            !window.isErrorActive && 
+            successOverlay.style.display !== 'flex' &&
+            processingOverlay.style.display !== 'flex' &&
+            errorOverlay.style.display !== 'flex' &&
+            document.activeElement !== lrnInput) {
+          
+          // Don't steal focus if user is interacting with other elements
+          if (!capturedImage && !applyBtn.disabled) {
+            lrnInput.focus();
+          }
+        }
+      }, 500); // Check every 500ms
+    }
     
     window.onload = function() {
       updateActionUI();
@@ -1260,6 +1341,7 @@
       }, 300);
       
       setupAutoCapture();
+      maintainInputFocus(); // Add this line
       
       lrnInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
