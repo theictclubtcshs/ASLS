@@ -928,6 +928,13 @@
       errorMessage.textContent = message;
       errorOverlay.style.display = 'flex';
       window.isErrorActive = true;
+    
+      // Auto close error after 2 seconds
+      setTimeout(() => {
+        if (window.isErrorActive) {
+          dismissErrorAndReset();
+        }
+      }, 2000);
     }
     
     function hideErrorOverlay() {
