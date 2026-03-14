@@ -446,13 +446,31 @@
         }
 
         // Open login page
-        function openLogin() {
-            window.open(CAMERA_PAGE_URL + '?action=Log%20in', '_blank', 'width=900,height=700');
-        }
+        let cameraWindow = null;
 
+        // Open login page
+        function openLogin() {
+            const url = CAMERA_PAGE_URL + '?action=Log%20in';
+        
+            if (!cameraWindow || cameraWindow.closed) {
+                cameraWindow = window.open(url, 'ASLS_CAMERA', 'width=900,height=700');
+            } else {
+                cameraWindow.location.href = url;
+                cameraWindow.focus();
+            }
+        }
+        
         // Open logout page
         function openLogout() {
-            window.open(CAMERA_PAGE_URL + '?action=Log%20out', '_blank', 'width=900,height=700');
+        
+            const url = CAMERA_PAGE_URL + '?action=Log%20out';
+        
+            if (!cameraWindow || cameraWindow.closed) {
+                cameraWindow = window.open(url, 'ASLS_CAMERA', 'width=900,height=700');
+            } else {
+                cameraWindow.location.href = url;
+                cameraWindow.focus();
+            }
         }
 
         // Open Google Sheet
