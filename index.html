@@ -259,24 +259,6 @@
       border-color: #ddd;
     }
     
-    .input-wrapper input:enabled {
-      background-color: white !important;
-      cursor: text !important;
-      border-color: #3498db;
-      box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
-      transition: all 0.3s ease;
-    }
-    
-    .input-wrapper input:enabled:focus {
-      border-color: #27ae60;
-      box-shadow: 0 0 0 3px rgba(39,174,96,0.2);
-    }
-    
-    .input-wrapper input:enabled::placeholder {
-      color: #95a5a6;
-      font-weight: normal;
-    }
-    
     .capture-btn {
       background: #3498db;
       color: white;
@@ -778,8 +760,7 @@
                       pattern="[0-9]{1,12}" 
                       inputmode="numeric" 
                       autocomplete="off"
-                      maxlength="12"
-                      oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12)">
+                      maxlength="12">
               </div>
               <button class="capture-btn" onclick="handleCapture()" id="captureBtn">
                 CAPTURE
@@ -847,48 +828,48 @@
 
   <script>
     // ============================================
-    // STABLE WORKING VERSION - WITH BARCODE FIXES
+    // COMPLETE OPTIMIZED VERSION - BARCODE SCANNER FIXED
     // ============================================
     
     // IMPORTANT: Replace with your actual Apps Script Web App URL
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxF-00EBShexByZOyK-rNewFOXP24sGryCIdPgjvnCx9POgLlQdChbWyt6Luue4u5qg-w/exec';
     
     // DOM Elements
-    let video = document.getElementById('video');
-    let canvas = document.getElementById('canvas');
-    let context = canvas.getContext('2d');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
     let currentStream = null;
     let capturedImage = null;
     let isProcessing = false;
     
-    let captureBtn = document.getElementById('captureBtn');
-    let applyBtn = document.getElementById('applyBtn');
-    let resetBtn = document.getElementById('resetBtn');
-    let statusIndicator = document.getElementById('statusIndicator');
-    let statusText = document.getElementById('statusText');
-    let previewImage = document.getElementById('previewImage');
-    let noImageText = document.getElementById('noImageText');
-    let previewContainer = document.getElementById('previewContainer');
-    let lrnInput = document.getElementById('lrn');
-    let actionBadge = document.getElementById('actionBadge');
+    const captureBtn = document.getElementById('captureBtn');
+    const applyBtn = document.getElementById('applyBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const statusText = document.getElementById('statusText');
+    const previewImage = document.getElementById('previewImage');
+    const noImageText = document.getElementById('noImageText');
+    const previewContainer = document.getElementById('previewContainer');
+    const lrnInput = document.getElementById('lrn');
+    const actionBadge = document.getElementById('actionBadge');
     
-    let successOverlay = document.getElementById('successOverlay');
-    let successIcon = document.getElementById('successIcon');
-    let successTitle = document.getElementById('successTitle');
-    let successMessage = document.getElementById('successMessage');
-    let successSubmessage = document.getElementById('successSubmessage');
+    const successOverlay = document.getElementById('successOverlay');
+    const successIcon = document.getElementById('successIcon');
+    const successTitle = document.getElementById('successTitle');
+    const successMessage = document.getElementById('successMessage');
+    const successSubmessage = document.getElementById('successSubmessage');
     
-    let processingOverlay = document.getElementById('processingOverlay');
-    let processingIcon = document.getElementById('processingIcon');
-    let processingTitle = document.getElementById('processingTitle');
-    let processingMessage = document.getElementById('processingMessage');
-    let processingSpinner = document.getElementById('processingSpinner');
+    const processingOverlay = document.getElementById('processingOverlay');
+    const processingIcon = document.getElementById('processingIcon');
+    const processingTitle = document.getElementById('processingTitle');
+    const processingMessage = document.getElementById('processingMessage');
+    const processingSpinner = document.getElementById('processingSpinner');
     
-    let errorOverlay = document.getElementById('errorOverlay');
-    let errorIcon = document.getElementById('errorIcon');
-    let errorTitle = document.getElementById('errorTitle');
-    let errorMessage = document.getElementById('errorMessage');
-    let errorSubmessage = document.getElementById('errorSubmessage');
+    const errorOverlay = document.getElementById('errorOverlay');
+    const errorIcon = document.getElementById('errorIcon');
+    const errorTitle = document.getElementById('errorTitle');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorSubmessage = document.getElementById('errorSubmessage');
     
     // Get action from URL parameter
     const urlParams = new URLSearchParams(window.location.search);
@@ -933,7 +914,6 @@
         processingTitle.textContent = 'LOGGING OUT...';
         processingTitle.className = 'processing-title logout';
       }
-      processingMessage.textContent = 'Please wait while we process your request';
       processingOverlay.style.display = 'flex';
     }
     
@@ -945,8 +925,7 @@
       errorMessage.textContent = message;
       errorOverlay.style.display = 'flex';
       window.isErrorActive = true;
-    
-      // Auto close error after 2 seconds
+      
       setTimeout(() => {
         if (window.isErrorActive) {
           dismissErrorAndReset();
@@ -960,41 +939,20 @@
     }
     
     function resetInputForNextScan() {
-      // Completely reset the input state
       lrnInput.disabled = false;
       lrnInput.value = '';
       lrnInput.style.backgroundColor = 'white';
       lrnInput.style.cursor = 'text';
       lrnInput.classList.remove('error');
-      
-      // Force focus
-      setTimeout(() => {
-        lrnInput.focus();
-        lrnInput.click();
-        
-        // Create and dispatch a custom event to wake up any listeners
-        const event = new Event('input', { bubbles: true });
-        lrnInput.dispatchEvent(event);
-      }, 100);
+      lrnInput.focus();
     }
     
     function dismissErrorAndReset() {
       hideErrorOverlay();
-      
-      // CRITICAL FIX: Ensure input is enabled and focused after error
       lockInput(false);
-      lrnInput.disabled = false;
-      lrnInput.style.backgroundColor = 'white';
-      lrnInput.style.cursor = 'text';
-      
       isProcessing = false;
       resetCamera();
-      lrnInput.value = '';
-      
-      // Focus the input after reset
-      setTimeout(function() {
-        resetInputForNextScan();
-      }, 300);
+      resetInputForNextScan();
     }
     
     async function initCamera() {
@@ -1043,19 +1001,19 @@
       }
     }
     
+    function validateLRN(lrn) {
+      if (!lrn) return 'Please enter LRN';
+      if (!/^\d+$/.test(lrn)) return 'LRN must contain only numbers';
+      if (lrn.length !== 12) return 'LRN must be exactly 12 digits';
+      return null;
+    }
+    
     function handleCapture() {
-      if (isProcessing) {
-        showErrorOverlay('Please wait, processing current entry...');
-        return;
-      }
+      if (lrnInput.disabled || window.isErrorActive) return;
       
-      if (window.isErrorActive) {
-        return;
-      }
+      const lrn = lrnInput.value.trim();
+      const validationError = validateLRN(lrn);
       
-      let lrn = lrnInput.value.trim();
-      
-      let validationError = validateLRN(lrn);
       if (validationError) {
         showErrorOverlay(validationError);
         lrnInput.classList.add('error');
@@ -1072,11 +1030,10 @@
         return;
       }
       
-      if (isProcessing) return;
       if (window.isErrorActive) return;
       
-      lockInput(true);
       isProcessing = true;
+      lockInput(true);
       
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -1099,19 +1056,8 @@
       resetBtn.style.display = 'block';
       
       setTimeout(() => {
-        if (window.isErrorActive) {
-          lockInput(false);
-          isProcessing = false;
-          return;
-        }
-        
-        let lrn = lrnInput.value.trim();
-        if (validateLRN(lrn) === null && capturedImage) {
+        if (!window.isErrorActive && capturedImage) {
           applyLog();
-        } else {
-          showErrorOverlay('Auto-apply failed: ' + (validateLRN(lrn) || 'No photo'));
-          lockInput(false);
-          isProcessing = false;
         }
       }, 200);
     }
@@ -1130,37 +1076,14 @@
       applyBtn.disabled = true;
       resetBtn.style.display = 'none';
       
-      // CRITICAL FIX: Ensure input is enabled when resetting camera
       lockInput(false);
-      lrnInput.disabled = false;
-      lrnInput.style.backgroundColor = 'white';
-      lrnInput.style.cursor = 'text';
-      
-      // Try to focus the input
-      setTimeout(() => {
-        if (!isProcessing && !window.isErrorActive) {
-          resetInputForNextScan();
-        }
-      }, 200);
-      
       isProcessing = false;
+      
+      setTimeout(resetInputForNextScan, 100);
       
       if (!video.srcObject) {
         initCamera();
       }
-    }
-    
-    function validateLRN(lrn) {
-      if (!lrn) {
-        return 'Please enter LRN';
-      }
-      if (!/^\d+$/.test(lrn)) {
-        return 'LRN must contain only numbers';
-      }
-      if (lrn.length !== 12) {
-        return 'LRN must be exactly 12 digits';
-      }
-      return null;
     }
     
     function showSuccessNotice(message) {
@@ -1177,169 +1100,22 @@
       successMessage.textContent = message;
       successOverlay.style.display = 'flex';
       
+      isProcessing = false;
+      
       setTimeout(() => {
         successOverlay.style.display = 'none';
-        
-        // CRITICAL FIX: Complete reset for next barcode scan
-        // First, ensure everything is reset
-        lockInput(false);
-        lrnInput.disabled = false;
-        lrnInput.style.backgroundColor = 'white';
-        lrnInput.style.cursor = 'text';
-        lrnInput.value = '';  // Clear the input
-        
-        // Force a complete reset of the input state
-        isProcessing = false;
         window.isErrorActive = false;
-        
-        // Reset camera state
         resetCamera();
-        
-        // Small delay to ensure DOM updates
-        setTimeout(() => {
-          resetInputForNextScan();
-          
-          // Double-check that the input is ready for barcode
-          console.log('Input ready for barcode scanner');
-        }, 150);
-        
+        resetInputForNextScan();
       }, 2000);
     }
     
-    function ensureInputEnabled() {
-      // Watch for any changes to the input's disabled state
-      const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          if (mutation.attributeName === 'disabled') {
-            // If someone tries to disable it, ensure we can re-enable
-            if (!isProcessing && !window.isErrorActive && successOverlay.style.display !== 'flex') {
-              setTimeout(() => {
-                lrnInput.disabled = false;
-                resetInputForNextScan();
-              }, 10);
-            }
-          }
-        });
-      });
-      
-      observer.observe(lrnInput, { attributes: true });
-    }
-    
-    function setupAutoCapture() {
-      let lastLength = 0;
-      let lastValue = '';
-      let scanTimeout = null;
-      
-      // Handle both input and change events
-      lrnInput.addEventListener('input', function(e) {
-        if (this.disabled || isProcessing || window.isErrorActive) {
-          return;
-        }
-        
-        this.classList.remove('error');
-        
-        let lrn = this.value.trim();
-        let currentLength = lrn.length;
-        
-        // Clear any pending scan timeout
-        if (scanTimeout) {
-          clearTimeout(scanTimeout);
-        }
-        
-        // Check if we have exactly 12 digits
-        if (currentLength === 12) {
-          // Validate and trigger capture
-          if (validateLRN(lrn) === null) {
-            // Small delay to ensure it's a complete barcode scan
-            scanTimeout = setTimeout(() => {
-              handleCapture();
-            }, 50);
-          }
-        }
-        
-        lastLength = currentLength;
-        lastValue = lrn;
-      });
-      
-      // Handle paste events specifically
-      lrnInput.addEventListener('paste', function(e) {
-        if (this.disabled || isProcessing || window.isErrorActive) {
-          e.preventDefault();
-          return;
-        }
-        
-        // Get pasted data
-        let pastedText = (e.clipboardData || window.clipboardData).getData('text');
-        let cleanPaste = pastedText.replace(/[^0-9]/g, '').slice(0, 12);
-        
-        if (cleanPaste.length === 12) {
-          // Allow the paste to happen naturally, but ensure we capture
-          setTimeout(() => {
-            if (validateLRN(this.value) === null) {
-              handleCapture();
-            }
-          }, 100);
-        }
-      });
-      
-      // Handle property changes (for barcode scanners that set value directly)
-      let originalDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
-      Object.defineProperty(lrnInput, 'value', {
-        get: function() {
-          return originalDescriptor.get.call(this);
-        },
-        set: function(newVal) {
-          originalDescriptor.set.call(this, newVal);
-          
-          // Trigger custom event when value is set programmatically
-          if (!this.disabled && !isProcessing && !window.isErrorActive) {
-            let event = new Event('input', { bubbles: true });
-            this.dispatchEvent(event);
-          }
-        }
-      });
-    }
-    
-    function maintainInputFocus() {
-      setInterval(() => {
-        // Only focus if no overlays are showing and not processing
-        if (!isProcessing && 
-            !window.isErrorActive && 
-            successOverlay.style.display !== 'flex' &&
-            processingOverlay.style.display !== 'flex' &&
-            errorOverlay.style.display !== 'flex' &&
-            document.activeElement !== lrnInput) {
-          
-          // Don't steal focus if user is interacting with other elements
-          if (!capturedImage && !applyBtn.disabled) {
-            lrnInput.focus();
-          }
-        }
-      }, 500); // Check every 500ms
-    }
-    
-    function debugInputState() {
-      console.log({
-        disabled: lrnInput.disabled,
-        value: lrnInput.value,
-        isProcessing: isProcessing,
-        isErrorActive: window.isErrorActive,
-        capturedImage: !!capturedImage,
-        activeElement: document.activeElement === lrnInput
-      });
-    }
-    
-    // ============================================
-    // STABLE APPLYLOG FUNCTION - WITH SUCCESS FIXES
-    // ============================================
     function applyLog() {
-      if (window.isErrorActive) {
-        return;
-      }
+      if (window.isErrorActive) return;
       
-      let lrn = lrnInput.value.trim();
+      const lrn = lrnInput.value.trim();
+      const validationError = validateLRN(lrn);
       
-      let validationError = validateLRN(lrn);
       if (validationError) {
         showErrorOverlay(validationError);
         lockInput(false);
@@ -1356,7 +1132,6 @@
       
       showProcessingOverlay();
       
-      // Compress image to reduce size
       function compressImage(dataUrl, maxSize = 300) {
         return new Promise((resolve) => {
           const img = new Image();
@@ -1387,7 +1162,6 @@
         });
       }
       
-      // Process and send
       compressImage(capturedImage).then(compressedImage => {
         const formData = new URLSearchParams();
         formData.append('action', 'processTimeLog');
@@ -1397,9 +1171,7 @@
         
         fetch(APPS_SCRIPT_URL, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: formData.toString()
         })
         .then(response => response.text())
@@ -1410,97 +1182,78 @@
             
             if (result.success) {
               showSuccessNotice(result.message);
-              lrnInput.value = '';
-              resetCamera();
-              applyBtn.disabled = true;
-              captureBtn.disabled = false;
-              
-              // CRITICAL FIX: Additional focus after success
-              setTimeout(() => {
-                lrnInput.disabled = false;
-                resetInputForNextScan();
-              }, 2200); // Slightly after the success message disappears
             } else {
               showErrorOverlay(result.message || 'Unknown error occurred');
+              isProcessing = false;
+              lockInput(false);
             }
           } catch (e) {
             hideProcessingOverlay();
             showErrorOverlay('Server returned invalid response');
+            isProcessing = false;
+            lockInput(false);
           }
         })
         .catch(error => {
           hideProcessingOverlay();
           showErrorOverlay('Connection error: ' + error.message);
+          isProcessing = false;
+          lockInput(false);
         });
       });
     }
     
+    // BARCODE SCANNER OPTIMIZATION
+    lrnInput.addEventListener('input', function(e) {
+      // Always clean the input
+      this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
+      
+      // If disabled or error, don't auto-capture
+      if (this.disabled || window.isErrorActive || isProcessing) return;
+      
+      // Auto-capture when 12 digits are entered
+      if (this.value.length === 12) {
+        const validationError = validateLRN(this.value);
+        if (!validationError) {
+          setTimeout(() => handleCapture(), 50);
+        }
+      }
+    });
+    
+    lrnInput.addEventListener('paste', function(e) {
+      // Always allow paste
+      setTimeout(() => {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
+      }, 10);
+    });
+    
+    lrnInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (!this.disabled && !window.isErrorActive && !isProcessing) {
+          handleCapture();
+        }
+      }
+    });
+    
     window.onload = function() {
       updateActionUI();
       initCamera();
+      resetInputForNextScan();
       
-      setTimeout(function() {
-        resetInputForNextScan();
-      }, 300);
-      
-      setupAutoCapture();
-      ensureInputEnabled();
-      maintainInputFocus();
-      
-      lrnInput.addEventListener('keydown', function(e) {
-        // Allow backspace, delete, tab, escape, enter and arrows
-        if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Tab' || 
-            e.key === 'Escape' || e.key === 'Enter' || e.key.startsWith('Arrow')) {
-          return;  // Let these keys work normally
+      // Ensure input is always ready
+      setInterval(() => {
+        if (!isProcessing && !window.isErrorActive && 
+            successOverlay.style.display !== 'flex' &&
+            processingOverlay.style.display !== 'flex' &&
+            errorOverlay.style.display !== 'flex' &&
+            !lrnInput.disabled) {
+          lrnInput.focus();
         }
-        
-        // Prevent non-numeric input
-        if (!/^[0-9]$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
-          e.preventDefault();
-        }
-      });
-      
-      lrnInput.addEventListener('keyup', function(e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          
-          if (this.disabled || isProcessing || window.isErrorActive) {
-            showErrorOverlay('Please wait, processing current entry...');
-            return;
-          }
-          
-          let lrn = this.value.trim();
-          if (lrn.length === 12) {
-            if (validateLRN(lrn) === null) {
-              handleCapture();
-            }
-          } else {
-            showErrorOverlay('LRN must be exactly 12 digits');
-          }
-        }
-      });
-      
-      lrnInput.addEventListener('input', function() {
-        if (!this.disabled) {
-          this.classList.remove('error');
-        }
-      });
-      
-      window.addEventListener('resize', handleResize);
+      }, 1000);
     };
     
-    let resizeTimeout;
-    function handleResize() {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        if (currentStream && !capturedImage && !isProcessing && !window.isErrorActive) {
-          initCamera();
-        }
-      }, 250);
-    }
-    
     window.onbeforeunload = function() {
-      window.removeEventListener('resize', handleResize);
       if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
       }
@@ -1510,7 +1263,6 @@
     window.applyLog = applyLog;
     window.resetCamera = resetCamera;
     window.dismissErrorAndReset = dismissErrorAndReset;
-    window.debugInputState = debugInputState;
   </script>
 </body>
 </html>
