@@ -621,7 +621,8 @@
         <input type="password" id="passwordInput" 
                placeholder="Enter password" 
                maxlength="20"
-               autocomplete="off">
+               autocomplete="off"
+               autofocus> <!-- AUTOFOCUS ATTRIBUTE ADDED -->
         <div class="password-strength">
           <div class="strength-bar" id="strengthBar"></div>
         </div>
@@ -754,7 +755,7 @@
 
   <script>
     // ============================================
-    // PASSWORD PROTECTION
+    // PASSWORD PROTECTION WITH AUTO FOCUS
     // ============================================
     
     // Set your admin password here
@@ -766,6 +767,17 @@
     const mainContent = document.getElementById('mainContent');
     const passwordError = document.getElementById('passwordError');
     const strengthBar = document.getElementById('strengthBar');
+    
+    // Force focus on password input when page loads
+    window.addEventListener('load', function() {
+      // Small delay to ensure DOM is fully loaded
+      setTimeout(() => {
+        passwordInput.focus();
+      }, 100);
+    });
+    
+    // Also try to focus immediately
+    passwordInput.focus();
     
     // Enable/disable enter button based on input
     passwordInput.addEventListener('input', function() {
@@ -802,7 +814,7 @@
         // Wrong password - show error
         passwordError.textContent = '❌ Incorrect password. Please try again.';
         passwordInput.value = '';
-        passwordInput.focus();
+        passwordInput.focus(); // Return focus to input field
         strengthBar.style.width = '0%';
         
         // Shake animation for error
@@ -812,6 +824,17 @@
         }, 500);
       }
     }
+    
+    // Add shake animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+      }
+    `;
+    document.head.appendChild(style);
     
     // ============================================
     // ASLS ADMIN PANEL - FIXED DELETE FUNCTIONALITY
