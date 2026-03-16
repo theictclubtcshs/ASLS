@@ -79,11 +79,15 @@
 
     .camera-container {
       flex: 1;
-      background: #f0f0f0;
+      background: #1a1a1a;
       border-radius: 20px;
       overflow: hidden;
       position: relative;
       margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
     }
 
     #video, #canvas {
@@ -100,7 +104,7 @@
       position: absolute;
       bottom: 20px;
       right: 20px;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.8);
       color: white;
       padding: 8px 16px;
       border-radius: 30px;
@@ -108,6 +112,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      z-index: 10;
     }
 
     .status-dot {
@@ -122,9 +127,30 @@
       background: #27ae60;
     }
 
+    .status-dot.error {
+      background: #e74c3c;
+    }
+
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
+    }
+
+    .camera-placeholder {
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .camera-placeholder button {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 1rem;
+      margin-top: 15px;
+      cursor: pointer;
     }
 
     .input-area {
@@ -155,6 +181,10 @@
       box-shadow: 0 0 0 3px rgba(24,110,0,0.1);
     }
 
+    .lrn-input input.error {
+      border-color: #e74c3c;
+    }
+
     .lrn-input button {
       padding: 15px 30px;
       background: #3498db;
@@ -164,6 +194,7 @@
       font-size: 1.1rem;
       font-weight: 600;
       cursor: pointer;
+      transition: all 0.2s;
     }
 
     .lrn-input button:hover:not(:disabled) {
@@ -198,6 +229,7 @@
       font-weight: 700;
       cursor: pointer;
       text-transform: uppercase;
+      transition: all 0.2s;
     }
 
     .action-btn.login {
@@ -208,6 +240,11 @@
     .action-btn.logout {
       background: #e74c3c;
       color: white;
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .overlay {
@@ -249,7 +286,7 @@
 <body>
   <div class="container">
     <div class="left-panel">
-      <h1>ASLS<br>Ultra Fast</h1>
+      <h1>ASLS<br>Student Log</h1>
       <p>Automated Student Log System</p>
       <div class="stats">
         <div class="stat-item">
@@ -257,20 +294,26 @@
           <span id="todayCount">0</span>
         </div>
         <div class="stat-item">
-          <span>👥 Students Loaded:</span>
+          <span>👥 Students:</span>
           <span id="studentCount">0</span>
         </div>
         <div class="stat-item">
-          <span>💾 Local Cache:</span>
-          <span id="cacheSize">0 logs</span>
+          <span>💾 Local Logs:</span>
+          <span id="cacheSize">0</span>
         </div>
       </div>
     </div>
     
     <div class="right-panel">
-      <div class="camera-container">
-        <video id="video" autoplay playsinline></video>
+      <div class="camera-container" id="cameraContainer">
+        <video id="video" autoplay playsinline style="display: none;"></video>
         <canvas id="canvas"></canvas>
+        <div class="camera-placeholder" id="cameraPlaceholder" style="display: flex; flex-direction: column; align-items: center;">
+          <div style="font-size: 48px; margin-bottom: 20px;">📷</div>
+          <h3 style="color: white; margin-bottom: 10px;">Camera Initializing...</h3>
+          <p style="color: #aaa; margin-bottom: 20px;">Please grant camera permission when prompted</p>
+          <button onclick="requestCameraPermission()" id="requestBtn" style="display: none;">Allow Camera Access</button>
+        </div>
         <div class="camera-status">
           <span class="status-dot" id="statusDot"></span>
           <span id="statusText">Initializing...</span>
@@ -284,13 +327,14 @@
                  placeholder="12-digit LRN" 
                  maxlength="12"
                  inputmode="numeric"
-                 autocomplete="off">
-          <button onclick="handleCapture()" id="captureBtn">CAPTURE</button>
+                 autocomplete="off"
+                 disabled>
+          <button onclick="handleCapture()" id="captureBtn" disabled>CAPTURE</button>
         </div>
         
         <div class="preview" id="previewArea" style="display: none;">
           <img id="previewImage" src="" alt="Preview">
-          <button class="action-btn" id="actionBtn" onclick="applyLog()">LOG IN</button>
+          <button class="action-btn" id="actionBtn" onclick="applyLog()" disabled>LOG IN</button>
         </div>
       </div>
     </div>
@@ -313,7 +357,7 @@
 
   <script>
     // ============================================
-    // ASLS MAIN CAMERA PAGE
+    // ASLS MAIN CAMERA PAGE - FIXED CAMERA INIT
     // ============================================
     
     // Student data is loaded from students.js
@@ -327,9 +371,12 @@
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
+    const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+    const requestBtn = document.getElementById('requestBtn');
     let currentStream = null;
     let capturedImage = null;
     let isProcessing = false;
+    let cameraActive = false;
     
     const lrnInput = document.getElementById('lrn');
     const captureBtn = document.getElementById('captureBtn');
@@ -367,20 +414,25 @@
     }
     
     function saveLogLocally(logEntry) {
-      // Master log
-      let masterLog = JSON.parse(localStorage.getItem('asls_master') || '[]');
-      masterLog.push(logEntry);
-      if (masterLog.length > 10000) masterLog = masterLog.slice(-10000);
-      localStorage.setItem('asls_master', JSON.stringify(masterLog));
-      
-      // Daily log
-      const today = getTodayPath();
-      let dailyLog = JSON.parse(localStorage.getItem(`asls_${today}`) || '[]');
-      dailyLog.push(logEntry);
-      localStorage.setItem(`asls_${today}`, JSON.stringify(dailyLog));
-      
-      updateStats();
-      return true;
+      try {
+        // Master log
+        let masterLog = JSON.parse(localStorage.getItem('asls_master') || '[]');
+        masterLog.push(logEntry);
+        if (masterLog.length > 10000) masterLog = masterLog.slice(-10000);
+        localStorage.setItem('asls_master', JSON.stringify(masterLog));
+        
+        // Daily log
+        const today = getTodayPath();
+        let dailyLog = JSON.parse(localStorage.getItem(`asls_${today}`) || '[]');
+        dailyLog.push(logEntry);
+        localStorage.setItem(`asls_${today}`, JSON.stringify(dailyLog));
+        
+        updateStats();
+        return true;
+      } catch (e) {
+        console.error('Error saving to localStorage:', e);
+        return false;
+      }
     }
     
     function updateStats() {
@@ -392,35 +444,96 @@
       document.getElementById('cacheSize').textContent = master.length + ' logs';
     }
     
-    // ========== CAMERA FUNCTIONS ==========
-    async function initCamera() {
+    // ========== FIXED CAMERA FUNCTIONS ==========
+    async function requestCameraPermission() {
+      updateCameraStatus('waiting', 'Requesting camera...');
+      requestBtn.style.display = 'none';
+      
       try {
-        statusText.textContent = 'Requesting camera...';
-        
-        if (currentStream) {
-          currentStream.getTracks().forEach(t => t.stop());
+        // Check if browser supports getUserMedia
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Your browser does not support camera access');
         }
         
-        currentStream = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: 'user' },
-          audio: false 
+        // Request camera with specific constraints
+        const constraints = {
+          video: {
+            facingMode: 'user',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        };
+        
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        
+        // Attach stream to video element
+        video.srcObject = currentStream;
+        
+        // Wait for video to be ready
+        await new Promise((resolve) => {
+          video.onloadedmetadata = () => {
+            video.play();
+            resolve();
+          };
         });
         
-        video.srcObject = currentStream;
-        await video.play();
+        // Success!
+        video.style.display = 'block';
+        cameraPlaceholder.style.display = 'none';
+        cameraActive = true;
         
-        statusDot.className = 'status-dot ready';
-        statusText.textContent = 'Ready';
+        updateCameraStatus('ready', 'Camera Ready');
+        lrnInput.disabled = false;
         captureBtn.disabled = false;
+        lrnInput.focus();
+        
+        console.log('✅ Camera initialized successfully');
         
       } catch (error) {
-        statusText.textContent = 'Camera error';
-        captureBtn.disabled = true;
+        console.error('Camera error:', error);
+        
+        // Handle specific errors
+        if (error.name === 'NotAllowedError' || error.message.includes('permission')) {
+          updateCameraStatus('error', 'Camera permission denied');
+          cameraPlaceholder.innerHTML = `
+            <div style="font-size: 48px; margin-bottom: 20px;">🚫</div>
+            <h3 style="color: white; margin-bottom: 10px;">Camera Access Denied</h3>
+            <p style="color: #aaa; margin-bottom: 20px;">Please allow camera access in your browser settings</p>
+            <button onclick="requestCameraPermission()" style="background: #3498db; color: white; border: none; padding: 12px 24px; border-radius: 30px; cursor: pointer;">Try Again</button>
+          `;
+        } else if (error.name === 'NotFoundError') {
+          updateCameraStatus('error', 'No camera found');
+          cameraPlaceholder.innerHTML = `
+            <div style="font-size: 48px; margin-bottom: 20px;">📵</div>
+            <h3 style="color: white; margin-bottom: 10px;">No Camera Detected</h3>
+            <p style="color: #aaa;">Please connect a camera to continue</p>
+          `;
+        } else {
+          updateCameraStatus('error', 'Camera error');
+          cameraPlaceholder.innerHTML = `
+            <div style="font-size: 48px; margin-bottom: 20px;">❌</div>
+            <h3 style="color: white; margin-bottom: 10px;">Camera Error</h3>
+            <p style="color: #aaa; margin-bottom: 20px;">${error.message}</p>
+            <button onclick="requestCameraPermission()" style="background: #3498db; color: white; border: none; padding: 12px 24px; border-radius: 30px; cursor: pointer;">Try Again</button>
+          `;
+        }
+      }
+    }
+    
+    function updateCameraStatus(status, text) {
+      statusText.textContent = text;
+      statusDot.className = 'status-dot';
+      
+      if (status === 'ready') {
+        statusDot.classList.add('ready');
+      } else if (status === 'error') {
+        statusDot.classList.add('error');
       }
     }
     
     function handleCapture() {
-      if (isProcessing) return;
+      if (!cameraActive || isProcessing) return;
       
       const lrn = lrnInput.value.trim();
       if (!lrn || lrn.length !== 12 || !/^\d+$/.test(lrn)) {
@@ -431,7 +544,7 @@
       
       const student = findStudent(lrn);
       if (!student) {
-        showError('Student not found');
+        showError('Student not found in database');
         lrnInput.classList.add('error');
         return;
       }
@@ -445,20 +558,49 @@
       captureBtn.disabled = true;
       lrnInput.disabled = true;
       
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      // Set canvas dimensions
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      
+      // Draw video frame to canvas
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       
+      // Capture image
       capturedImage = canvas.toDataURL('image/jpeg', 0.6);
       
+      // Show preview
       previewImage.src = capturedImage;
       previewArea.style.display = 'flex';
+      video.style.display = 'none';
+      canvas.style.display = 'block';
+      
+      updateCameraStatus('ready', 'Photo Captured');
       actionBtn.disabled = false;
       
+      // Auto-apply after short delay
       setTimeout(() => {
         if (!isProcessing) return;
         applyLog();
       }, 200);
+    }
+    
+    function resetCamera() {
+      isProcessing = false;
+      captureBtn.disabled = false;
+      lrnInput.disabled = false;
+      actionBtn.disabled = true;
+      previewArea.style.display = 'none';
+      capturedImage = null;
+      
+      // Show video again
+      video.style.display = 'block';
+      canvas.style.display = 'none';
+      
+      if (cameraActive) {
+        updateCameraStatus('ready', 'Camera Ready');
+      }
+      
+      lrnInput.focus();
     }
     
     async function applyLog() {
@@ -479,32 +621,24 @@
         period: now.getHours() >= 12 ? 'PM' : 'AM',
         lrn: lrn,
         name: student.name,
-        sex: student.sex,
-        grade: student.grade,
-        section: student.section,
+        sex: student.sex || 'N/A',
+        grade: student.grade || 'N/A',
+        section: student.section || 'N/A',
         action: action,
         photo: capturedImage || 'no-photo',
         status: 'verified'
       };
       
-      saveLogLocally(logEntry);
+      const saved = saveLogLocally(logEntry);
       
-      showSuccess(`${student.name} ${action} successful!`);
+      if (saved) {
+        showSuccess(`${student.name} ${action} successful!`);
+      } else {
+        showError('Failed to save log');
+      }
       
       resetCamera();
       lrnInput.value = '';
-      lrnInput.focus();
-    }
-    
-    function resetCamera() {
-      isProcessing = false;
-      captureBtn.disabled = false;
-      lrnInput.disabled = false;
-      actionBtn.disabled = true;
-      previewArea.style.display = 'none';
-      capturedImage = null;
-      video.style.display = 'block';
-      canvas.style.display = 'none';
     }
     
     function showSuccess(msg) {
@@ -526,7 +660,7 @@
     // ========== EVENT LISTENERS ==========
     lrnInput.addEventListener('input', function(e) {
       this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
-      if (this.value.length === 12 && !isProcessing) {
+      if (this.value.length === 12 && !isProcessing && cameraActive) {
         handleCapture();
       }
     });
@@ -540,9 +674,13 @@
     
     // ========== INIT ==========
     window.onload = function() {
-      initCamera();
       updateStats();
-      lrnInput.focus();
+      
+      // Auto-request camera on page load
+      setTimeout(() => {
+        requestCameraPermission();
+      }, 500);
+      
       setInterval(updateStats, 1000);
     };
     
@@ -555,6 +693,7 @@
     // Expose functions
     window.handleCapture = handleCapture;
     window.applyLog = applyLog;
+    window.requestCameraPermission = requestCameraPermission;
   </script>
 </body>
 </html>
