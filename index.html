@@ -6,9 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>ASLS - Student Log System</title>
   <style>
-    /* ============================================
-       COMPLETE CSS - Copy from previous version
-       ============================================ */
+    /* ALL YOUR EXISTING CSS HERE - Keep the same */
     * {
       margin: 0;
       padding: 0;
@@ -833,14 +831,16 @@
 
   <script>
     // ============================================
-    // ASLS - SECURE VERSION WITH GOOGLE SCRIPT PROXY
+    // ASLS - FIXED VERSION WITH PROPER PROXY TESTING
     // ============================================
     
     // ========== CONFIGURATION ==========
     const GITHUB_USERNAME = 'theictclubtcshs';
     const GITHUB_REPO = 'ASLS';
-    // Replace with your Google Apps Script Web App URL
+    
+    // !!! IMPORTANT: Replace this with your ACTUAL Google Apps Script URL !!!
     const PROXY_URL = 'https://script.google.com/macros/s/AKfycbzkL078TTiZDRtJrjDd-xXdroKn1VtQGL6p0fWr9y2NjlIsQHWQ1NkjnzTM-g7zpvyk/exec';
+    
     const STUDENTS_CSV_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/students.csv`;
     const LOGS_BASE_PATH = 'logs';
     
@@ -852,6 +852,7 @@
     let capturedImage = null;
     let isProcessing = false;
     let studentsData = [];
+    let proxyWorking = false;
     
     const captureBtn = document.getElementById('captureBtn');
     const applyBtn = document.getElementById('applyBtn');
@@ -888,24 +889,58 @@
     
     window.isErrorActive = false;
     
-    // ========== PROXY FUNCTIONS ==========
-    
-    // Test proxy connection
+    // ========== PROXY TEST FUNCTION ==========
     async function testProxyConnection() {
       try {
-        const response = await fetch(PROXY_URL);
+        console.log('Testing proxy connection to:', PROXY_URL);
+        
+        // Add cache busting
+        const testUrl = PROXY_URL + '?t=' + Date.now();
+        
+        const response = await fetch(testUrl, {
+          method: 'GET',
+          mode: 'cors',
+          cache: 'no-cache',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
-        console.log('✅ Proxy connected:', data);
-        return true;
+        console.log('✅ Proxy response:', data);
+        
+        if (data.status === 'running') {
+          proxyWorking = true;
+          return true;
+        } else {
+          throw new Error('Proxy returned unexpected response');
+        }
       } catch (error) {
-        console.error('❌ Proxy connection failed:', error);
-        showErrorOverlay('Cannot connect to proxy server. Check your proxy URL.');
+        console.error('❌ Proxy test failed:', error);
+        
+        // Show detailed error message
+        let errorMsg = 'Cannot connect to proxy server.\n\n';
+        errorMsg += 'Please check:\n';
+        errorMsg += '1. Your proxy URL is correct\n';
+        errorMsg += '2. The Google Apps Script is deployed\n';
+        errorMsg += '3. The script has "Anyone" access\n\n';
+        errorMsg += 'Current URL: ' + PROXY_URL;
+        
+        alert(errorMsg);
         return false;
       }
     }
     
-    // Upload to GitHub via proxy
+    // ========== PROXY UPLOAD FUNCTION ==========
     async function uploadToGitHub(path, content, message) {
+      if (!proxyWorking) {
+        throw new Error('Proxy not connected');
+      }
+      
       try {
         // First check if file exists to get SHA
         let sha = null;
@@ -916,8 +951,6 @@
             const data = await checkResponse.json();
             sha = data.sha;
             console.log('📁 File exists, updating...');
-          } else {
-            console.log('📁 Creating new file...');
           }
         } catch (e) {
           console.log('📁 Creating new file...');
@@ -926,7 +959,12 @@
         // Upload through proxy
         const response = await fetch(PROXY_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          mode: 'cors',
+          cache: 'no-cache',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
           body: JSON.stringify({
             username: GITHUB_USERNAME,
             repo: GITHUB_REPO,
@@ -936,6 +974,10 @@
             sha: sha
           })
         });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         
         const result = await response.json();
         
@@ -951,7 +993,7 @@
       }
     }
     
-    // ========== DATA FUNCTIONS ==========
+    // ========== REST OF YOUR FUNCTIONS (keep all the same) ==========
     
     // Load students data
     async function loadStudentsData() {
@@ -1078,8 +1120,7 @@
       }
     }
     
-    // ========== UI FUNCTIONS ==========
-    
+    // Update UI based on action
     function updateActionUI() {
       actionBadge.textContent = action;
       applyBtn.textContent = action;
@@ -1149,8 +1190,6 @@
       resetCamera();
       resetInputForNextScan();
     }
-    
-    // ========== CAMERA FUNCTIONS ==========
     
     async function initCamera() {
       try {
@@ -1300,10 +1339,14 @@
       }, 2000);
     }
     
-    // ========== MAIN LOGIC ==========
-    
     async function applyLog() {
       if (window.isErrorActive) return;
+      
+      // Check if proxy is working
+      if (!proxyWorking) {
+        showErrorOverlay('Proxy not connected. Please refresh the page.');
+        return;
+      }
       
       const lrn = lrnInput.value.trim();
       const validationError = validateLRN(lrn);
@@ -1407,8 +1450,7 @@
       }
     }
     
-    // ========== EVENT LISTENERS ==========
-    
+    // Barcode scanner
     lrnInput.addEventListener('input', function(e) {
       this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
       
@@ -1437,12 +1479,17 @@
       }
     });
     
-    // ========== INITIALIZATION ==========
-    
+    // Initialize
     window.onload = async function() {
+      console.log('Starting ASLS...');
+      console.log('Proxy URL:', PROXY_URL);
+      
       // Test proxy connection first
       const proxyOk = await testProxyConnection();
-      if (!proxyOk) return;
+      if (!proxyOk) {
+        showErrorOverlay('Cannot connect to proxy server. Check console for details.');
+        return;
+      }
       
       // Load students
       const studentsLoaded = await loadStudentsData();
@@ -1470,7 +1517,7 @@
       }
     };
     
-    // Expose functions globally
+    // Expose functions
     window.handleCapture = handleCapture;
     window.applyLog = applyLog;
     window.resetCamera = resetCamera;
