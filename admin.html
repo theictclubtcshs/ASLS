@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ASLS - Admin Panel with Drive Upload</title>
+  <title>ASLS - Upload to Google Drive</title>
   <style>
     * {
       margin: 0;
@@ -70,16 +70,6 @@
     
     .refresh-btn {
       background: #3498db;
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      border-radius: 50px;
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
-    
-    .reset-btn {
-      background: #e67e22;
       color: white;
       border: none;
       padding: 15px 30px;
@@ -238,16 +228,6 @@
       color: #721c24;
     }
     
-    .single-delete {
-      background: #e74c3c;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-left: 5px;
-    }
-    
     .modal {
       display: none;
       position: fixed;
@@ -300,51 +280,6 @@
       color: white;
       border-color: #186E00;
     }
-    
-    .confirm-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.8);
-      display: none;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    .confirm-content {
-      background: white;
-      padding: 40px;
-      border-radius: 20px;
-      max-width: 400px;
-      text-align: center;
-    }
-    
-    .confirm-buttons {
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    
-    .confirm-yes {
-      background: #e74c3c;
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-    
-    .confirm-no {
-      background: #7f8c8d;
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
@@ -352,12 +287,10 @@
     <div class="header">
       <div>
         <h1>📊 ASLS Admin Panel</h1>
-        <p>Manage student logs and upload to Google Drive</p>
+        <p>Upload student logs to Google Drive</p>
       </div>
       <div class="btn-group">
-        <button class="drive-btn" onclick="uploadToDrive()">☁️ UPLOAD TO DRIVE</button>
         <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
-        <button class="reset-btn" onclick="confirmResetAll()">🗑️ RESET ALL DATA</button>
       </div>
     </div>
     
@@ -381,24 +314,25 @@
     </div>
     
     <div class="drive-section">
-      <h2>☁️ Google Drive Upload</h2>
+      <h2>☁️ Upload to Google Drive</h2>
       <div class="drive-input-group">
         <input type="text" id="scriptUrl" class="drive-input" 
                placeholder="Paste your Apps Script URL here"
-               value="https://script.google.com/macros/s/AKfycbwADqDZgDjv0qEOv-V1Fbt4ssKkFccW4vx7EbMzn6aXi7BQ5qyFkMqUzI7Ab1W9XQ/exec">
-        <button class="test-btn" onclick="testConnection()">✓ Test Connection</button>
+               value="https://script.google.com/macros/s/AKfycbxYJvrOY7VuFSI0zozHPMWojzr3WfD-fom7zn9CG4lyQfLNSdXDnHXhNyZqUvHi1fiAPw/exec">
+        <button class="test-btn" onclick="testConnection()">✓ Test</button>
+        <button class="drive-btn" onclick="uploadToDrive()">☁️ UPLOAD TO DRIVE</button>
       </div>
       <div class="status-box" id="driveStatus">
-        ⚡ Ready to upload to Google Drive
+        ⚡ Ready to upload. Click Test first, then Upload.
       </div>
     </div>
     
     <div class="search-section">
-      <input type="text" class="search-box" id="searchInput" placeholder="🔍 Search by name, LRN, grade, section..." onkeyup="filterLogs()">
+      <input type="text" class="search-box" id="searchInput" placeholder="🔍 Search..." onkeyup="filterLogs()">
       <select class="filter-select" id="actionFilter" onchange="filterLogs()">
         <option value="all">All Actions</option>
-        <option value="Log in">Log In Only</option>
-        <option value="Log out">Log Out Only</option>
+        <option value="Log in">Log In</option>
+        <option value="Log out">Log Out</option>
       </select>
     </div>
     
@@ -414,12 +348,10 @@
             <th>Grade</th>
             <th>Section</th>
             <th>Action</th>
-            <th>Status</th>
-            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="logsBody">
-          <tr><td colspan="10" style="text-align: center; padding: 50px;">Loading logs...</td></tr>
+          <tr><td colspan="8" style="text-align: center; padding: 50px;">Loading logs...</td></tr>
         </tbody>
       </table>
       <div class="pagination" id="pagination"></div>
@@ -432,21 +364,9 @@
     <img class="modal-image" id="modalImage" src="">
   </div>
 
-  <!-- Confirm Modal -->
-  <div class="confirm-modal" id="confirmModal">
-    <div class="confirm-content">
-      <h3 id="confirmTitle">⚠️ Confirm</h3>
-      <p id="confirmMessage"></p>
-      <div class="confirm-buttons">
-        <button class="confirm-yes" id="confirmYesBtn">Yes</button>
-        <button class="confirm-no" onclick="closeConfirmModal()">Cancel</button>
-      </div>
-    </div>
-  </div>
-
   <script>
     // ============================================
-    // ASLS ADMIN PANEL - WORKING VERSION
+    // ASLS - WORKING DRIVE UPLOAD
     // ============================================
     
     let allLogs = [];
@@ -496,9 +416,7 @@
       filteredLogs = allLogs.filter(log => {
         if (searchTerm) {
           const matches = (log.name && log.name.toLowerCase().includes(searchTerm)) ||
-                         (log.lrn && log.lrn.includes(searchTerm)) ||
-                         (log.grade && log.grade.toLowerCase().includes(searchTerm)) ||
-                         (log.section && log.section.toLowerCase().includes(searchTerm));
+                         (log.lrn && log.lrn.includes(searchTerm));
           if (!matches) return false;
         }
         if (actionFilter !== 'all' && log.action !== actionFilter) return false;
@@ -517,13 +435,12 @@
       const pageLogs = filteredLogs.slice(start, end);
       
       if (filteredLogs.length === 0) {
-        document.getElementById('logsBody').innerHTML = '<tr><td colspan="10" style="text-align:center;">No logs found</td></tr>';
+        document.getElementById('logsBody').innerHTML = '<tr><td colspan="8" style="text-align:center;">No logs found</td></tr>';
         return;
       }
       
       let html = '';
-      pageLogs.forEach((log, idx) => {
-        const actualIndex = start + idx;
+      pageLogs.forEach((log) => {
         const date = new Date(log.timestamp);
         
         html += `<tr>
@@ -535,8 +452,6 @@
           <td>${log.grade || 'N/A'}</td>
           <td>${log.section || 'N/A'}</td>
           <td><span class="action-badge ${log.action === 'Log in' ? 'action-login' : 'action-logout'}">${log.action}</span></td>
-          <td>✅ Verified</td>
-          <td><button class="single-delete" onclick="confirmDelete(${actualIndex})">🗑️</button></td>
         </tr>`;
       });
       
@@ -564,50 +479,34 @@
       renderTable();
     }
     
+    // View photo
+    function viewPhoto(src) {
+      document.getElementById('modalImage').src = src;
+      document.getElementById('photoModal').style.display = 'flex';
+    }
+    
     // Test connection
     function testConnection() {
       const url = document.getElementById('scriptUrl').value.trim();
-      const statusEl = document.getElementById('driveStatus');
+      const status = document.getElementById('driveStatus');
       
       if (!url) {
-        statusEl.innerHTML = '❌ Please enter a URL';
+        status.innerHTML = '❌ Please enter a URL';
         return;
       }
       
-      statusEl.innerHTML = '⏳ Testing connection...';
+      status.innerHTML = '⏳ Testing connection...';
       APPS_SCRIPT_URL = url;
       localStorage.setItem('asls_script_url', url);
       
-      // Simple fetch test
-      fetch(url + '?t=' + Date.now())
-        .then(() => {
-          statusEl.innerHTML = '✅ Connection successful! Ready to upload.';
-        })
-        .catch(() => {
-          statusEl.innerHTML = '⚠️ URL saved but may need CORS. Try uploading anyway.';
-        });
+      // Simple test - just save the URL
+      status.innerHTML = '✅ URL saved! Ready to upload.';
     }
     
-    // Upload to Drive
-    function uploadToDrive() {
-      if (!APPS_SCRIPT_URL) {
-        alert('Please test connection first');
-        return;
-      }
-      
-      if (allLogs.length === 0) {
-        alert('No logs to upload');
-        return;
-      }
-      
-      const statusEl = document.getElementById('driveStatus');
-      statusEl.innerHTML = '⏳ Generating HTML file...';
-      
-      // Generate filename
+    // Generate HTML file from logs
+    function generateLogsHTML() {
       const now = new Date();
-      const filename = `ASLS_Logs_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}.html`;
       
-      // Generate HTML
       let html = `<!DOCTYPE html>
 <html>
 <head>
@@ -668,92 +567,90 @@
 </body>
 </html>`;
       
-      statusEl.innerHTML = '⏳ Uploading ' + allLogs.length + ' logs to Drive...';
+      return html;
+    }
+    
+    // Upload to Drive
+    function uploadToDrive() {
+      if (!APPS_SCRIPT_URL) {
+        alert('Please test connection first');
+        return;
+      }
       
-      // Create form and submit
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = APPS_SCRIPT_URL;
-      form.target = 'upload_frame';
-      form.style.display = 'none';
+      if (allLogs.length === 0) {
+        alert('No logs to upload');
+        return;
+      }
       
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'data';
-      input.value = JSON.stringify({
+      const status = document.getElementById('driveStatus');
+      status.innerHTML = '⏳ Generating HTML file...';
+      
+      // Generate filename with timestamp
+      const now = new Date();
+      const filename = `ASLS_Logs_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}.html`;
+      
+      // Generate HTML content
+      const htmlContent = generateLogsHTML();
+      
+      status.innerHTML = '⏳ Uploading ' + allLogs.length + ' logs to Drive...';
+      
+      // Create form data
+      const formData = new URLSearchParams();
+      formData.append('data', JSON.stringify({
         filename: filename,
-        content: html,
-        folderName: 'ASLS_Logs'
-      });
+        content: htmlContent,
+        folderName: 'AttendanceASLS'
+      }));
       
-      form.appendChild(input);
-      document.body.appendChild(form);
-      
-      const iframe = document.createElement('iframe');
-      iframe.name = 'upload_frame';
-      iframe.style.display = 'none';
-      document.body.appendChild(iframe);
-      
-      iframe.onload = function() {
-        statusEl.innerHTML = '✅ Upload complete!<br>' +
-                            'File: ' + filename + '<br>' +
-                            'Logs: ' + allLogs.length + '<br>' +
-                            'Folder: ASLS_Logs in your Google Drive';
+      // Use fetch with no-cors mode
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData
+      }).then(() => {
+        status.innerHTML = `✅ Upload initiated!<br>
+                           File: ${filename}<br>
+                           Logs: ${allLogs.length}<br>
+                           Folder: AttendanceASLS<br><br>
+                           <strong>Check your Google Drive now!</strong>`;
+        
+        // Also try with iframe as backup
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = APPS_SCRIPT_URL;
+        form.target = 'upload_iframe';
+        form.style.display = 'none';
+        
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'data';
+        input.value = JSON.stringify({
+          filename: filename,
+          content: htmlContent,
+          folderName: 'AttendanceASLS'
+        });
+        
+        form.appendChild(input);
+        document.body.appendChild(form);
+        
+        const iframe = document.createElement('iframe');
+        iframe.name = 'upload_iframe';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+        
+        form.submit();
         
         setTimeout(() => {
           document.body.removeChild(form);
           document.body.removeChild(iframe);
-        }, 2000);
-      };
-      
-      form.submit();
-    }
-    
-    // Photo viewer
-    function viewPhoto(src) {
-      document.getElementById('modalImage').src = src;
-      document.getElementById('photoModal').style.display = 'flex';
-    }
-    
-    // Delete functions
-    function confirmDelete(index) {
-      const log = filteredLogs[index];
-      document.getElementById('confirmTitle').innerHTML = '⚠️ Delete Log';
-      document.getElementById('confirmMessage').innerHTML = `Delete log for ${log.name}?`;
-      document.getElementById('confirmYesBtn').onclick = () => executeDelete(index);
-      document.getElementById('confirmModal').style.display = 'flex';
-    }
-    
-    function executeDelete(index) {
-      const logIndex = allLogs.findIndex(l => l.timestamp === filteredLogs[index].timestamp);
-      if (logIndex !== -1) {
-        allLogs.splice(logIndex, 1);
-        localStorage.setItem('asls_master', JSON.stringify(allLogs));
-        loadData();
-      }
-      closeConfirmModal();
-    }
-    
-    function confirmResetAll() {
-      if (allLogs.length === 0) {
-        alert('No logs to reset');
-        return;
-      }
-      document.getElementById('confirmTitle').innerHTML = '⚠️ RESET ALL DATA';
-      document.getElementById('confirmMessage').innerHTML = `Delete ALL ${allLogs.length} logs permanently?`;
-      document.getElementById('confirmYesBtn').onclick = resetAllData;
-      document.getElementById('confirmModal').style.display = 'flex';
-    }
-    
-    function resetAllData() {
-      localStorage.removeItem('asls_master');
-      closeConfirmModal();
-      alert('All data reset. Page will reload.');
-      window.location.reload();
-    }
-    
-    function closeConfirmModal() {
-      document.getElementById('confirmModal').style.display = 'none';
+        }, 5000);
+        
+      }).catch(error => {
+        status.innerHTML = '❌ Error: ' + error.message;
+      });
     }
     
     // Initialize
