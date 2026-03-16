@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ASLS - Admin Panel</title>
+  <title>ASLS - Admin Export</title>
   <style>
-    /* ===== ADMIN PANEL CSS ===== */
     * {
       margin: 0;
       padding: 0;
@@ -38,6 +37,12 @@
     .header h1 {
       color: #186E00;
       font-size: 2.5rem;
+      font-weight: 800;
+    }
+    
+    .header p {
+      color: #666;
+      margin-top: 5px;
     }
     
     .btn-group {
@@ -45,29 +50,45 @@
       gap: 15px;
     }
     
-    .export-btn, .refresh-btn {
-      padding: 15px 30px;
-      border: none;
-      border-radius: 50px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    
     .export-btn {
       background: #186E00;
       color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .export-btn:hover {
+      background: #0f4f00;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
     }
     
     .refresh-btn {
       background: #3498db;
       color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
     
-    .export-btn:hover, .refresh-btn:hover {
+    .refresh-btn:hover {
+      background: #2980b9;
       transform: translateY(-3px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
     }
     
     .stats-grid {
@@ -82,12 +103,32 @@
       padding: 25px;
       border-radius: 20px;
       box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .stat-label {
+      color: #666;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
     }
     
     .stat-value {
       font-size: 3rem;
       font-weight: 800;
       color: #186E00;
+      line-height: 1;
+    }
+    
+    .stat-sub {
+      color: #999;
+      margin-top: 5px;
+      font-size: 0.9rem;
     }
     
     .github-section {
@@ -96,21 +137,35 @@
       padding: 30px;
       border-radius: 20px;
       margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .github-section h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
     }
     
     .input-group {
       display: grid;
       grid-template-columns: 1fr 1fr auto;
       gap: 15px;
-      margin-top: 20px;
+      margin-bottom: 20px;
     }
     
     .input-group input {
       padding: 15px;
       border: none;
       border-radius: 10px;
+      font-size: 1rem;
       background: rgba(255,255,255,0.1);
       color: white;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .input-group input::placeholder {
+      color: rgba(255,255,255,0.5);
     }
     
     .upload-btn {
@@ -119,7 +174,16 @@
       border: none;
       padding: 15px 30px;
       border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+    
+    .upload-btn:hover {
+      background: #2c974b;
+      transform: scale(1.02);
     }
     
     .search-section {
@@ -131,21 +195,34 @@
       gap: 15px;
     }
     
-    .search-box, .filter-select {
+    .search-box {
+      flex: 1;
       padding: 15px;
       border: 2px solid #e0e0e0;
       border-radius: 10px;
       font-size: 1rem;
+      transition: all 0.3s;
     }
     
-    .search-box {
-      flex: 1;
+    .search-box:focus {
+      outline: none;
+      border-color: #186E00;
+      box-shadow: 0 0 0 3px rgba(24,110,0,0.1);
+    }
+    
+    .filter-select {
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      min-width: 150px;
     }
     
     .logs-container {
       background: white;
       border-radius: 20px;
       padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
       overflow-x: auto;
     }
     
@@ -157,14 +234,46 @@
     
     th {
       background: #f8f9fa;
-      padding: 15px;
+      padding: 15px 10px;
       text-align: left;
       border-bottom: 3px solid #186E00;
+      color: #2c3e50;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      background: white;
     }
     
     td {
       padding: 12px 10px;
       border-bottom: 1px solid #ecf0f1;
+      vertical-align: middle;
+    }
+    
+    tr:hover {
+      background: #f8f9fa;
+    }
+    
+    .action-badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+    
+    .action-login {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .action-logout {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .photo-cell {
+      position: relative;
     }
     
     .photo-thumb {
@@ -174,6 +283,13 @@
       object-fit: cover;
       cursor: pointer;
       border: 3px solid #186E00;
+      transition: all 0.3s;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+    
+    .photo-thumb:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
     }
     
     .view-photo-btn {
@@ -182,10 +298,24 @@
       border: none;
       padding: 5px 12px;
       border-radius: 5px;
+      font-size: 0.8rem;
       cursor: pointer;
+      transition: all 0.2s;
       margin-left: 5px;
+      white-space: nowrap;
     }
     
+    .view-photo-btn:hover {
+      background: #2980b9;
+    }
+    
+    .no-photo {
+      color: #95a5a6;
+      font-size: 0.8rem;
+      font-style: italic;
+    }
+    
+    /* Photo Modal */
     .modal {
       display: none;
       position: fixed;
@@ -202,12 +332,14 @@
     .modal-content {
       position: relative;
       max-width: 90%;
+      max-height: 90%;
     }
     
     .modal-image {
       max-width: 100%;
       max-height: 90vh;
       border-radius: 10px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
     }
     
     .modal-close {
@@ -221,6 +353,16 @@
       border-radius: 50%;
       font-size: 24px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    
+    .modal-close:hover {
+      transform: rotate(90deg);
+      background: #e74c3c;
+      color: white;
     }
     
     .modal-info {
@@ -230,6 +372,24 @@
       right: 0;
       text-align: center;
       color: white;
+      font-size: 1.1rem;
+      background: rgba(0,0,0,0.5);
+      padding: 10px;
+      border-radius: 10px;
+    }
+    
+    .download-btn {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 5px 15px;
+      border-radius: 5px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    
+    .download-btn:hover {
+      background: #219a52;
     }
     
     .pagination {
@@ -237,13 +397,21 @@
       justify-content: center;
       gap: 10px;
       margin-top: 20px;
+      padding: 20px;
     }
     
     .page-btn {
-      padding: 10px 20px;
+      background: white;
       border: 2px solid #e0e0e0;
+      padding: 10px 20px;
       border-radius: 10px;
       cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .page-btn:hover {
+      border-color: #186E00;
+      color: #186E00;
     }
     
     .page-btn.active {
@@ -251,58 +419,83 @@
       color: white;
       border-color: #186E00;
     }
+    
+    @media (max-width: 768px) {
+      .input-group {
+        grid-template-columns: 1fr;
+      }
+      .btn-group {
+        flex-direction: column;
+      }
+    }
   </style>
-  
-  <!-- Load student data from separate file -->
-  <script src="students.js"></script>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <div>
         <h1>📊 ASLS Admin Panel</h1>
-        <p>Loaded <span id="studentCountDisplay"></span> students from students.js</p>
+        <p>Manage and export student logs</p>
       </div>
       <div class="btn-group">
-        <button class="export-btn" onclick="exportAllLogs()">⚡ EXPORT ALL</button>
-        <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+        <button class="export-btn" onclick="exportAllLogs()">
+          ⚡ EXPORT ALL LOGS
+        </button>
+        <button class="refresh-btn" onclick="loadData()">
+          🔄 Refresh
+        </button>
       </div>
     </div>
     
-    <div class="stats-grid">
+    <div class="stats-grid" id="stats">
       <div class="stat-card">
+        <div class="stat-label">Total Logs</div>
         <div class="stat-value" id="totalLogs">0</div>
-        <div>Total Logs</div>
+        <div class="stat-sub">all time</div>
       </div>
       <div class="stat-card">
+        <div class="stat-label">Today's Logs</div>
         <div class="stat-value" id="todayLogs">0</div>
-        <div>Today</div>
+        <div class="stat-sub" id="todayPeriod"></div>
       </div>
       <div class="stat-card">
+        <div class="stat-label">Storage Used</div>
         <div class="stat-value" id="storageUsed">0 MB</div>
-        <div>Storage Used</div>
+        <div class="stat-sub">local cache</div>
       </div>
       <div class="stat-card">
+        <div class="stat-label">Unique Students</div>
         <div class="stat-value" id="uniqueStudents">0</div>
-        <div>Unique Today</div>
+        <div class="stat-sub">active today</div>
       </div>
     </div>
     
     <div class="github-section">
       <h2>📤 Upload to GitHub</h2>
       <div class="input-group">
-        <input type="password" id="githubToken" placeholder="GitHub Token">
-        <input type="text" id="repoPath" placeholder="username/repo" value="theictclubtcshs/ASLS">
-        <button class="upload-btn" onclick="uploadToGitHub()">🚀 Upload All</button>
+        <input type="password" id="githubToken" placeholder="GitHub Token (ghp_...)" value="">
+        <input type="text" id="repoPath" placeholder="Repository (e.g., username/repo)" value="theictclubtcshs/ASLS">
+        <button class="upload-btn" onclick="uploadToGitHub()">
+          🚀 Upload All to GitHub
+        </button>
+      </div>
+      <div style="color: #aaa; font-size: 0.9rem;">
+        ⚡ Tip: Upload once at end of day. All logs will be organized by date and period.
       </div>
     </div>
     
     <div class="search-section">
-      <input type="text" class="search-box" id="searchInput" placeholder="🔍 Search..." onkeyup="filterLogs()">
+      <input type="text" class="search-box" id="searchInput" placeholder="🔍 Search by name, LRN, grade, section..." onkeyup="filterLogs()">
       <select class="filter-select" id="actionFilter" onchange="filterLogs()">
         <option value="all">All Actions</option>
-        <option value="Log in">Log In</option>
-        <option value="Log out">Log Out</option>
+        <option value="Log in">Log In Only</option>
+        <option value="Log out">Log Out Only</option>
+      </select>
+      <select class="filter-select" id="dateFilter" onchange="filterLogs()">
+        <option value="all">All Dates</option>
+        <option value="today">Today</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="week">This Week</option>
       </select>
     </div>
     
@@ -322,9 +515,14 @@
           </tr>
         </thead>
         <tbody id="logsBody">
-          <tr><td colspan="9" style="text-align: center; padding: 50px;">Loading...</td></tr>
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 50px;">
+              <div class="loading">Loading logs...</div>
+            </td>
+          </tr>
         </tbody>
       </table>
+      
       <div class="pagination" id="pagination"></div>
     </div>
   </div>
@@ -333,136 +531,250 @@
   <div class="modal" id="photoModal" onclick="closeModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal()">✕</button>
-      <img class="modal-image" id="modalImage" src="">
+      <img class="modal-image" id="modalImage" src="" alt="Student Photo">
       <div class="modal-info" id="modalInfo"></div>
     </div>
   </div>
 
   <script>
     // ============================================
-    // ASLS ADMIN PANEL
+    // ASLS ADMIN PANEL - WITH PHOTO VIEWER
     // ============================================
-    
-    // Show student count
-    document.getElementById('studentCountDisplay').textContent = STUDENTS_DATA.length;
     
     let allLogs = [];
     let filteredLogs = [];
     let currentPage = 1;
     const logsPerPage = 50;
     
+    // Load data from localStorage
     function loadData() {
-      allLogs = JSON.parse(localStorage.getItem('asls_master') || '[]');
-      filteredLogs = [...allLogs];
-      updateStats();
-      filterLogs();
+      try {
+        allLogs = JSON.parse(localStorage.getItem('asls_master') || '[]');
+        filteredLogs = [...allLogs];
+        updateStats();
+        filterLogs();
+      } catch (e) {
+        console.error('Error loading logs:', e);
+        document.getElementById('logsBody').innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 50px; color: #e74c3c;">
+              ❌ Error loading logs from localStorage
+            </td>
+          </tr>
+        `;
+      }
     }
     
+    // Update statistics
     function updateStats() {
       const total = allLogs.length;
+      
+      // Today's logs
       const today = new Date().toISOString().split('T')[0];
       const todayLogs = allLogs.filter(l => l.timestamp.startsWith(today)).length;
-      const size = new Blob([JSON.stringify(allLogs)]).size / (1024 * 1024);
-      const uniqueToday = new Set(allLogs.filter(l => l.timestamp.startsWith(today)).map(l => l.lrn)).size;
       
-      document.getElementById('totalLogs').textContent = total;
+      // Calculate storage size
+      const size = new Blob([JSON.stringify(allLogs)]).size / (1024 * 1024);
+      
+      // Unique students today
+      const todayStudents = new Set(
+        allLogs.filter(l => l.timestamp.startsWith(today)).map(l => l.lrn)
+      ).size;
+      
+      // Get current period
+      const period = new Date().getHours() >= 12 ? 'PM' : 'AM';
+      
+      document.getElementById('totalLogs').textContent = total.toLocaleString();
       document.getElementById('todayLogs').textContent = todayLogs;
+      document.getElementById('todayPeriod').textContent = `Current: ${period}`;
       document.getElementById('storageUsed').textContent = size.toFixed(2) + ' MB';
-      document.getElementById('uniqueStudents').textContent = uniqueToday;
+      document.getElementById('uniqueStudents').textContent = todayStudents;
     }
     
+    // Filter logs based on search and filters
     function filterLogs() {
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
       const actionFilter = document.getElementById('actionFilter').value;
+      const dateFilter = document.getElementById('dateFilter').value;
       
       filteredLogs = allLogs.filter(log => {
-        if (searchTerm && !log.name.toLowerCase().includes(searchTerm) && !log.lrn.includes(searchTerm)) {
-          return false;
+        // Search filter
+        if (searchTerm) {
+          const matches = 
+            (log.name && log.name.toLowerCase().includes(searchTerm)) ||
+            (log.lrn && log.lrn.includes(searchTerm)) ||
+            (log.grade && log.grade.toLowerCase().includes(searchTerm)) ||
+            (log.section && log.section.toLowerCase().includes(searchTerm));
+          if (!matches) return false;
         }
+        
+        // Action filter
         if (actionFilter !== 'all' && log.action !== actionFilter) {
           return false;
         }
+        
+        // Date filter
+        if (dateFilter !== 'all') {
+          const logDate = new Date(log.timestamp);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          const yesterday = new Date(today);
+          yesterday.setDate(yesterday.getDate() - 1);
+          
+          const weekAgo = new Date(today);
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          
+          if (dateFilter === 'today' && logDate < today) return false;
+          if (dateFilter === 'yesterday') {
+            const logDay = new Date(logDate);
+            logDay.setHours(0, 0, 0, 0);
+            if (logDay.getTime() !== yesterday.getTime()) return false;
+          }
+          if (dateFilter === 'week' && logDate < weekAgo) return false;
+        }
+        
         return true;
       });
       
+      // Sort by timestamp descending (newest first)
       filteredLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
       currentPage = 1;
       renderTable();
     }
     
+    // Render table with pagination
     function renderTable() {
       const start = (currentPage - 1) * logsPerPage;
       const end = start + logsPerPage;
       const pageLogs = filteredLogs.slice(start, end);
       
       if (filteredLogs.length === 0) {
-        document.getElementById('logsBody').innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 50px;">No logs found</td></tr>';
+        document.getElementById('logsBody').innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 50px;">
+              📭 No logs found matching your filters
+            </td>
+          </tr>
+        `;
+        document.getElementById('pagination').innerHTML = '';
         return;
       }
       
       let html = '';
-      pageLogs.forEach(log => {
-        const timeStr = new Date(log.timestamp).toLocaleTimeString();
+      pageLogs.forEach((log, index) => {
+        const date = new Date(log.timestamp);
+        const timeStr = date.toLocaleTimeString();
+        const dateStr = date.toLocaleDateString();
         
         html += `
           <tr>
-            <td>${timeStr}<br><small>${log.date}</small></td>
             <td>
+              <div><strong>${timeStr}</strong></div>
+              <div style="font-size: 0.8rem; color: #666;">${dateStr}</div>
+            </td>
+            <td class="photo-cell">
               ${log.photo && log.photo !== 'no-photo' ? 
-                `<img src="${log.photo}" class="photo-thumb" onclick="viewPhoto('${log.photo}', '${log.name}', '${log.lrn}')">` : 
-                'No photo'}
+                `<img src="${log.photo}" class="photo-thumb" alt="Photo" 
+                     onclick="viewPhoto('${log.photo}', '${log.name}', '${log.lrn}', '${log.action}', '${timeStr}')"
+                     title="Click to enlarge">` : 
+                '<span class="no-photo">No photo</span>'
+              }
             </td>
             <td><strong>${log.name}</strong></td>
-            <td>${log.lrn}</td>
-            <td>${log.sex}</td>
-            <td>${log.grade}</td>
-            <td>${log.section}</td>
-            <td><span class="badge ${log.action === 'Log in' ? 'badge-success' : 'badge-danger'}">${log.action}</span></td>
+            <td><code>${log.lrn}</code></td>
+            <td>${log.sex || 'N/A'}</td>
+            <td>${log.grade || 'N/A'}</td>
+            <td>${log.section || 'N/A'}</td>
             <td>
-              ✅ Verified
+              <span class="action-badge ${log.action === 'Log in' ? 'action-login' : 'action-logout'}">
+                ${log.action}
+              </span>
+            </td>
+            <td>
+              <span style="color: #27ae60;">✅ Verified</span>
               ${log.photo && log.photo !== 'no-photo' ? 
-                `<button class="view-photo-btn" onclick="viewPhoto('${log.photo}', '${log.name}', '${log.lrn}')">View</button>` : ''}
+                `<button class="view-photo-btn" onclick="viewPhoto('${log.photo}', '${log.name}', '${log.lrn}', '${log.action}', '${timeStr}')">
+                  👁️ View
+                </button>` : ''
+              }
             </td>
           </tr>
         `;
       });
       
       document.getElementById('logsBody').innerHTML = html;
+      renderPagination();
     }
     
-    function viewPhoto(photoData, name, lrn) {
-      document.getElementById('modalImage').src = photoData;
-      document.getElementById('modalInfo').innerHTML = `<strong>${name}</strong> (${lrn})`;
-      document.getElementById('photoModal').style.display = 'flex';
+    // Render pagination controls
+    function renderPagination() {
+      const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
+      if (totalPages <= 1) {
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+      
+      let paginationHtml = '';
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+          paginationHtml += `
+            <button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">
+              ${i}
+            </button>
+          `;
+        } else if (i === currentPage - 3 || i === currentPage + 3) {
+          paginationHtml += `<span style="padding: 10px;">...</span>`;
+        }
+      }
+      
+      document.getElementById('pagination').innerHTML = paginationHtml;
+    }
+    
+    // Go to specific page
+    function goToPage(page) {
+      currentPage = page;
+      renderTable();
+    }
+    
+    // View photo in modal
+    function viewPhoto(photoData, studentName, lrn, action, time) {
+      const modal = document.getElementById('photoModal');
+      const modalImage = document.getElementById('modalImage');
+      const modalInfo = document.getElementById('modalInfo');
+      
+      modalImage.src = photoData;
+      modalInfo.innerHTML = `
+        <strong>${studentName}</strong> (${lrn}) - ${action} at ${time}
+        <button class="download-btn" onclick="downloadPhoto('${photoData}', '${studentName}_${lrn}')">
+          ⬇️ Download
+        </button>
+      `;
+      
+      modal.style.display = 'flex';
+      
+      // Prevent body scrolling
       document.body.style.overflow = 'hidden';
     }
     
+    // Close modal
     function closeModal() {
       document.getElementById('photoModal').style.display = 'none';
       document.body.style.overflow = 'auto';
     }
     
-    function exportAllLogs() {
-      const blob = new Blob([JSON.stringify(allLogs, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `asls_export_${new Date().toISOString().split('T')[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+    // Download photo
+    function downloadPhoto(photoData, filename) {
+      const link = document.createElement('a');
+      link.href = photoData;
+      link.download = `asls_${filename}_${new Date().toISOString().split('T')[0]}.jpg`;
+      link.click();
     }
     
-    async function uploadToGitHub() {
-      const token = document.getElementById('githubToken').value;
-      const repoPath = document.getElementById('repoPath').value;
-      const [username, repo] = repoPath.split('/');
-      
-      if (!token || !username || !repo) {
-        alert('Please enter token and repository');
-        return;
-      }
-      
-      // Group by date for organized upload
+    // Export all logs as JSON
+    function exportAllLogs() {
+      // Group by date for organized export
       const byDate = {};
       allLogs.forEach(log => {
         const date = log.timestamp.split('T')[0];
@@ -470,12 +782,81 @@
         byDate[date].push(log);
       });
       
+      // Export master file
+      const masterBlob = new Blob([JSON.stringify(allLogs, null, 2)], { type: 'application/json' });
+      const masterUrl = URL.createObjectURL(masterBlob);
+      
+      const a = document.createElement('a');
+      a.href = masterUrl;
+      a.download = `asls_complete_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      
+      // Also export daily files
+      Object.keys(byDate).forEach(date => {
+        const dailyBlob = new Blob([JSON.stringify(byDate[date], null, 2)], { type: 'application/json' });
+        const dailyUrl = URL.createObjectURL(dailyBlob);
+        
+        const b = document.createElement('a');
+        b.href = dailyUrl;
+        b.download = `asls_${date}.json`;
+        b.click();
+        
+        URL.revokeObjectURL(dailyUrl);
+      });
+      
+      URL.revokeObjectURL(masterUrl);
+      
+      // Show success message
+      alert(`✅ Exported ${allLogs.length} logs successfully!`);
+    }
+    
+    // Upload to GitHub
+    async function uploadToGitHub() {
+      const token = document.getElementById('githubToken').value;
+      const repoPath = document.getElementById('repoPath').value;
+      const [username, repo] = repoPath.split('/');
+      
+      if (!token || !username || !repo) {
+        alert('❌ Please enter GitHub token and repository path');
+        return;
+      }
+      
+      if (allLogs.length === 0) {
+        alert('❌ No logs to upload');
+        return;
+      }
+      
+      // Group by date and period for organized upload
+      const byPath = {};
+      allLogs.forEach(log => {
+        const date = new Date(log.timestamp);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const period = date.getHours() >= 12 ? 'PM' : 'AM';
+        const path = `logs/${year}/${month}/${day}/${period}/logs.json`;
+        
+        if (!byPath[path]) byPath[path] = [];
+        byPath[path].push(log);
+      });
+      
       let success = 0;
-      for (const [date, logs] of Object.entries(byDate)) {
+      let failed = 0;
+      
+      for (const [path, logs] of Object.entries(byPath)) {
         try {
-          const path = `logs/${date}/logs.json`;
-          const content = btoa(unescape(encodeURIComponent(JSON.stringify(logs, null, 2))));
+          // Check if file exists
+          let sha = null;
+          try {
+            const check = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`);
+            if (check.ok) {
+              const data = await check.json();
+              sha = data.sha;
+            }
+          } catch (e) {}
           
+          // Upload
+          const content = btoa(unescape(encodeURIComponent(JSON.stringify(logs, null, 2))));
           const response = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`, {
             method: 'PUT',
             headers: {
@@ -483,25 +864,47 @@
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              message: `Update logs for ${date}`,
+              message: `Update logs for ${path}`,
               content: content,
+              sha: sha,
               branch: 'main'
             })
           });
           
-          if (response.ok) success++;
-        } catch (e) {}
+          if (response.ok) {
+            success++;
+          } else {
+            failed++;
+          }
+        } catch (e) {
+          failed++;
+        }
       }
       
-      alert(`Uploaded ${success} files successfully!`);
+      alert(`📤 Upload complete!\n✅ Success: ${success}\n❌ Failed: ${failed}\n\nTotal logs: ${allLogs.length}`);
     }
     
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal();
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
     });
     
-    window.onload = loadData;
-    setInterval(loadData, 30000);
+    // Click outside modal to close
+    window.onclick = function(event) {
+      const modal = document.getElementById('photoModal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    };
+    
+    // Load data on page load
+    window.onload = function() {
+      loadData();
+      // Auto-refresh every 30 seconds
+      setInterval(loadData, 30000);
+    };
   </script>
 </body>
 </html>
