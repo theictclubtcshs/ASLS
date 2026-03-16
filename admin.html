@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ASLS - Admin Export</title>
+  <title>ASLS - Admin Panel with Drive Upload</title>
+  <!-- Google Drive API -->
+  <script src="https://apis.google.com/js/api.js"></script>
   <style>
     * {
       margin: 0;
@@ -51,8 +53,8 @@
       flex-wrap: wrap;
     }
     
-    .export-btn {
-      background: #186E00;
+    .drive-btn {
+      background: #4285F4;
       color: white;
       border: none;
       padding: 15px 40px;
@@ -66,10 +68,16 @@
       gap: 10px;
     }
     
-    .export-btn:hover {
-      background: #0f4f00;
+    .drive-btn:hover {
+      background: #3367D6;
       transform: translateY(-3px);
       box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    
+    .drive-btn:disabled {
+      background: #a5c1f9;
+      cursor: not-allowed;
+      transform: none;
     }
     
     .refresh-btn {
@@ -92,6 +100,26 @@
       transform: translateY(-3px);
     }
     
+    .reset-btn {
+      background: #e67e22;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .reset-btn:hover {
+      background: #d35400;
+      transform: translateY(-3px);
+    }
+    
     .delete-btn {
       background: #e74c3c;
       color: white;
@@ -107,7 +135,7 @@
       gap: 10px;
     }
     
-    .delete-btn:hover {
+    .delete-btn:hover:not(:disabled) {
       background: #c0392b;
       transform: translateY(-3px);
     }
@@ -158,8 +186,8 @@
       font-size: 0.9rem;
     }
     
-    .github-section {
-      background: #24292e;
+    .drive-section {
+      background: #4285F4;
       color: white;
       padding: 30px;
       border-radius: 20px;
@@ -167,50 +195,79 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
     
-    .github-section h2 {
+    .drive-section h2 {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-bottom: 20px;
     }
     
-    .input-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr auto;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-    
-    .input-group input {
-      padding: 15px;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
+    .drive-status {
       background: rgba(255,255,255,0.1);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-    
-    .input-group input::placeholder {
-      color: rgba(255,255,255,0.5);
-    }
-    
-    .upload-btn {
-      background: #2ea44f;
-      color: white;
-      border: none;
-      padding: 15px 30px;
+      padding: 15px;
       border-radius: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .drive-connected {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .drive-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #2ecc71;
+      animation: pulse 2s infinite;
+    }
+    
+    .drive-dot.disconnected {
+      background: #e74c3c;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    
+    .drive-buttons {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .drive-action-btn {
+      background: white;
+      color: #4285F4;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 30px;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
-      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
-    .upload-btn:hover {
-      background: #2c974b;
-      transform: scale(1.02);
+    .drive-action-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .drive-action-btn:disabled {
+      background: #ecf0f1;
+      color: #95a5a6;
+      cursor: not-allowed;
     }
     
     .search-section {
@@ -634,10 +691,49 @@
       background: #6c7a7d;
     }
     
+    .progress-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2500;
+    }
+    
+    .progress-content {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      max-width: 500px;
+      text-align: center;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background: #ecf0f1;
+      border-radius: 10px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: #27ae60;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    
+    .progress-text {
+      color: #666;
+      margin-top: 10px;
+    }
+    
     @media (max-width: 768px) {
-      .input-group {
-        grid-template-columns: 1fr;
-      }
       .btn-group {
         flex-direction: column;
         width: 100%;
@@ -657,14 +753,17 @@
     <div class="header">
       <div>
         <h1>📊 ASLS Admin Panel</h1>
-        <p>Manage and export student logs</p>
+        <p>Manage student logs and upload to Google Drive</p>
       </div>
       <div class="btn-group">
-        <button class="export-btn" onclick="exportAllLogs()">
-          ⚡ EXPORT ALL LOGS
+        <button class="drive-btn" onclick="uploadToDrive()" id="driveBtn" disabled>
+          ☁️ UPLOAD TO DRIVE
         </button>
         <button class="refresh-btn" onclick="loadData()">
           🔄 Refresh
+        </button>
+        <button class="reset-btn" onclick="confirmResetAll()" id="resetBtn">
+          🗑️ RESET ALL DATA
         </button>
         <button class="delete-btn" onclick="enterSelectionMode()" id="selectModeBtn">
           ✨ Select to Delete
@@ -695,17 +794,24 @@
       </div>
     </div>
     
-    <div class="github-section">
-      <h2>📤 Upload to GitHub</h2>
-      <div class="input-group">
-        <input type="password" id="githubToken" placeholder="GitHub Token (ghp_...)" value="">
-        <input type="text" id="repoPath" placeholder="Repository (e.g., username/repo)" value="theictclubtcshs/ASLS">
-        <button class="upload-btn" onclick="uploadToGitHub()">
-          🚀 Upload All to GitHub
-        </button>
+    <div class="drive-section">
+      <h2>☁️ Google Drive Integration</h2>
+      <div class="drive-status">
+        <div class="drive-connected">
+          <span class="drive-dot disconnected" id="driveDot"></span>
+          <span id="driveStatus">Not connected to Google Drive</span>
+        </div>
+        <div class="drive-buttons">
+          <button class="drive-action-btn" onclick="initDrive()" id="connectBtn">
+            🔌 Connect to Drive
+          </button>
+          <button class="drive-action-btn" onclick="uploadToDrive()" id="uploadBtn" disabled>
+            ☁️ Upload Current Logs
+          </button>
+        </div>
       </div>
-      <div style="color: #aaa; font-size: 0.9rem;">
-        ⚡ Tip: Upload once at end of day. All logs will be organized by date and period.
+      <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+        ⚡ Files are saved as HTML tables with student photos. Filename format: YYYY-MM-DD_HH-MM-SS_LOGS.html
       </div>
     </div>
     
@@ -796,9 +902,36 @@
     </div>
   </div>
 
+  <!-- Confirm Reset Modal -->
+  <div class="confirm-modal" id="resetModal">
+    <div class="confirm-content">
+      <h3 style="color: #e67e22;">⚠️ RESET ALL DATA</h3>
+      <p>This will DELETE ALL LOGS permanently!<br><br>
+         Make sure you've uploaded to Drive first.<br>
+         <strong>Total logs: <span id="resetLogCount">0</span></strong>
+      </p>
+      <div class="confirm-buttons">
+        <button class="confirm-yes" style="background: #e67e22;" onclick="resetAllData()">Yes, Reset Everything</button>
+        <button class="confirm-no" onclick="closeResetModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Modal -->
+  <div class="progress-modal" id="progressModal">
+    <div class="progress-content">
+      <h3 style="color: #27ae60;">☁️ Uploading to Drive</h3>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <p id="progressMessage">Preparing files...</p>
+      <p class="progress-text" id="progressDetail"></p>
+    </div>
+  </div>
+
   <script>
     // ============================================
-    // ASLS ADMIN PANEL - WITH DELETE FUNCTIONALITY
+    // ASLS ADMIN PANEL - WITH GOOGLE DRIVE UPLOAD
     // ============================================
     
     let allLogs = [];
@@ -807,7 +940,11 @@
     const logsPerPage = 50;
     let selectionMode = false;
     let selectedIndices = new Set();
-    let deleteTarget = null; // 'selected' or specific index
+    let deleteTarget = null;
+    
+    // Google Drive API
+    let accessToken = null;
+    let driveFolderId = null;
     
     // Load data from localStorage
     function loadData() {
@@ -817,6 +954,9 @@
         updateStats();
         filterLogs();
         exitSelectionMode();
+        
+        // Update reset button with count
+        document.getElementById('resetLogCount').textContent = allLogs.length;
       } catch (e) {
         console.error('Error loading logs:', e);
         document.getElementById('logsBody').innerHTML = `
@@ -908,6 +1048,333 @@
       renderTable();
     }
     
+    // ========== GOOGLE DRIVE FUNCTIONS ==========
+    
+    // Initialize Google Drive API
+    function initDrive() {
+      showProgress('Connecting to Google Drive...', 0);
+      
+      // Load the Google API client
+      gapi.load('client:auth2', function() {
+        gapi.client.init({
+          apiKey: 'YOUR_API_KEY', // Optional - you can leave empty
+          clientId: '551981086343-3bkfskrjnpicc5l6k49dkc7bnc1bjjcp.apps.googleusercontent.com', // You'll need to create this
+          scope: 'https://www.googleapis.com/auth/drive.file',
+          discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+        }).then(function() {
+          // Sign in
+          return gapi.auth2.getAuthInstance().signIn();
+        }).then(function() {
+          accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
+          
+          // Update UI
+          document.getElementById('driveDot').className = 'drive-dot';
+          document.getElementById('driveStatus').textContent = 'Connected to Google Drive';
+          document.getElementById('connectBtn').disabled = true;
+          document.getElementById('uploadBtn').disabled = false;
+          document.getElementById('driveBtn').disabled = false;
+          
+          // Create or find ASLS folder
+          createASLSFolder();
+          
+          closeProgress();
+        }).catch(function(error) {
+          console.error('Drive auth error:', error);
+          closeProgress();
+          alert('Failed to connect to Google Drive. Please try again.');
+        });
+      });
+    }
+    
+    // Create or find ASLS folder in Drive
+    async function createASLSFolder() {
+      try {
+        // Search for existing ASLS folder
+        const response = await gapi.client.drive.files.list({
+          q: "name='ASLS_LOGS' and mimeType='application/vnd.google-apps.folder' and trashed=false",
+          fields: 'files(id, name)',
+          spaces: 'drive'
+        });
+        
+        if (response.result.files && response.result.files.length > 0) {
+          driveFolderId = response.result.files[0].id;
+          console.log('Found existing folder:', driveFolderId);
+        } else {
+          // Create new folder
+          const folder = await gapi.client.drive.files.create({
+            resource: {
+              name: 'ASLS_LOGS',
+              mimeType: 'application/vnd.google-apps.folder'
+            },
+            fields: 'id'
+          });
+          driveFolderId = folder.result.id;
+          console.log('Created new folder:', driveFolderId);
+        }
+      } catch (error) {
+        console.error('Error creating folder:', error);
+      }
+    }
+    
+    // Generate HTML table from logs
+    function generateHTMLTable() {
+      const now = new Date();
+      const dateTimeStr = now.toLocaleString();
+      
+      let html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ASLS Logs - ${dateTimeStr}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #186E00;
+      border-bottom: 3px solid #186E00;
+      padding-bottom: 10px;
+    }
+    .info {
+      margin: 20px 0;
+      padding: 15px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    th {
+      background: #186E00;
+      color: white;
+      padding: 12px;
+      text-align: left;
+    }
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    tr:hover {
+      background: #f5f5f5;
+    }
+    .photo {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 3px solid #186E00;
+    }
+    .action-login {
+      background: #d4edda;
+      color: #155724;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+    .action-logout {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #186E00;
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 ASLS Student Logs</h1>
+  <div class="info">
+    <strong>Generated:</strong> ${dateTimeStr}<br>
+    <strong>Total Logs:</strong> ${allLogs.length}<br>
+    <strong>Date Range:</strong> ${allLogs.length > 0 ? new Date(allLogs[allLogs.length-1].timestamp).toLocaleDateString() + ' to ' + new Date(allLogs[0].timestamp).toLocaleDateString() : 'No logs'}
+  </div>
+  
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-value">${allLogs.length}</div>
+      <div>Total Logs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${new Set(allLogs.map(l => l.lrn)).size}</div>
+      <div>Unique Students</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${allLogs.filter(l => l.action === 'Log in').length}</div>
+      <div>Total Logins</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${allLogs.filter(l => l.action === 'Log out').length}</div>
+      <div>Total Logouts</div>
+    </div>
+  </div>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Date & Time</th>
+        <th>Photo</th>
+        <th>Name</th>
+        <th>LRN</th>
+        <th>Sex</th>
+        <th>Grade</th>
+        <th>Section</th>
+        <th>Action</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+`;
+      
+      allLogs.forEach(log => {
+        const date = new Date(log.timestamp);
+        const dateTimeStr = date.toLocaleString();
+        
+        html += `
+      <tr>
+        <td>${dateTimeStr}</td>
+        <td>${log.photo && log.photo !== 'no-photo' ? 
+          `<img src="${log.photo}" class="photo" alt="Student Photo">` : 
+          'No Photo'}
+        </td>
+        <td><strong>${log.name}</strong></td>
+        <td>${log.lrn}</td>
+        <td>${log.sex || 'N/A'}</td>
+        <td>${log.grade || 'N/A'}</td>
+        <td>${log.section || 'N/A'}</td>
+        <td><span class="${log.action === 'Log in' ? 'action-login' : 'action-logout'}">${log.action}</span></td>
+        <td>✅ Verified</td>
+      </tr>
+`;
+      });
+      
+      html += `
+    </tbody>
+  </table>
+  <p style="text-align: center; margin-top: 20px; color: #666;">
+    Generated by ASLS - Automated Student Log System
+  </p>
+</body>
+</html>
+`;
+      
+      return html;
+    }
+    
+    // Upload to Google Drive
+    async function uploadToDrive() {
+      if (!accessToken) {
+        alert('Please connect to Google Drive first');
+        return;
+      }
+      
+      if (allLogs.length === 0) {
+        alert('No logs to upload');
+        return;
+      }
+      
+      showProgress('Uploading to Google Drive...', 0);
+      
+      try {
+        const html = generateHTMLTable();
+        const blob = new Blob([html], { type: 'text/html' });
+        
+        // Generate filename with date and time
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        const filename = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}_LOGS.html`;
+        
+        // Convert blob to base64
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = async function() {
+          const base64 = reader.result.split(',')[1];
+          
+          // Create file metadata
+          const metadata = {
+            name: filename,
+            mimeType: 'text/html',
+            parents: driveFolderId ? [driveFolderId] : []
+          };
+          
+          // Create multipart upload
+          const form = new FormData();
+          form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+          form.append('file', blob);
+          
+          showProgress('Uploading file...', 50);
+          
+          const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            },
+            body: form
+          });
+          
+          const result = await response.json();
+          
+          if (response.ok) {
+            showProgress('Upload complete!', 100);
+            setTimeout(() => {
+              closeProgress();
+              alert(`✅ Successfully uploaded to Google Drive!\n\nFilename: ${filename}\nTotal logs: ${allLogs.length}`);
+            }, 1000);
+          } else {
+            throw new Error(result.error.message);
+          }
+        };
+      } catch (error) {
+        console.error('Upload error:', error);
+        closeProgress();
+        alert('❌ Upload failed: ' + error.message);
+      }
+    }
+    
+    // Show progress modal
+    function showProgress(message, percent) {
+      document.getElementById('progressMessage').textContent = message;
+      document.getElementById('progressFill').style.width = percent + '%';
+      document.getElementById('progressModal').style.display = 'flex';
+    }
+    
+    // Close progress modal
+    function closeProgress() {
+      document.getElementById('progressModal').style.display = 'none';
+    }
+    
+    // ========== SELECTION AND DELETE FUNCTIONS ==========
+    
     // Enter selection mode
     function enterSelectionMode() {
       selectionMode = true;
@@ -995,10 +1462,24 @@
       document.getElementById('confirmModal').style.display = 'flex';
     }
     
+    // Confirm reset all
+    function confirmResetAll() {
+      if (allLogs.length === 0) {
+        alert('No logs to reset');
+        return;
+      }
+      document.getElementById('resetModal').style.display = 'flex';
+    }
+    
     // Close confirm modal
     function closeConfirmModal() {
       document.getElementById('confirmModal').style.display = 'none';
       deleteTarget = null;
+    }
+    
+    // Close reset modal
+    function closeResetModal() {
+      document.getElementById('resetModal').style.display = 'none';
     }
     
     // Execute delete
@@ -1039,6 +1520,26 @@
       
       // Show success message
       alert('✅ Selected logs deleted successfully!');
+    }
+    
+    // Reset all data
+    function resetAllData() {
+      // Clear all localStorage items
+      localStorage.removeItem('asls_master');
+      
+      // Clear all daily logs
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('asls_')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      closeResetModal();
+      
+      // Reload page to reset everything
+      alert('✅ All data has been reset. The page will now reload.');
+      window.location.reload();
     }
     
     // Update daily logs in localStorage
@@ -1084,6 +1585,10 @@
         const timeStr = date.toLocaleTimeString();
         const dateStr = date.toLocaleDateString();
         
+        // Escape quotes for HTML attributes
+        const safeName = log.name.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+        const safePhoto = log.photo ? log.photo.replace(/'/g, "&apos;").replace(/"/g, "&quot;") : '';
+        
         html += `
           <tr class="${selectionMode && selectedIndices.has(actualIndex) ? 'selected' : ''}">
             ${selectionMode ? `
@@ -1100,7 +1605,7 @@
             <td class="photo-cell">
               ${log.photo && log.photo !== 'no-photo' ? 
                 `<img src="${log.photo}" class="photo-thumb" alt="Photo" 
-                     onclick="viewPhoto('${log.photo}', '${log.name.replace(/'/g, "\\'")}', '${log.lrn}', '${log.action}', '${timeStr}')"
+                     onclick='viewPhoto("${safePhoto}", "${safeName}", "${log.lrn}", "${log.action}", "${timeStr}")'
                      title="Click to enlarge">` : 
                 '<span class="no-photo">No photo</span>'
               }
@@ -1120,7 +1625,7 @@
             </td>
             <td>
               ${log.photo && log.photo !== 'no-photo' ? 
-                `<button class="view-photo-btn" onclick="viewPhoto('${log.photo}', '${log.name.replace(/'/g, "\\'")}', '${log.lrn}', '${log.action}', '${timeStr}')">
+                `<button class="view-photo-btn" onclick='viewPhoto("${safePhoto}", "${safeName}", "${log.lrn}", "${log.action}", "${timeStr}")'>
                   👁️ View
                 </button>` : ''
               }
@@ -1199,122 +1704,12 @@
       link.click();
     }
     
-    // Export all logs as JSON
-    function exportAllLogs() {
-      // Group by date for organized export
-      const byDate = {};
-      allLogs.forEach(log => {
-        const date = log.timestamp.split('T')[0];
-        if (!byDate[date]) byDate[date] = [];
-        byDate[date].push(log);
-      });
-      
-      // Export master file
-      const masterBlob = new Blob([JSON.stringify(allLogs, null, 2)], { type: 'application/json' });
-      const masterUrl = URL.createObjectURL(masterBlob);
-      
-      const a = document.createElement('a');
-      a.href = masterUrl;
-      a.download = `asls_complete_${new Date().toISOString().split('T')[0]}.json`;
-      a.click();
-      
-      // Also export daily files
-      Object.keys(byDate).forEach(date => {
-        const dailyBlob = new Blob([JSON.stringify(byDate[date], null, 2)], { type: 'application/json' });
-        const dailyUrl = URL.createObjectURL(dailyBlob);
-        
-        const b = document.createElement('a');
-        b.href = dailyUrl;
-        b.download = `asls_${date}.json`;
-        b.click();
-        
-        URL.revokeObjectURL(dailyUrl);
-      });
-      
-      URL.revokeObjectURL(masterUrl);
-      
-      alert(`✅ Exported ${allLogs.length} logs successfully!`);
-    }
-    
-    // Upload to GitHub
-    async function uploadToGitHub() {
-      const token = document.getElementById('githubToken').value;
-      const repoPath = document.getElementById('repoPath').value;
-      const [username, repo] = repoPath.split('/');
-      
-      if (!token || !username || !repo) {
-        alert('❌ Please enter GitHub token and repository path');
-        return;
-      }
-      
-      if (allLogs.length === 0) {
-        alert('❌ No logs to upload');
-        return;
-      }
-      
-      // Group by date and period for organized upload
-      const byPath = {};
-      allLogs.forEach(log => {
-        const date = new Date(log.timestamp);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const period = date.getHours() >= 12 ? 'PM' : 'AM';
-        const path = `logs/${year}/${month}/${day}/${period}/logs.json`;
-        
-        if (!byPath[path]) byPath[path] = [];
-        byPath[path].push(log);
-      });
-      
-      let success = 0;
-      let failed = 0;
-      
-      for (const [path, logs] of Object.entries(byPath)) {
-        try {
-          // Check if file exists
-          let sha = null;
-          try {
-            const check = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`);
-            if (check.ok) {
-              const data = await check.json();
-              sha = data.sha;
-            }
-          } catch (e) {}
-          
-          // Upload
-          const content = btoa(unescape(encodeURIComponent(JSON.stringify(logs, null, 2))));
-          const response = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`, {
-            method: 'PUT',
-            headers: {
-              'Authorization': `token ${token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              message: `Update logs for ${path}`,
-              content: content,
-              sha: sha,
-              branch: 'main'
-            })
-          });
-          
-          if (response.ok) {
-            success++;
-          } else {
-            failed++;
-          }
-        } catch (e) {
-          failed++;
-        }
-      }
-      
-      alert(`📤 Upload complete!\n✅ Success: ${success}\n❌ Failed: ${failed}\n\nTotal logs: ${allLogs.length}`);
-    }
-    
     // Close modal with Escape key
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         closeModal();
         closeConfirmModal();
+        closeResetModal();
       }
     });
     
