@@ -78,6 +78,21 @@
       cursor: pointer;
     }
     
+    .delete-mode-btn {
+      background: #e67e22;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    
+    .delete-mode-btn.active {
+      background: #e74c3c;
+      box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.5);
+    }
+    
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -173,6 +188,80 @@
       min-width: 150px;
     }
     
+    .delete-bar {
+      background: #fff3e0;
+      padding: 15px 20px;
+      border-radius: 15px;
+      margin-bottom: 15px;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      border: 2px solid #e67e22;
+    }
+    
+    .delete-bar.active {
+      display: flex;
+    }
+    
+    .delete-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .select-all {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    
+    .select-all input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .selected-count {
+      background: #e67e22;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 30px;
+      font-weight: 600;
+    }
+    
+    .delete-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .delete-selected-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    .delete-selected-btn:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
+    }
+    
+    .cancel-delete-btn {
+      background: #7f8c8d;
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
     .logs-container {
       background: white;
       border-radius: 20px;
@@ -183,7 +272,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 1300px;
+      min-width: 1400px;
     }
     
     th {
@@ -200,6 +289,21 @@
     
     tr:hover {
       background: #f8f9fa;
+    }
+    
+    tr.selected {
+      background: #fff3e0;
+    }
+    
+    .checkbox-cell {
+      width: 40px;
+      text-align: center;
+    }
+    
+    .checkbox-cell input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
     }
     
     .photo-thumb {
@@ -226,6 +330,20 @@
     .action-logout {
       background: #f8d7da;
       color: #721c24;
+    }
+    
+    .delete-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    
+    .delete-btn:hover {
+      background: #c0392b;
     }
     
     .modal {
@@ -260,6 +378,57 @@
       cursor: pointer;
     }
     
+    .confirm-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+    
+    .confirm-content {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      max-width: 400px;
+      text-align: center;
+    }
+    
+    .confirm-content h3 {
+      color: #e74c3c;
+      margin-bottom: 20px;
+    }
+    
+    .confirm-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    .confirm-yes {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    
+    .confirm-no {
+      background: #7f8c8d;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    
     .pagination {
       display: flex;
       justify-content: center;
@@ -291,6 +460,7 @@
       </div>
       <div class="btn-group">
         <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+        <button class="delete-mode-btn" id="deleteModeBtn" onclick="toggleDeleteMode()">🗑️ Delete Mode</button>
       </div>
     </div>
     
@@ -328,7 +498,7 @@
     </div>
     
     <div class="search-section">
-      <input type="text" class="search-box" id="searchInput" placeholder="🔍 Search..." onkeyup="filterLogs()">
+      <input type="text" class="search-box" id="searchInput" placeholder="🔍 Search by name or LRN..." onkeyup="filterLogs()">
       <select class="filter-select" id="actionFilter" onchange="filterLogs()">
         <option value="all">All Actions</option>
         <option value="Log in">Log In</option>
@@ -336,10 +506,26 @@
       </select>
     </div>
     
+    <!-- Delete Bar (hidden by default) -->
+    <div class="delete-bar" id="deleteBar">
+      <div class="delete-info">
+        <label class="select-all">
+          <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+          <span>Select All</span>
+        </label>
+        <span class="selected-count" id="selectedCount">0 selected</span>
+      </div>
+      <div class="delete-actions">
+        <button class="delete-selected-btn" id="deleteSelectedBtn" onclick="confirmDeleteSelected()" disabled>🗑️ Delete Selected</button>
+        <button class="cancel-delete-btn" onclick="toggleDeleteMode()">✕ Cancel</button>
+      </div>
+    </div>
+    
     <div class="logs-container">
       <table>
         <thead>
           <tr>
+            <th class="checkbox-cell" id="checkboxHeader" style="display: none;">Select</th>
             <th>Time</th>
             <th>Photo</th>
             <th>Name</th>
@@ -348,10 +534,11 @@
             <th>Grade</th>
             <th>Section</th>
             <th>Action</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="logsBody">
-          <tr><td colspan="8" style="text-align: center; padding: 50px;">Loading logs...</td></tr>
+          <tr><td colspan="10" style="text-align: center; padding: 50px;">Loading logs...</td></tr>
         </tbody>
       </table>
       <div class="pagination" id="pagination"></div>
@@ -364,9 +551,21 @@
     <img class="modal-image" id="modalImage" src="">
   </div>
 
+  <!-- Confirm Delete Modal -->
+  <div class="confirm-modal" id="confirmModal">
+    <div class="confirm-content">
+      <h3>⚠️ Confirm Delete</h3>
+      <p id="confirmMessage">Are you sure you want to delete selected logs?</p>
+      <div class="confirm-buttons">
+        <button class="confirm-yes" id="confirmYesBtn">Yes, Delete</button>
+        <button class="confirm-no" onclick="closeConfirmModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ============================================
-    // ASLS - SINGLE FILE UPLOAD (FIXED)
+    // ASLS - WITH SELECT AND DELETE FUNCTIONALITY
     // ============================================
     
     let allLogs = [];
@@ -374,6 +573,9 @@
     let currentPage = 1;
     const logsPerPage = 50;
     let APPS_SCRIPT_URL = '';
+    let deleteMode = false;
+    let selectedIndices = new Set();
+    let deleteCallback = null;
     
     // Load data from localStorage
     function loadData() {
@@ -382,6 +584,7 @@
         filteredLogs = [...allLogs];
         updateStats();
         filterLogs();
+        exitDeleteMode();
         
         // Load saved URL
         const savedUrl = localStorage.getItem('asls_script_url');
@@ -425,7 +628,137 @@
       
       filteredLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       currentPage = 1;
+      selectedIndices.clear();
       renderTable();
+    }
+    
+    // Toggle delete mode
+    function toggleDeleteMode() {
+      deleteMode = !deleteMode;
+      selectedIndices.clear();
+      
+      const deleteBar = document.getElementById('deleteBar');
+      const checkboxHeader = document.getElementById('checkboxHeader');
+      const deleteModeBtn = document.getElementById('deleteModeBtn');
+      
+      if (deleteMode) {
+        deleteBar.style.display = 'flex';
+        checkboxHeader.style.display = 'table-cell';
+        deleteModeBtn.classList.add('active');
+        deleteModeBtn.textContent = '❌ Exit Delete Mode';
+      } else {
+        deleteBar.style.display = 'none';
+        checkboxHeader.style.display = 'none';
+        deleteModeBtn.classList.remove('active');
+        deleteModeBtn.textContent = '🗑️ Delete Mode';
+      }
+      
+      renderTable();
+    }
+    
+    function exitDeleteMode() {
+      if (deleteMode) {
+        toggleDeleteMode();
+      }
+    }
+    
+    // Toggle select all
+    function toggleSelectAll() {
+      const selectAll = document.getElementById('selectAllCheckbox').checked;
+      const start = (currentPage - 1) * logsPerPage;
+      const end = Math.min(start + logsPerPage, filteredLogs.length);
+      
+      if (selectAll) {
+        for (let i = start; i < end; i++) {
+          selectedIndices.add(i);
+        }
+      } else {
+        for (let i = start; i < end; i++) {
+          selectedIndices.delete(i);
+        }
+      }
+      
+      updateSelectionUI();
+      renderTable();
+    }
+    
+    // Toggle single selection
+    function toggleSelection(index) {
+      if (selectedIndices.has(index)) {
+        selectedIndices.delete(index);
+      } else {
+        selectedIndices.add(index);
+      }
+      updateSelectionUI();
+      renderTable();
+    }
+    
+    // Update selection UI
+    function updateSelectionUI() {
+      const count = selectedIndices.size;
+      document.getElementById('selectedCount').textContent = count + ' selected';
+      document.getElementById('deleteSelectedBtn').disabled = count === 0;
+      
+      // Update select all checkbox
+      const start = (currentPage - 1) * logsPerPage;
+      const end = Math.min(start + logsPerPage, filteredLogs.length);
+      let allSelected = true;
+      for (let i = start; i < end; i++) {
+        if (!selectedIndices.has(i)) {
+          allSelected = false;
+          break;
+        }
+      }
+      document.getElementById('selectAllCheckbox').checked = allSelected && end > start;
+    }
+    
+    // Confirm delete selected
+    function confirmDeleteSelected() {
+      if (selectedIndices.size === 0) return;
+      
+      const count = selectedIndices.size;
+      document.getElementById('confirmMessage').textContent = `Are you sure you want to delete ${count} selected log(s)?`;
+      deleteCallback = deleteSelected;
+      document.getElementById('confirmModal').style.display = 'flex';
+    }
+    
+    // Confirm delete single
+    function confirmDeleteSingle(index) {
+      selectedIndices.clear();
+      selectedIndices.add(index);
+      document.getElementById('confirmMessage').textContent = 'Are you sure you want to delete this log?';
+      deleteCallback = deleteSelected;
+      document.getElementById('confirmModal').style.display = 'flex';
+    }
+    
+    // Delete selected logs
+    function deleteSelected() {
+      // Convert selected indices to actual log indices
+      const indicesToDelete = Array.from(selectedIndices).sort((a, b) => b - a);
+      
+      indicesToDelete.forEach(filteredIndex => {
+        const logToDelete = filteredLogs[filteredIndex];
+        const actualIndex = allLogs.findIndex(log => 
+          log.timestamp === logToDelete.timestamp && 
+          log.lrn === logToDelete.lrn
+        );
+        if (actualIndex !== -1) {
+          allLogs.splice(actualIndex, 1);
+        }
+      });
+      
+      // Save to localStorage
+      localStorage.setItem('asls_master', JSON.stringify(allLogs));
+      
+      // Refresh data
+      loadData();
+      closeConfirmModal();
+    }
+    
+    // Close confirm modal
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').style.display = 'none';
+      deleteCallback = null;
     }
     
     // Render table
@@ -435,15 +768,26 @@
       const pageLogs = filteredLogs.slice(start, end);
       
       if (filteredLogs.length === 0) {
-        document.getElementById('logsBody').innerHTML = '<tr><td colspan="8" style="text-align:center;">No logs found</td></tr>';
+        document.getElementById('logsBody').innerHTML = '<tr><td colspan="10" style="text-align:center;">No logs found</td></tr>';
+        document.getElementById('pagination').innerHTML = '';
         return;
       }
       
       let html = '';
-      pageLogs.forEach((log) => {
+      pageLogs.forEach((log, idx) => {
+        const actualIndex = start + idx;
         const date = new Date(log.timestamp);
+        const isSelected = selectedIndices.has(actualIndex);
         
-        html += `<tr>
+        html += `<tr class="${isSelected ? 'selected' : ''}">`;
+        
+        if (deleteMode) {
+          html += `<td class="checkbox-cell">
+            <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelection(${actualIndex})">
+          </td>`;
+        }
+        
+        html += `
           <td>${date.toLocaleString()}</td>
           <td>${log.photo && log.photo !== 'no-photo' ? `<img src="${log.photo}" class="photo-thumb" onclick="viewPhoto('${log.photo}')">` : 'No photo'}</td>
           <td>${log.name}</td>
@@ -452,6 +796,7 @@
           <td>${log.grade || 'N/A'}</td>
           <td>${log.section || 'N/A'}</td>
           <td><span class="action-badge ${log.action === 'Log in' ? 'action-login' : 'action-logout'}">${log.action}</span></td>
+          <td><button class="delete-btn" onclick="confirmDeleteSingle(${actualIndex})">🗑️ Delete</button></td>
         </tr>`;
       });
       
@@ -476,7 +821,9 @@
     
     function goToPage(page) {
       currentPage = page;
+      selectedIndices.clear();
       renderTable();
+      if (deleteMode) updateSelectionUI();
     }
     
     // View photo
@@ -567,7 +914,7 @@
       return html;
     }
     
-    // Upload to Drive - SINGLE UPLOAD METHOD
+    // Upload to Drive
     function uploadToDrive() {
       if (!APPS_SCRIPT_URL) {
         alert('Please test connection first');
@@ -591,7 +938,7 @@
       
       status.innerHTML = '⏳ Uploading ' + allLogs.length + ' logs to Drive...';
       
-      // Create a form to submit - THIS IS THE ONLY UPLOAD METHOD
+      // Create form to submit
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = APPS_SCRIPT_URL;
