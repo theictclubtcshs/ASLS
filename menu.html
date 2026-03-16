@@ -379,11 +379,11 @@
 
             <!-- Quick Actions -->
             <div class="quick-actions">
-                <button class="quick-btn" onclick="openSheet()">
-                   Admin
+                <button class="quick-btn" onclick="openAdminPanel()">
+                   👑 Admin Panel
                 </button>
                 <button class="quick-btn" onclick="window.location.reload()">
-                    Refresh
+                    🔄 Refresh
                 </button>
             </div>
 
@@ -404,8 +404,8 @@
         // Your GitHub Pages camera page URL - UPDATED for your repository
         const CAMERA_PAGE_URL = 'https://theictclubtcshs.github.io/ASLS/';
         
-        // Your Google Sheet URL (optional - for quick access)
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1of_KiJN3_xQx7sHEoIKi5sHNwnAD-XuSKqux5wyIyqI/edit?usp=sharing';  // UPDATE THIS!
+        // Your Admin Panel HTML page URL
+        const ADMIN_PANEL_URL = 'https://theictclubtcshs.github.io/ASLS/admin.html';  // Update this to your actual admin panel filename
 
         // ============================================
         // LOGO HANDLING
@@ -462,7 +462,6 @@
         
         // Open logout page
         function openLogout() {
-        
             const url = CAMERA_PAGE_URL + '?action=Log%20out';
         
             if (!cameraWindow || cameraWindow.closed) {
@@ -473,13 +472,13 @@
             }
         }
 
-        // Open Google Sheet
-        function openSheet() {
-            if (SHEET_URL !== 'YOUR_GOOGLE_SHEET_URL') {
-                window.open(SHEET_URL, '_blank');
-            } else {
-                alert('Please set your Sheet URL in the script');
-            }
+        // Open Admin Panel
+        function openAdminPanel() {
+            // Open admin panel in a new tab
+            window.open(ADMIN_PANEL_URL, '_blank');
+            
+            // Optional: Add a small notification
+            console.log('Opening Admin Panel...');
         }
 
         // Initialize
@@ -492,7 +491,7 @@
         // Expose functions globally
         window.openLogin = openLogin;
         window.openLogout = openLogout;
-        window.openSheet = openSheet;
+        window.openAdminPanel = openAdminPanel;
     </script>
 </body>
 </html>
