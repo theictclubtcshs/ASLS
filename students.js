@@ -3,7 +3,6 @@
 // ============================================
 
 const STUDENTS_DATA = [
-    // PASTE YOUR EXCEL DATA HERE
     // Format: { lrn: '12-digit', name: 'FULL NAME', sex: 'M/F', grade: 'GRADE', section: 'SECTION' }
     
     { lrn: '104406130081', name: 'JUAN DELA CRUZ', sex: 'M', grade: '10', section: 'MAGALANG' },
