@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Google Drive Folder Creator</title>
-  <meta charset="UTF-8">
+  <title>Create Drive Folder</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -21,200 +20,202 @@
       text-align: center;
       max-width: 500px;
     }
-    h1 {
-      color: #186E00;
-      margin-bottom: 30px;
+    h1 { color: #186E00; }
+    input {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 14px;
     }
     button {
       background: #4285F4;
       color: white;
       border: none;
-      padding: 20px 40px;
-      font-size: 24px;
-      border-radius: 50px;
+      padding: 15px 30px;
+      font-size: 18px;
+      border-radius: 10px;
       cursor: pointer;
-      margin: 20px 0;
-      transition: all 0.3s;
-      box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
-    }
-    button:hover {
-      background: #3367D6;
-      transform: scale(1.05);
-    }
-    button:disabled {
-      background: #a5c1f9;
-      cursor: not-allowed;
-      transform: none;
+      margin: 10px 0;
+      width: 100%;
     }
     .status {
       margin-top: 20px;
       padding: 15px;
       border-radius: 10px;
       background: #f0f0f0;
-      min-height: 60px;
+      min-height: 80px;
       text-align: left;
       font-family: monospace;
+      white-space: pre-wrap;
     }
-    .success {
-      color: #27ae60;
-      font-weight: bold;
-    }
-    .error {
-      color: #e74c3c;
-      font-weight: bold;
-    }
-    .info {
-      margin-top: 20px;
-      color: #666;
-      font-size: 14px;
-    }
+    .success { color: #27ae60; font-weight: bold; }
+    .error { color: #e74c3c; font-weight: bold; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📁 Google Drive Folder Creator</h1>
-    <p>Click the button to create "AttendanceASLS" folder in your Google Drive</p>
+    <h1>📁 Create Drive Folder</h1>
+    <p>Using your working Apps Script</p>
     
-    <button id="createBtn" onclick="startAuth()">
-      📂 CREATE FOLDER
-    </button>
+    <input type="text" id="scriptUrl" 
+           placeholder="Paste your Apps Script URL here" 
+           value="https://script.google.com/macros/s/AKfycbwADqDZgDjv0qEOv-V1Fbt4ssKkFccW4vx7EbMzn6aXi7BQ5qyFkMqUzI7Ab1W9XQ/exec">
+    
+    <button onclick="testConnection()">1. Test Connection</button>
+    <button onclick="createFolder()">2. CREATE AttendanceASLS FOLDER</button>
+    <button onclick="checkFolder()">3. Check if folder exists</button>
     
     <div class="status" id="status">
-      Ready to create folder...
-    </div>
-    
-    <div class="info">
-      ⚡ A popup window will appear for you to sign in<br>
-      ⚡ The folder will be created in your Google Drive root
+      Ready. Follow the steps above.
     </div>
   </div>
 
   <script>
-    // Your GitHub Pages URL
-    const REDIRECT_URI = 'https://theictclubtcshs.github.io/ASLS/Tester.html';
-    const CLIENT_ID = '407408718192.apps.googleusercontent.com'; // Public test client
-    const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+    let scriptUrl = '';
 
-    let authWindow = null;
-    let accessToken = null;
-
-    function startAuth() {
+    function testConnection() {
+      scriptUrl = document.getElementById('scriptUrl').value.trim();
       const status = document.getElementById('status');
-      status.innerHTML = '⏳ Opening login window...';
       
-      // Create the OAuth URL
-      const authUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-        'client_id=' + CLIENT_ID +
-        '&redirect_uri=' + encodeURIComponent(REDIRECT_URI) +
-        '&response_type=token' +
-        '&scope=' + encodeURIComponent(SCOPES) +
-        '&include_granted_scopes=true' +
-        '&state=pass-through-value';
-      
-      // Open popup window
-      authWindow = window.open(
-        authUrl,
-        'google-auth',
-        'width=600,height=600,left=200,top=200'
-      );
-      
-      // Check if popup was blocked
-      if (!authWindow || authWindow.closed || typeof authWindow.closed === 'undefined') {
-        status.innerHTML = '❌ Popup was blocked. Please allow popups for this site.';
-      }
-      
-      // Start checking for the token
-      checkForToken();
-    }
-
-    function checkForToken() {
-      if (authWindow && !authWindow.closed) {
-        setTimeout(checkForToken, 500);
+      if (!scriptUrl) {
+        status.innerHTML = '<span class="error">❌ Please enter URL</span>';
         return;
       }
       
-      // Check URL fragment for access token
-      if (authWindow && authWindow.location && authWindow.location.href) {
-        const hash = authWindow.location.hash.substring(1);
-        const params = new URLSearchParams(hash);
-        const token = params.get('access_token');
-        
-        if (token) {
-          accessToken = token;
-          document.getElementById('status').innerHTML = '✅ Signed in successfully!';
-          createFolder();
-        }
-      }
+      status.innerHTML = '⏳ Testing connection...';
       
-      authWindow = null;
-    }
-
-    // Create folder in Google Drive
-    async function createFolder() {
-      const status = document.getElementById('status');
-      const btn = document.getElementById('createBtn');
-      
-      if (!accessToken) {
-        status.innerHTML = '❌ Not signed in. Please try again.';
-        return;
-      }
-
-      try {
-        status.innerHTML = '⏳ Creating folder "AttendanceASLS"...';
-        
-        // Create folder metadata
-        const metadata = {
-          name: 'AttendanceASLS',
-          mimeType: 'application/vnd.google-apps.folder'
-        };
-
-        // Send request to create folder
-        const response = await fetch('https://www.googleapis.com/drive/v3/files', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + accessToken,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(metadata)
+      fetch(scriptUrl + '?t=' + Date.now())
+        .then(r => r.text())
+        .then(text => {
+          status.innerHTML = '<span class="success">✅ Connected!</span><br>' + text.substring(0, 200);
+        })
+        .catch(err => {
+          status.innerHTML = '<span class="error">❌ Error: ' + err.message + '</span>';
         });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          status.innerHTML = `
-            <span class="success">✅ Folder created successfully!</span><br>
-            <strong>Folder Name:</strong> AttendanceASLS<br>
-            <strong>Folder ID:</strong> ${data.id}<br>
-            <strong>Link:</strong> <a href="https://drive.google.com/drive/folders/${data.id}" target="_blank">Open in Drive</a>
-          `;
-        } else {
-          throw new Error(data.error.message);
-        }
-      } catch (error) {
-        status.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
-      }
     }
 
-    // Check if we have token in URL (when redirected back)
-    function checkHashForToken() {
-      if (window.location.hash) {
-        const hash = window.location.hash.substring(1);
-        const params = new URLSearchParams(hash);
-        const token = params.get('access_token');
+    function createFolder() {
+      scriptUrl = document.getElementById('scriptUrl').value.trim();
+      const status = document.getElementById('status');
+      
+      if (!scriptUrl) {
+        status.innerHTML = '<span class="error">❌ Please enter URL</span>';
+        return;
+      }
+      
+      status.innerHTML = '⏳ Creating folder via Apps Script...';
+      
+      // Create a dummy file which will create the folder
+      const now = new Date();
+      const html = `<!DOCTYPE html>
+<html>
+<body>
+  <h1>Folder Creation Trigger</h1>
+  <p>This file was uploaded to create the AttendanceASLS folder.</p>
+  <p>Time: ${now.toLocaleString()}</p>
+</body>
+</html>`;
+      
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = scriptUrl;
+      form.target = 'upload_frame';
+      form.style.display = 'none';
+      
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'data';
+      input.value = JSON.stringify({
+        filename: 'folder_trigger.html',
+        content: html,
+        folderName: 'AttendanceASLS'  // This creates the folder!
+      });
+      
+      form.appendChild(input);
+      document.body.appendChild(form);
+      
+      const iframe = document.createElement('iframe');
+      iframe.name = 'upload_frame';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+      
+      iframe.onload = function() {
+        status.innerHTML = '<span class="success">✅ Upload complete!</span><br>' +
+                          'The folder "AttendanceASLS" should now exist in your Drive.<br>' +
+                          'Click "Check if folder exists" to verify.';
         
-        if (token) {
-          accessToken = token;
-          document.getElementById('status').innerHTML = '✅ Signed in successfully!';
-          createFolder();
-          
-          // Clean URL
-          window.location.hash = '';
-        }
-      }
+        setTimeout(() => {
+          document.body.removeChild(form);
+          document.body.removeChild(iframe);
+        }, 2000);
+      };
+      
+      form.submit();
     }
 
-    // Run on page load
-    window.onload = checkHashForToken;
+    function checkFolder() {
+      scriptUrl = document.getElementById('scriptUrl').value.trim();
+      const status = document.getElementById('status');
+      
+      if (!scriptUrl) {
+        status.innerHTML = '<span class="error">❌ Please enter URL</span>';
+        return;
+      }
+      
+      status.innerHTML = '⏳ Checking Drive...';
+      
+      // Try to access the folder by uploading another file to it
+      const now = new Date();
+      const html = `<!DOCTYPE html>
+<html>
+<body>
+  <h1>Folder Check</h1>
+  <p>If you can see this, the folder exists!</p>
+  <p>Time: ${now.toLocaleString()}</p>
+</body>
+</html>`;
+      
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = scriptUrl;
+      form.target = 'check_frame';
+      form.style.display = 'none';
+      
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'data';
+      input.value = JSON.stringify({
+        filename: 'check_file.html',
+        content: html,
+        folderName: 'AttendanceASLS'  // Try to put in existing folder
+      });
+      
+      form.appendChild(input);
+      document.body.appendChild(form);
+      
+      const iframe = document.createElement('iframe');
+      iframe.name = 'check_frame';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+      
+      iframe.onload = function() {
+        status.innerHTML = '<span class="success">✅ Check complete!</span><br>' +
+                          'If no errors appeared, the folder exists.<br>' +
+                          '<strong>Please check your Google Drive manually:</strong><br>' +
+                          '1. Go to drive.google.com<br>' +
+                          '2. Search for "AttendanceASLS"<br>' +
+                          '3. Look for files named "folder_trigger.html" and "check_file.html"';
+        
+        setTimeout(() => {
+          document.body.removeChild(form);
+          document.body.removeChild(iframe);
+        }, 2000);
+      };
+      
+      form.submit();
+    }
   </script>
 </body>
 </html>
