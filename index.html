@@ -828,7 +828,8 @@
     // CONFIGURATION - UPDATE THESE!
     const GITHUB_USERNAME = 'theictclubtcshs';
     const GITHUB_REPO = 'ASLS';
-    const GITHUB_TOKEN = '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'; // YOU NEED TO CREATE THIS
+    // YOUR GITHUB TOKEN - Make sure there are no spaces
+    const GITHUB_TOKEN = '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';
     
     const STUDENTS_CSV_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/students.csv`;
     const LOGS_BASE_PATH = `logs`; // Base folder for all logs
@@ -877,10 +878,30 @@
     
     window.isErrorActive = false;
     
+    // Validate token format
+    function validateToken() {
+      if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN') {
+        showErrorOverlay('Please set your GitHub Personal Access Token in the script!');
+        return false;
+      }
+      if (!GITHUB_TOKEN.startsWith('ghp_')) {
+        showErrorOverlay('Invalid token format. Token should start with "ghp_"');
+        return false;
+      }
+      if (GITHUB_TOKEN.length < 40) {
+        showErrorOverlay('Token seems too short. Please check your token.');
+        return false;
+      }
+      return true;
+    }
+    
     // Load students data
     async function loadStudentsData() {
       try {
         const response = await fetch(STUDENTS_CSV_URL);
+        if (!response.ok) {
+          throw new Error('Failed to load students.csv');
+        }
         const csvText = await response.text();
         
         // Parse CSV
@@ -898,9 +919,11 @@
           }
         }
         console.log('Loaded', studentsData.length, 'students');
+        return true;
       } catch (error) {
         console.error('Error loading students data:', error);
-        showErrorOverlay('Failed to load student database');
+        showErrorOverlay('Failed to load student database. Make sure students.csv exists in your repository.');
+        return false;
       }
     }
     
@@ -927,13 +950,17 @@
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const day = String(now.getDate()).padStart(2, '0');
+      const hours = now.getHours();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
       
-      return `${LOGS_BASE_PATH}/${year}/${month}/${day}/logs.json`;
+      return `${LOGS_BASE_PATH}/${year}/${month}/${day}/${ampm}/logs.json`;
     }
     
     // Upload file to GitHub
     async function uploadToGitHub(path, content, message) {
       try {
+        console.log('Uploading to:', path);
+        
         // Check if file exists
         let sha = null;
         try {
@@ -947,9 +974,12 @@
           if (checkResponse.ok) {
             const data = await checkResponse.json();
             sha = data.sha;
+            console.log('File exists, SHA:', sha);
+          } else {
+            console.log('File does not exist, will create new');
           }
         } catch (e) {
-          console.log('File does not exist, creating new');
+          console.log('Error checking file, will try to create new');
         }
         
         // Prepare upload data
@@ -962,6 +992,8 @@
         if (sha) {
           uploadData.sha = sha;
         }
+        
+        console.log('Uploading with data length:', content.length);
         
         // Upload file
         const uploadResponse = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${path}`, {
@@ -976,9 +1008,12 @@
         
         if (!uploadResponse.ok) {
           const error = await uploadResponse.json();
+          console.error('GitHub API error:', error);
           throw new Error(error.message || 'Upload failed');
         }
         
+        const result = await uploadResponse.json();
+        console.log('Upload successful:', result.content.path);
         return true;
       } catch (error) {
         console.error('GitHub upload error:', error);
@@ -989,18 +1024,19 @@
     // Save log to GitHub with folder organization
     async function saveLogToGitHub(logEntry) {
       try {
-        const folderPath = getFolderPath();
         const todayLogPath = getTodayLogPath();
+        console.log('Saving to:', todayLogPath);
         
-        // Get existing logs for today
+        // Get existing logs for today/period
         let existingLogs = [];
         try {
           const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/${todayLogPath}?t=${Date.now()}`);
           if (response.ok) {
             existingLogs = await response.json();
+            console.log('Found existing logs:', existingLogs.length);
           }
         } catch (e) {
-          console.log('No existing logs for today, creating new');
+          console.log('No existing logs for this period, creating new');
         }
         
         // Add new log
@@ -1301,6 +1337,9 @@
     async function applyLog() {
       if (window.isErrorActive) return;
       
+      // Validate token first
+      if (!validateToken()) return;
+      
       const lrn = lrnInput.value.trim();
       const validationError = validateLRN(lrn);
       
@@ -1437,13 +1476,17 @@
     });
     
     window.onload = async function() {
-      // Check if GitHub token is set
-      if (GITHUB_TOKEN === 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN') {
-        alert('Please set your GitHub Personal Access Token in the script!');
+      // First validate token
+      if (!validateToken()) {
         return;
       }
       
-      await loadStudentsData();
+      // Load students data
+      const studentsLoaded = await loadStudentsData();
+      if (!studentsLoaded) {
+        return;
+      }
+      
       updateActionUI();
       initCamera();
       resetInputForNextScan();
