@@ -308,11 +308,11 @@
       <div class="camera-container" id="cameraContainer">
         <video id="video" autoplay playsinline style="display: none;"></video>
         <canvas id="canvas"></canvas>
-        <div class="camera-placeholder" id="cameraPlaceholder" style="display: flex; flex-direction: column; align-items: center;">
+        <div class="camera-placeholder" id="cameraPlaceholder">
           <div style="font-size: 48px; margin-bottom: 20px;">📷</div>
           <h3 style="color: white; margin-bottom: 10px;">Camera Initializing...</h3>
           <p style="color: #aaa; margin-bottom: 20px;">Please grant camera permission when prompted</p>
-          <button onclick="requestCameraPermission()" id="requestBtn" style="display: none;">Allow Camera Access</button>
+          <button onclick="requestCameraPermission()" id="requestBtn">Allow Camera Access</button>
         </div>
         <div class="camera-status">
           <span class="status-dot" id="statusDot"></span>
@@ -447,7 +447,6 @@
     // ========== FIXED CAMERA FUNCTIONS ==========
     async function requestCameraPermission() {
       updateCameraStatus('waiting', 'Requesting camera...');
-      requestBtn.style.display = 'none';
       
       try {
         // Check if browser supports getUserMedia
@@ -470,12 +469,30 @@
         // Attach stream to video element
         video.srcObject = currentStream;
         
-        // Wait for video to be ready
-        await new Promise((resolve) => {
+        // Wait for video to be ready - FIXED HERE
+        await new Promise((resolve, reject) => {
           video.onloadedmetadata = () => {
-            video.play();
-            resolve();
+            video.play()
+              .then(() => {
+                resolve();
+              })
+              .catch((err) => {
+                reject(new Error('Failed to play video: ' + err.message));
+              });
           };
+          
+          video.onerror = () => {
+            reject(new Error('Video element error'));
+          };
+          
+          // Set a timeout in case the event doesn't fire
+          setTimeout(() => {
+            if (!video.srcObject) return;
+            // If video is already playing, resolve
+            if (video.readyState >= 2) {
+              resolve();
+            }
+          }, 1000);
         });
         
         // Success!
@@ -518,6 +535,9 @@
             <button onclick="requestCameraPermission()" style="background: #3498db; color: white; border: none; padding: 12px 24px; border-radius: 30px; cursor: pointer;">Try Again</button>
           `;
         }
+        
+        // Show request button again
+        requestBtn.style.display = 'inline-block';
       }
     }
     
@@ -576,12 +596,6 @@
       
       updateCameraStatus('ready', 'Photo Captured');
       actionBtn.disabled = false;
-      
-      // Auto-apply after short delay
-      setTimeout(() => {
-        if (!isProcessing) return;
-        applyLog();
-      }, 200);
     }
     
     function resetCamera() {
