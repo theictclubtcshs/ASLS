@@ -828,11 +828,11 @@
     // CONFIGURATION - UPDATE THESE!
     const GITHUB_USERNAME = 'theictclubtcshs';
     const GITHUB_REPO = 'ASLS';
-    // YOUR GITHUB TOKEN - Make sure there are no spaces
-    const GITHUB_TOKEN = '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';
+    // REPLACE THIS WITH YOUR NEW TOKEN FROM STEP 2
+    const GITHUB_TOKEN = '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';
     
     const STUDENTS_CSV_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/students.csv`;
-    const LOGS_BASE_PATH = `logs`; // Base folder for all logs
+    const LOGS_BASE_PATH = `logs`;
     
     // DOM Elements
     const video = document.getElementById('video');
@@ -878,21 +878,29 @@
     
     window.isErrorActive = false;
     
-    // Validate token format
-    function validateToken() {
-      if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN') {
-        showErrorOverlay('Please set your GitHub Personal Access Token in the script!');
+    // Test GitHub token first
+    async function testGitHubToken() {
+      try {
+        const response = await fetch('https://api.github.com/user', {
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Token invalid');
+        }
+        
+        const user = await response.json();
+        console.log('✅ GitHub token valid! Logged in as:', user.login);
+        return true;
+      } catch (error) {
+        console.error('❌ GitHub token error:', error);
+        showErrorOverlay('GitHub token invalid: ' + error.message);
         return false;
       }
-      if (!GITHUB_TOKEN.startsWith('ghp_')) {
-        showErrorOverlay('Invalid token format. Token should start with "ghp_"');
-        return false;
-      }
-      if (GITHUB_TOKEN.length < 40) {
-        showErrorOverlay('Token seems too short. Please check your token.');
-        return false;
-      }
-      return true;
     }
     
     // Load students data
@@ -904,7 +912,6 @@
         }
         const csvText = await response.text();
         
-        // Parse CSV
         const lines = csvText.split('\n');
         const headers = lines[0].split(',');
         
@@ -918,11 +925,11 @@
             studentsData.push(student);
           }
         }
-        console.log('Loaded', studentsData.length, 'students');
+        console.log('✅ Loaded', studentsData.length, 'students');
         return true;
       } catch (error) {
         console.error('Error loading students data:', error);
-        showErrorOverlay('Failed to load student database. Make sure students.csv exists in your repository.');
+        showErrorOverlay('Failed to load student database. Make sure students.csv exists.');
         return false;
       }
     }
@@ -932,7 +939,7 @@
       return studentsData.find(s => s.LRN === lrn);
     }
     
-    // Get folder path based on date and time
+    // Get folder path
     function getFolderPath() {
       const now = new Date();
       const year = now.getFullYear();
@@ -959,7 +966,7 @@
     // Upload file to GitHub
     async function uploadToGitHub(path, content, message) {
       try {
-        console.log('Uploading to:', path);
+        console.log('📤 Uploading to:', path);
         
         // Check if file exists
         let sha = null;
@@ -974,26 +981,24 @@
           if (checkResponse.ok) {
             const data = await checkResponse.json();
             sha = data.sha;
-            console.log('File exists, SHA:', sha);
+            console.log('📁 File exists, updating...');
           } else {
-            console.log('File does not exist, will create new');
+            console.log('📁 Creating new file...');
           }
         } catch (e) {
-          console.log('Error checking file, will try to create new');
+          console.log('📁 Creating new file...');
         }
         
         // Prepare upload data
         const uploadData = {
           message: message,
-          content: btoa(unescape(encodeURIComponent(content))), // Convert to base64
+          content: btoa(unescape(encodeURIComponent(content))),
           branch: 'main'
         };
         
         if (sha) {
           uploadData.sha = sha;
         }
-        
-        console.log('Uploading with data length:', content.length);
         
         // Upload file
         const uploadResponse = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${path}`, {
@@ -1008,51 +1013,46 @@
         
         if (!uploadResponse.ok) {
           const error = await uploadResponse.json();
-          console.error('GitHub API error:', error);
+          console.error('❌ GitHub API error:', error);
           throw new Error(error.message || 'Upload failed');
         }
         
-        const result = await uploadResponse.json();
-        console.log('Upload successful:', result.content.path);
+        console.log('✅ Upload successful!');
         return true;
       } catch (error) {
-        console.error('GitHub upload error:', error);
+        console.error('❌ GitHub upload error:', error);
         throw error;
       }
     }
     
-    // Save log to GitHub with folder organization
+    // Save log to GitHub
     async function saveLogToGitHub(logEntry) {
       try {
         const todayLogPath = getTodayLogPath();
-        console.log('Saving to:', todayLogPath);
+        console.log('📝 Saving to:', todayLogPath);
         
-        // Get existing logs for today/period
+        // Get existing logs
         let existingLogs = [];
         try {
           const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/${todayLogPath}?t=${Date.now()}`);
           if (response.ok) {
             existingLogs = await response.json();
-            console.log('Found existing logs:', existingLogs.length);
+            console.log('📚 Found existing logs:', existingLogs.length);
           }
         } catch (e) {
-          console.log('No existing logs for this period, creating new');
+          console.log('📚 No existing logs, creating new');
         }
         
         // Add new log
         existingLogs.push(logEntry);
-        
-        // Sort by timestamp descending (newest first)
         existingLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         
-        // Convert to JSON string
+        // Upload
         const jsonContent = JSON.stringify(existingLogs, null, 2);
-        
-        // Upload to GitHub
-        const commitMessage = `Add ${logEntry.action} log for ${logEntry.name} (${logEntry.lrn})`;
+        const commitMessage = `Add ${logEntry.action} log for ${logEntry.name}`;
         await uploadToGitHub(todayLogPath, jsonContent, commitMessage);
         
-        // Also update master log file (all logs combined)
+        // Update master log
         await updateMasterLog(logEntry);
         
         return true;
@@ -1062,41 +1062,29 @@
       }
     }
     
-    // Update master log file (all logs combined)
+    // Update master log
     async function updateMasterLog(newLog) {
       try {
         const masterLogPath = `${LOGS_BASE_PATH}/all_logs.json`;
         
-        // Get existing master log
         let masterLogs = [];
         try {
           const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/${masterLogPath}?t=${Date.now()}`);
           if (response.ok) {
             masterLogs = await response.json();
           }
-        } catch (e) {
-          console.log('No master log found, creating new');
-        }
+        } catch (e) {}
         
-        // Add new log
         masterLogs.push(newLog);
-        
-        // Keep only last 5000 logs to prevent file from getting too big
-        if (masterLogs.length > 5000) {
-          masterLogs = masterLogs.slice(-5000);
-        }
-        
-        // Sort by timestamp descending
+        if (masterLogs.length > 5000) masterLogs = masterLogs.slice(-5000);
         masterLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         
-        // Upload master log
         const jsonContent = JSON.stringify(masterLogs, null, 2);
         await uploadToGitHub(masterLogPath, jsonContent, 'Update master log');
         
         return true;
       } catch (error) {
         console.error('Error updating master log:', error);
-        // Don't throw - this is not critical
         return false;
       }
     }
@@ -1337,9 +1325,6 @@
     async function applyLog() {
       if (window.isErrorActive) return;
       
-      // Validate token first
-      if (!validateToken()) return;
-      
       const lrn = lrnInput.value.trim();
       const validationError = validateLRN(lrn);
       
@@ -1357,7 +1342,6 @@
         return;
       }
       
-      // Find student
       const student = findStudentByLRN(lrn);
       if (!student) {
         showErrorOverlay('Student not found in database');
@@ -1407,7 +1391,6 @@
         });
       }
       
-      // Compress and save
       const compressedImage = await compressImage(capturedImage);
       
       const logEntry = {
@@ -1427,13 +1410,11 @@
       };
       
       try {
-        // Save to GitHub
         await saveLogToGitHub(logEntry);
         
         hideProcessingOverlay();
         showSuccessNotice(`${student.NAME} ${action} successful!`);
         
-        // Open logs page
         setTimeout(() => {
           window.open('logs.html', '_blank');
         }, 1500);
@@ -1446,7 +1427,7 @@
       }
     }
     
-    // BARCODE SCANNER OPTIMIZATION
+    // Barcode scanner
     lrnInput.addEventListener('input', function(e) {
       this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
       
@@ -1476,16 +1457,13 @@
     });
     
     window.onload = async function() {
-      // First validate token
-      if (!validateToken()) {
-        return;
-      }
+      // First test the token
+      const tokenValid = await testGitHubToken();
+      if (!tokenValid) return;
       
-      // Load students data
+      // Load students
       const studentsLoaded = await loadStudentsData();
-      if (!studentsLoaded) {
-        return;
-      }
+      if (!studentsLoaded) return;
       
       updateActionUI();
       initCamera();
