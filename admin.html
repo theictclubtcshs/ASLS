@@ -366,7 +366,7 @@
 
   <script>
     // ============================================
-    // ASLS - WORKING DRIVE UPLOAD
+    // ASLS - SINGLE FILE UPLOAD (FIXED)
     // ============================================
     
     let allLogs = [];
@@ -495,11 +495,8 @@
         return;
       }
       
-      status.innerHTML = '⏳ Testing connection...';
       APPS_SCRIPT_URL = url;
       localStorage.setItem('asls_script_url', url);
-      
-      // Simple test - just save the URL
       status.innerHTML = '✅ URL saved! Ready to upload.';
     }
     
@@ -570,7 +567,7 @@
       return html;
     }
     
-    // Upload to Drive
+    // Upload to Drive - SINGLE UPLOAD METHOD
     function uploadToDrive() {
       if (!APPS_SCRIPT_URL) {
         alert('Please test connection first');
@@ -594,63 +591,46 @@
       
       status.innerHTML = '⏳ Uploading ' + allLogs.length + ' logs to Drive...';
       
-      // Create form data
-      const formData = new URLSearchParams();
-      formData.append('data', JSON.stringify({
+      // Create a form to submit - THIS IS THE ONLY UPLOAD METHOD
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = APPS_SCRIPT_URL;
+      form.target = 'upload_iframe';
+      form.style.display = 'none';
+      
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'data';
+      input.value = JSON.stringify({
         filename: filename,
         content: htmlContent,
         folderName: 'AttendanceASLS'
-      }));
+      });
       
-      // Use fetch with no-cors mode
-      fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData
-      }).then(() => {
-        status.innerHTML = `✅ Upload initiated!<br>
+      form.appendChild(input);
+      document.body.appendChild(form);
+      
+      const iframe = document.createElement('iframe');
+      iframe.name = 'upload_iframe';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+      
+      // Handle completion
+      iframe.onload = function() {
+        status.innerHTML = `✅ Upload complete!<br>
                            File: ${filename}<br>
                            Logs: ${allLogs.length}<br>
                            Folder: AttendanceASLS<br><br>
                            <strong>Check your Google Drive now!</strong>`;
         
-        // Also try with iframe as backup
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = APPS_SCRIPT_URL;
-        form.target = 'upload_iframe';
-        form.style.display = 'none';
-        
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'data';
-        input.value = JSON.stringify({
-          filename: filename,
-          content: htmlContent,
-          folderName: 'AttendanceASLS'
-        });
-        
-        form.appendChild(input);
-        document.body.appendChild(form);
-        
-        const iframe = document.createElement('iframe');
-        iframe.name = 'upload_iframe';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-        
-        form.submit();
-        
+        // Clean up
         setTimeout(() => {
           document.body.removeChild(form);
           document.body.removeChild(iframe);
-        }, 5000);
-        
-      }).catch(error => {
-        status.innerHTML = '❌ Error: ' + error.message;
-      });
+        }, 1000);
+      };
+      
+      form.submit();
     }
     
     // Initialize
