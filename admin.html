@@ -16,8 +16,166 @@
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       padding: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     
+    /* Password Protection Overlay */
+    .password-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    
+    .password-container {
+      background: white;
+      padding: 50px;
+      border-radius: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      text-align: center;
+      max-width: 450px;
+      width: 90%;
+      animation: fadeInScale 0.5s ease-out;
+    }
+    
+    @keyframes fadeInScale {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    
+    .password-container h2 {
+      color: #186E00;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      font-weight: 800;
+    }
+    
+    .password-container p {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+    }
+    
+    .password-container .emoji-shield {
+      font-size: 5rem;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    .password-input-group {
+      position: relative;
+      margin-bottom: 25px;
+    }
+    
+    .password-input-group input {
+      width: 100%;
+      padding: 18px 20px;
+      font-size: 1.2rem;
+      border: 3px solid #e0e0e0;
+      border-radius: 15px;
+      outline: none;
+      transition: all 0.3s;
+      letter-spacing: 3px;
+      font-weight: 600;
+    }
+    
+    .password-input-group input:focus {
+      border-color: #186E00;
+      box-shadow: 0 0 0 4px rgba(24,110,0,0.2);
+    }
+    
+    .password-input-group input::placeholder {
+      letter-spacing: normal;
+      font-weight: normal;
+      color: #999;
+    }
+    
+    .password-strength {
+      height: 5px;
+      background: #e0e0e0;
+      border-radius: 5px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+    
+    .strength-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #e74c3c, #f39c12, #27ae60);
+      transition: width 0.3s;
+    }
+    
+    .enter-btn {
+      background: #186E00;
+      color: white;
+      border: none;
+      padding: 18px 40px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 5px 20px rgba(24,110,0,0.3);
+    }
+    
+    .enter-btn:hover:not(:disabled) {
+      background: #0f4f00;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(24,110,0,0.4);
+    }
+    
+    .enter-btn:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    
+    .error-message {
+      color: #e74c3c;
+      margin-top: 15px;
+      font-size: 1rem;
+      font-weight: 600;
+      min-height: 25px;
+    }
+    
+    .hint-text {
+      color: #999;
+      font-size: 0.9rem;
+      margin-top: 20px;
+      border-top: 1px solid #e0e0e0;
+      padding-top: 20px;
+    }
+    
+    /* Main Content (initially hidden) */
+    .main-content {
+      display: none;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .main-content.visible {
+      display: block;
+    }
+    
+    /* Rest of your existing styles */
     .container {
       max-width: 1400px;
       margin: 0 auto;
@@ -452,97 +610,127 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div>
-        <h1>📊 ASLS Admin Panel</h1>
-        <p>Manage student logs</p>
+  <!-- Password Protection Overlay -->
+  <div class="password-overlay" id="passwordOverlay">
+    <div class="password-container">
+      <div class="emoji-shield">🛡️</div>
+      <h2>Admin Access</h2>
+      <p>Enter password to access admin panel</p>
+      
+      <div class="password-input-group">
+        <input type="password" id="passwordInput" 
+               placeholder="Enter password" 
+               maxlength="20"
+               autocomplete="off">
+        <div class="password-strength">
+          <div class="strength-bar" id="strengthBar"></div>
+        </div>
       </div>
-      <div class="btn-group">
-        <button class="drive-btn" onclick="uploadToDrive()" id="driveBtn">☁️ UPLOAD TO DRIVE</button>
-        <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
-        <button class="delete-mode-btn" id="deleteModeBtn" onclick="toggleDeleteMode()">🗑️ Delete Mode</button>
-      </div>
-    </div>
-    
-    <div class="stats-grid" id="stats">
-      <div class="stat-card">
-        <div class="stat-label">Total Logs</div>
-        <div class="stat-value" id="totalLogs">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Today's Logs</div>
-        <div class="stat-value" id="todayLogs">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Storage Used</div>
-        <div class="stat-value" id="storageUsed">0 MB</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Unique Students</div>
-        <div class="stat-value" id="uniqueStudents">0</div>
+      
+      <button class="enter-btn" id="enterBtn" onclick="checkPassword()" disabled>Enter Admin Panel</button>
+      
+      <div class="error-message" id="passwordError"></div>
+      
+      <div class="hint-text">
+        <strong>Hint:</strong> Contact system administrator for password
       </div>
     </div>
-    
-    <div class="drive-section">
-      <h2>☁️ Upload to Google Drive</h2>
-      <div class="drive-input-group">
-        <input type="text" id="scriptUrl" class="drive-input" 
-               placeholder="Paste your Apps Script URL here"
-               value="https://script.google.com/macros/s/AKfycbwADqDZgDjv0qEOv-V1Fbt4ssKkFccW4vx7EbMzn6aXi7BQ5qyFkMqUzI7Ab1W9XQ/exec">
-        <button class="test-btn" onclick="testConnection()">✓ Test</button>
-        <button class="drive-btn" onclick="uploadToDrive()">☁️ UPLOAD TO DRIVE</button>
+  </div>
+
+  <!-- Main Content (initially hidden) -->
+  <div class="main-content" id="mainContent">
+    <div class="container">
+      <div class="header">
+        <div>
+          <h1>📊 ASLS Admin Panel</h1>
+          <p>Manage student logs</p>
+        </div>
+        <div class="btn-group">
+          <button class="drive-btn" onclick="uploadToDrive()" id="driveBtn">☁️ UPLOAD TO DRIVE</button>
+          <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+          <button class="delete-mode-btn" id="deleteModeBtn" onclick="toggleDeleteMode()">🗑️ Delete Mode</button>
+        </div>
       </div>
-      <div class="status-box" id="driveStatus">
-        ⚡ Ready to upload. Click Test first, then Upload.
+      
+      <div class="stats-grid" id="stats">
+        <div class="stat-card">
+          <div class="stat-label">Total Logs</div>
+          <div class="stat-value" id="totalLogs">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Today's Logs</div>
+          <div class="stat-value" id="todayLogs">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Storage Used</div>
+          <div class="stat-value" id="storageUsed">0 MB</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Unique Students</div>
+          <div class="stat-value" id="uniqueStudents">0</div>
+        </div>
       </div>
-    </div>
-    
-    <div class="search-section">
-      <input type="text" class="search-box" id="searchInput" placeholder="🔍 Search by name or LRN..." onkeyup="filterLogs()">
-      <select class="filter-select" id="actionFilter" onchange="filterLogs()">
-        <option value="all">All Actions</option>
-        <option value="Log in">Log In</option>
-        <option value="Log out">Log Out</option>
-      </select>
-    </div>
-    
-    <!-- Delete Bar (hidden by default) -->
-    <div class="delete-bar" id="deleteBar">
-      <div class="delete-info">
-        <label class="select-all">
-          <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
-          <span>Select All (Current Page)</span>
-        </label>
-        <span class="selected-count" id="selectedCount">0 selected</span>
+      
+      <div class="drive-section">
+        <h2>☁️ Upload to Google Drive</h2>
+        <div class="drive-input-group">
+          <input type="text" id="scriptUrl" class="drive-input" 
+                 placeholder="Paste your Apps Script URL here"
+                 value="https://script.google.com/macros/s/AKfycbwADqDZgDjv0qEOv-V1Fbt4ssKkFccW4vx7EbMzn6aXi7BQ5qyFkMqUzI7Ab1W9XQ/exec">
+          <button class="test-btn" onclick="testConnection()">✓ Test</button>
+          <button class="drive-btn" onclick="uploadToDrive()">☁️ UPLOAD TO DRIVE</button>
+        </div>
+        <div class="status-box" id="driveStatus">
+          ⚡ Ready to upload. Click Test first, then Upload.
+        </div>
       </div>
-      <div class="delete-actions">
-        <button class="delete-selected-btn" id="deleteSelectedBtn" onclick="confirmDeleteSelected()" disabled>🗑️ Delete Selected</button>
-        <button class="cancel-delete-btn" onclick="toggleDeleteMode()">✕ Cancel</button>
+      
+      <div class="search-section">
+        <input type="text" class="search-box" id="searchInput" placeholder="🔍 Search by name or LRN..." onkeyup="filterLogs()">
+        <select class="filter-select" id="actionFilter" onchange="filterLogs()">
+          <option value="all">All Actions</option>
+          <option value="Log in">Log In</option>
+          <option value="Log out">Log Out</option>
+        </select>
       </div>
-    </div>
-    
-    <div class="logs-container">
-      <table>
-        <thead>
-          <tr>
-            <th class="checkbox-cell" id="checkboxHeader" style="display: none;"></th>
-            <th>Time</th>
-            <th>Photo</th>
-            <th>Name</th>
-            <th>LRN</th>
-            <th>Sex</th>
-            <th>Grade</th>
-            <th>Section</th>
-            <th>Action</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="logsBody">
-          <tr><td colspan="10" style="text-align: center; padding: 50px;">Loading logs...</td></tr>
-        </tbody>
-      </table>
-      <div class="pagination" id="pagination"></div>
+      
+      <!-- Delete Bar (hidden by default) -->
+      <div class="delete-bar" id="deleteBar">
+        <div class="delete-info">
+          <label class="select-all">
+            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+            <span>Select All (Current Page)</span>
+          </label>
+          <span class="selected-count" id="selectedCount">0 selected</span>
+        </div>
+        <div class="delete-actions">
+          <button class="delete-selected-btn" id="deleteSelectedBtn" onclick="confirmDeleteSelected()" disabled>🗑️ Delete Selected</button>
+          <button class="cancel-delete-btn" onclick="toggleDeleteMode()">✕ Cancel</button>
+        </div>
+      </div>
+      
+      <div class="logs-container">
+        <table>
+          <thead>
+            <tr>
+              <th class="checkbox-cell" id="checkboxHeader" style="display: none;"></th>
+              <th>Time</th>
+              <th>Photo</th>
+              <th>Name</th>
+              <th>LRN</th>
+              <th>Sex</th>
+              <th>Grade</th>
+              <th>Section</th>
+              <th>Action</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="logsBody">
+            <tr><td colspan="10" style="text-align: center; padding: 50px;">Loading logs...</td></tr>
+          </tbody>
+        </table>
+        <div class="pagination" id="pagination"></div>
+      </div>
     </div>
   </div>
 
@@ -565,6 +753,66 @@
   </div>
 
   <script>
+    // ============================================
+    // PASSWORD PROTECTION
+    // ============================================
+    
+    // Set your admin password here
+    const ADMIN_PASSWORD = 'ictwatchyourback.'; // CHANGE THIS TO YOUR DESIRED PASSWORD
+    
+    const passwordInput = document.getElementById('passwordInput');
+    const enterBtn = document.getElementById('enterBtn');
+    const passwordOverlay = document.getElementById('passwordOverlay');
+    const mainContent = document.getElementById('mainContent');
+    const passwordError = document.getElementById('passwordError');
+    const strengthBar = document.getElementById('strengthBar');
+    
+    // Enable/disable enter button based on input
+    passwordInput.addEventListener('input', function() {
+      const hasValue = this.value.length > 0;
+      enterBtn.disabled = !hasValue;
+      
+      // Simple strength indicator
+      const strength = Math.min(this.value.length * 10, 100);
+      strengthBar.style.width = strength + '%';
+    });
+    
+    // Allow Enter key to submit
+    passwordInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && this.value.length > 0) {
+        checkPassword();
+      }
+    });
+    
+    // Check password function
+    function checkPassword() {
+      const enteredPassword = passwordInput.value;
+      
+      if (enteredPassword === ADMIN_PASSWORD) {
+        // Correct password - show main content
+        passwordOverlay.style.display = 'none';
+        mainContent.classList.add('visible');
+        
+        // Initialize the admin panel
+        loadData();
+        
+        // Optional: Show success message
+        console.log('✅ Admin access granted');
+      } else {
+        // Wrong password - show error
+        passwordError.textContent = '❌ Incorrect password. Please try again.';
+        passwordInput.value = '';
+        passwordInput.focus();
+        strengthBar.style.width = '0%';
+        
+        // Shake animation for error
+        passwordInput.style.animation = 'shake 0.5s';
+        setTimeout(() => {
+          passwordInput.style.animation = '';
+        }, 500);
+      }
+    }
+    
     // ============================================
     // ASLS ADMIN PANEL - FIXED DELETE FUNCTIONALITY
     // ============================================
@@ -1008,8 +1256,8 @@
       form.submit();
     }
     
-    // Initialize
-    window.onload = loadData;
+    // Initialize will be called after password success
+    // window.onload is removed because we call loadData() after password
   </script>
 </body>
 </html>
