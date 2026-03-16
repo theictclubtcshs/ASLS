@@ -245,6 +245,35 @@
       font-size: 0.9rem;
     }
 
+    /* Mode indicator */
+    .mode-indicator {
+      margin-top: 15px;
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.95rem;
+    }
+
+    .mode-badge {
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .mode-badge.login {
+      background: #27ae60;
+      color: white;
+    }
+
+    .mode-badge.logout {
+      background: #e74c3c;
+      color: white;
+    }
+
     /* Overlays - Minimal for speed */
     .overlay {
       position: fixed;
@@ -294,7 +323,7 @@
 <body>
   <div class="container">
     <div class="left-panel">
-      <h1>ASLS<br>Ultra Fast</h1>
+      <h1>ASLS<br>VERSION 2.0</h1>
       <p>Automated Student Log System</p>
       <div class="stats">
         <div class="stat-item">
@@ -309,6 +338,11 @@
           <span>💾 Local Cache:</span>
           <span id="cacheSize">0 logs</span>
         </div>
+      </div>
+      <!-- Current Mode Indicator -->
+      <div class="mode-indicator">
+        <span>Current Mode:</span>
+        <span class="mode-badge" id="modeBadge">LOG IN</span>
       </div>
     </div>
     
@@ -370,7 +404,7 @@
     
     // CONFIGURATION
     const STUDENTS_DATA = [
-      // Load from CSV or embed directly for speed
+      // Your existing student data here (truncated for brevity)
       { lrn: '400561180001', name: 'ALLAPITAN, JOAQUIN MIGUEL, QUILANG', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
       { lrn: '104385180002', name: 'ARESTA, KOJI, DE MATA', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
       { lrn: '102633180001', name: 'BURAC, LANCE AEDOR, AGGABAO', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
@@ -1287,7 +1321,6 @@
       { lrn: '102696140053', name: 'SUETOS WINELLE ADHA GARMA', sex: 'FEMALE', grade: '12', section: 'Da Vinci' },
       { lrn: '102359140042', name: 'TRINIDAD ASHLEY JENINA ZAPATA', sex: 'FEMALE', grade: '12', section: 'Da Vinci' },
       { lrn: '104393140022', name: 'ZABALA JANETH ROWEN ALSECO', sex: 'FEMALE', grade: '12', section: 'Da Vinci' },
-      // Add all students here - up to 10,000 loads instantly
     ];
     
     // Fast lookup using Map (O(1) constant time)
@@ -1309,6 +1342,7 @@
     const actionBtn = document.getElementById('actionBtn');
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
+    const modeBadge = document.getElementById('modeBadge');
     
     const successOverlay = document.getElementById('successOverlay');
     const errorOverlay = document.getElementById('errorOverlay');
@@ -1316,8 +1350,23 @@
     // Get action from URL
     const urlParams = new URLSearchParams(window.location.search);
     let action = urlParams.get('action') || 'Log in';
-    actionBtn.textContent = action;
-    actionBtn.className = `action-btn ${action === 'Log in' ? 'login' : 'logout'}`;
+    
+    // Update UI based on action
+    function updateActionUI() {
+      actionBtn.textContent = action;
+      modeBadge.textContent = action;
+      
+      if (action === 'Log in') {
+        actionBtn.className = 'action-btn login';
+        modeBadge.className = 'mode-badge login';
+      } else {
+        actionBtn.className = 'action-btn logout';
+        modeBadge.className = 'mode-badge logout';
+      }
+    }
+    
+    // Initial UI update
+    updateActionUI();
     
     // ========== FAST LOCAL STORAGE ==========
     
