@@ -470,11 +470,14 @@
 
     <script>
         // ============================================
-        // CONFIGURATION - UPDATE THESE!
+        // CONFIGURATION - URL IS NOW SET!
         // ============================================
         
-        // Your Apps Script Web App URL (for Drive upload)
+        // Your Apps Script Web App URL (for Drive upload) - NOW FIXED
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYJvrOY7VuFSI0zozHPMWojzr3WfD-fom7zn9CG4lyQfLNSdXDnHXhNyZqUvHi1fiAPw/exec';
+        
+        // Save it to localStorage so admin panel can use it too
+        localStorage.setItem('asls_script_url', APPS_SCRIPT_URL);
         
         // Your GitHub Pages camera page URL
         const CAMERA_PAGE_URL = 'https://theictclubtcshs.github.io/ASLS/';
@@ -653,38 +656,37 @@
     }
 
     // Upload logs to Drive - FIXED VERSION
-    // Upload logs to Drive - FIXED VERSION WITH CONFIGURABLE URL
     function uploadLogsToDrive(logs) {
         return new Promise((resolve, reject) => {
-            // Try to get URL from localStorage first (if saved from admin panel)
-            let scriptUrl = localStorage.getItem('asls_script_url');
+            console.log('Starting upload with URL:', APPS_SCRIPT_URL);
             
-            // If not in localStorage, use the hardcoded default
-            if (!scriptUrl) {
-                scriptUrl = APPS_SCRIPT_URL; // Your hardcoded default
-            }
-            
-            if (!scriptUrl) {
+            if (!APPS_SCRIPT_URL) {
                 reject(new Error('Apps Script URL not configured'));
                 return;
             }
-    
+
             if (logs.length === 0) {
                 resolve(0);
                 return;
             }
-    
+
             // Generate filename with timestamp
             const now = new Date();
             const filename = `ASLS_Backup_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}.html`;
             
             // Generate HTML content
             const htmlContent = generateLogsHTML(logs);
-    
+
+            // Create a hidden iframe for the upload
+            const iframe = document.createElement('iframe');
+            iframe.name = 'fresh_start_iframe';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
             // Create form
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = scriptUrl; // Use the retrieved URL
+            form.action = APPS_SCRIPT_URL;
             form.target = 'fresh_start_iframe';
             form.style.display = 'none';
             
@@ -694,25 +696,26 @@
             input.value = JSON.stringify({
                 filename: filename,
                 content: htmlContent,
-                folderName: 'AttendanceASLS' // Changed to match admin panel folder name
+                folderName: 'AttendanceASLS'  // Same folder as admin panel
             });
             
             form.appendChild(input);
             document.body.appendChild(form);
-            
-            const iframe = document.createElement('iframe');
-            iframe.name = 'fresh_start_iframe';
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
             
             let uploadCompleted = false;
             
             // Handle completion
             iframe.onload = function() {
                 if (!uploadCompleted) {
+                    console.log('Upload completed successfully');
                     uploadCompleted = true;
-                    document.body.removeChild(form);
-                    document.body.removeChild(iframe);
+                    
+                    // Clean up
+                    setTimeout(() => {
+                        document.body.removeChild(form);
+                        document.body.removeChild(iframe);
+                    }, 1000);
+                    
                     resolve(logs.length);
                 }
             };
@@ -720,26 +723,33 @@
             // Handle error
             iframe.onerror = function() {
                 if (!uploadCompleted) {
+                    console.error('Upload error occurred');
                     uploadCompleted = true;
+                    
+                    // Clean up
                     document.body.removeChild(form);
                     document.body.removeChild(iframe);
+                    
                     reject(new Error('Upload failed'));
                 }
             };
             
-            // Set a timeout in case iframe events don't fire
+            // Set a timeout
             setTimeout(() => {
                 if (!uploadCompleted) {
+                    console.log('Upload timeout - assuming success');
                     uploadCompleted = true;
+                    
+                    // Clean up
                     document.body.removeChild(form);
                     document.body.removeChild(iframe);
                     
-                    // Show warning but continue - assume upload might have worked
-                    console.warn('Upload timeout - assuming success');
+                    // Assume success
                     resolve(logs.length);
                 }
-            }, 5000);
+            }, 8000);
             
+            console.log('Submitting form to:', APPS_SCRIPT_URL);
             form.submit();
         });
     }
@@ -781,7 +791,7 @@
             
             if (logs.length > 0) {
                 // Upload logs to Drive
-                updateLoadingMessage(`Uploading ${logs.length} logs to Google Drive...`, 'This may take a few seconds...');
+                updateLoadingMessage(`Uploading ${logs.length} logs to Google Drive...`, 'Please wait...');
                 
                 try {
                     await uploadLogsToDrive(logs);
@@ -792,7 +802,7 @@
                     updateLoadingMessage('⚠️ Upload may have failed', 'Continuing with fresh start...');
                 }
                 
-                // Small delay for visibility
+                // Small delay
                 await new Promise(resolve => setTimeout(resolve, 1500));
             } else {
                 updateLoadingMessage('No logs found to upload.', 'Proceeding with fresh start...');
@@ -814,7 +824,7 @@
                 updateLoadingMessage(`✅ Fresh Start complete`, `No logs to backup`);
             }
             
-            // Wait a moment before refreshing
+            // Wait before refreshing
             await new Promise(resolve => setTimeout(resolve, 2000));
             
             // Refresh the page
@@ -822,7 +832,7 @@
             
         } catch (error) {
             console.error('Fresh Start error:', error);
-            alert('❌ Error during Fresh Start: ' + error.message + '\n\nPlease try again or contact admin.');
+            alert('❌ Error during Fresh Start: ' + error.message);
             loadingOverlay.style.display = 'none';
         }
     }
@@ -832,6 +842,9 @@
         updateDateTime();
         setInterval(updateDateTime, 1000);
         window.focus();
+        
+        // Verify URL is set
+        console.log('Fresh Start URL configured:', APPS_SCRIPT_URL);
     };
 
     // Expose functions globally
