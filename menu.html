@@ -653,29 +653,38 @@
     }
 
     // Upload logs to Drive - FIXED VERSION
+    // Upload logs to Drive - FIXED VERSION WITH CONFIGURABLE URL
     function uploadLogsToDrive(logs) {
         return new Promise((resolve, reject) => {
-            if (!APPS_SCRIPT_URL) {
+            // Try to get URL from localStorage first (if saved from admin panel)
+            let scriptUrl = localStorage.getItem('asls_script_url');
+            
+            // If not in localStorage, use the hardcoded default
+            if (!scriptUrl) {
+                scriptUrl = APPS_SCRIPT_URL; // Your hardcoded default
+            }
+            
+            if (!scriptUrl) {
                 reject(new Error('Apps Script URL not configured'));
                 return;
             }
-
+    
             if (logs.length === 0) {
                 resolve(0);
                 return;
             }
-
+    
             // Generate filename with timestamp
             const now = new Date();
             const filename = `ASLS_Backup_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}.html`;
             
             // Generate HTML content
             const htmlContent = generateLogsHTML(logs);
-
+    
             // Create form
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = APPS_SCRIPT_URL;
+            form.action = scriptUrl; // Use the retrieved URL
             form.target = 'fresh_start_iframe';
             form.style.display = 'none';
             
@@ -685,7 +694,7 @@
             input.value = JSON.stringify({
                 filename: filename,
                 content: htmlContent,
-                folderName: 'ASLS_Backups'
+                folderName: 'AttendanceASLS' // Changed to match admin panel folder name
             });
             
             form.appendChild(input);
