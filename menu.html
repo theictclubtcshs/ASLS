@@ -231,6 +231,11 @@
             color: white;
         }
 
+        .menu-btn.fresh-start {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
         .menu-btn .icon {
             font-size: 2.5rem;
             margin-right: 20px;
@@ -288,6 +293,57 @@
             color: #95a5a6;
             font-size: 0.9rem;
             border-top: 1px solid #ecf0f1;
+        }
+
+        /* Loading overlay for Fresh Start */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-content {
+            background: white;
+            padding: 50px;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 400px;
+            animation: fadeInScale 0.5s ease-out;
+        }
+
+        .loading-content h2 {
+            color: #186E00;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #186E00;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-progress {
+            color: #666;
+            margin-top: 10px;
+            font-size: 1rem;
         }
 
         /* Loading state for logo */
@@ -364,15 +420,24 @@
         </div>
 
         <div class="content">
-            <!-- Only Login and Logout Buttons -->
+            <!-- Main Menu Buttons -->
             <div class="menu-buttons">
                 <button class="menu-btn login" onclick="openLogin()">
+                    <span class="icon">🔑</span>
                     <span class="text">LOG IN</span>
                     <span class="arrow">→</span>
                 </button>
                 
                 <button class="menu-btn logout" onclick="openLogout()">
+                    <span class="icon">🚪</span>
                     <span class="text">LOG OUT</span>
+                    <span class="arrow">→</span>
+                </button>
+
+                <!-- NEW: Fresh Start Button -->
+                <button class="menu-btn fresh-start" onclick="confirmFreshStart()">
+                    <span class="icon">🔄</span>
+                    <span class="text">FRESH START</span>
                     <span class="arrow">→</span>
                 </button>
             </div>
@@ -393,19 +458,29 @@
         </div>
     </div>
 
+    <!-- Loading Overlay for Fresh Start -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <h2>🔄 Fresh Start</h2>
+            <div class="loading-spinner"></div>
+            <p id="loadingMessage">Saving logs to Google Drive...</p>
+            <div class="loading-progress" id="loadingProgress"></div>
+        </div>
+    </div>
+
     <script>
         // ============================================
         // CONFIGURATION - UPDATE THESE!
         // ============================================
         
-        // Your Apps Script Web App URL
+        // Your Apps Script Web App URL (for Drive upload)
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz5neNE6fQqo2_9ihCqwLV-xeO3i8SzXJOhx6KMdqeHn50dBv_NzRkdfxHz07BNYkqe4g/exec';
         
-        // Your GitHub Pages camera page URL - UPDATED for your repository
+        // Your GitHub Pages camera page URL
         const CAMERA_PAGE_URL = 'https://theictclubtcshs.github.io/ASLS/';
         
-        // Your Admin Panel HTML page URL
-        const ADMIN_PANEL_URL = 'https://theictclubtcshs.github.io/ASLS/admin.html';  // Update this to your actual admin panel filename
+        // Your Admin Panel URL
+        const ADMIN_PANEL_URL = 'https://theictclubtcshs.github.io/ASLS/admin.html';
 
         // ============================================
         // LOGO HANDLING
@@ -448,7 +523,6 @@
         // Open login page
         let cameraWindow = null;
 
-        // Open login page
         function openLogin() {
             const url = CAMERA_PAGE_URL + '?action=Log%20in';
         
@@ -460,7 +534,6 @@
             }
         }
         
-        // Open logout page
         function openLogout() {
             const url = CAMERA_PAGE_URL + '?action=Log%20out';
         
@@ -474,12 +547,221 @@
 
         // Open Admin Panel
         function openAdminPanel() {
-            // Open admin panel in a new tab
             window.open(ADMIN_PANEL_URL, '_blank');
-            
-            // Optional: Add a small notification
-            console.log('Opening Admin Panel...');
         }
+
+        // ============================================
+        // FRESH START FUNCTIONALITY
+        // ============================================
+
+        // Show confirmation dialog before Fresh Start
+        function confirmFreshStart() {
+            if (confirm('🔄 FRESH START\n\nThis will:\n1. Upload all logs to Google Drive\n2. Clear all data from this device\n3. Refresh the page for a fresh start\n\nAre you sure you want to continue?')) {
+                performFreshStart();
+            }
+        }
+
+        // Get all logs from localStorage
+        function getAllLogs() {
+            try {
+                return JSON.parse(localStorage.getItem('asls_master') || '[]');
+            } catch (e) {
+                console.error('Error getting logs:', e);
+                return [];
+            }
+        }
+
+        // Generate HTML file from logs
+        function generateLogsHTML(logs) {
+            const now = new Date();
+            
+            let html = `<!DOCTYPE html>
+<html>
+<head>
+  <title>ASLS Logs Backup - ${now.toLocaleDateString()}</title>
+  <style>
+    body { font-family: Arial; margin: 30px; background: #f5f5f5; }
+    h1 { color: #186E00; border-bottom: 3px solid #186E00; padding-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+    th { background: #186E00; color: white; padding: 12px; text-align: left; }
+    td { padding: 12px; border-bottom: 1px solid #ddd; }
+    img { width: 100px; height: 100px; object-fit: cover; border-radius: 5px; border: 2px solid #186E00; }
+    .login { background: #d4edda; color: #155724; padding: 5px 10px; border-radius: 20px; }
+    .logout { background: #f8d7da; color: #721c24; padding: 5px 10px; border-radius: 20px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0; }
+    .stat-card { background: white; padding: 20px; border-radius: 10px; text-align: center; }
+    .stat-value { font-size: 2rem; font-weight: bold; color: #186E00; }
+  </style>
+</head>
+<body>
+  <h1>📊 ASLS Logs Backup</h1>
+  <p>Generated: ${now.toLocaleString()}</p>
+  <p><strong>Reason:</strong> Fresh Start - Automatic Backup</p>
+  
+  <div class="stats">
+    <div class="stat-card"><div class="stat-value">${logs.length}</div><div>Total Logs</div></div>
+    <div class="stat-card"><div class="stat-value">${new Set(logs.map(l => l.lrn)).size}</div><div>Unique Students</div></div>
+    <div class="stat-card"><div class="stat-value">${logs.filter(l => l.action === 'Log in').length}</div><div>Logins</div></div>
+    <div class="stat-card"><div class="stat-value">${logs.filter(l => l.action === 'Log out').length}</div><div>Logouts</div></div>
+  </div>
+  
+  <table>
+    <tr>
+      <th>Date/Time</th>
+      <th>Photo</th>
+      <th>Name</th>
+      <th>LRN</th>
+      <th>Sex</th>
+      <th>Grade</th>
+      <th>Section</th>
+      <th>Action</th>
+    </tr>`;
+      
+      logs.forEach(log => {
+        const d = new Date(log.timestamp);
+        html += `<tr>
+          <td>${d.toLocaleString()}</td>
+          <td>${log.photo && log.photo !== 'no-photo' ? `<img src="${log.photo}">` : 'No photo'}</td>
+          <td>${log.name}</td>
+          <td>${log.lrn}</td>
+          <td>${log.sex || ''}</td>
+          <td>${log.grade || ''}</td>
+          <td>${log.section || ''}</td>
+          <td><span class="${log.action === 'Log in' ? 'login' : 'logout'}">${log.action}</span></td>
+        </tr>`;
+      });
+      
+      html += `</table>
+<p style="margin-top: 30px; color: #666;">Generated by ASLS Fresh Start - ${now.toLocaleString()}</p>
+</body>
+</html>`;
+      
+      return html;
+    }
+
+    // Upload logs to Drive
+    async function uploadLogsToDrive(logs) {
+        return new Promise((resolve, reject) => {
+            if (!APPS_SCRIPT_URL) {
+                reject(new Error('Apps Script URL not configured'));
+                return;
+            }
+
+            if (logs.length === 0) {
+                resolve(0); // No logs to upload
+                return;
+            }
+
+            // Generate filename with timestamp
+            const now = new Date();
+            const filename = `ASLS_Backup_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}.html`;
+            
+            // Generate HTML content
+            const htmlContent = generateLogsHTML(logs);
+
+            // Create form to submit
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = APPS_SCRIPT_URL;
+            form.target = 'fresh_start_iframe';
+            form.style.display = 'none';
+            
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'data';
+            input.value = JSON.stringify({
+                filename: filename,
+                content: htmlContent,
+                folderName: 'ASLS_Backups' // Separate folder for backups
+            });
+            
+            form.appendChild(input);
+            document.body.appendChild(form);
+            
+            const iframe = document.createElement('iframe');
+            iframe.name = 'fresh_start_iframe';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
+            // Handle completion
+            iframe.onload = function() {
+                document.body.removeChild(form);
+                document.body.removeChild(iframe);
+                resolve(logs.length);
+            };
+            
+            // Handle error
+            iframe.onerror = function() {
+                document.body.removeChild(form);
+                document.body.removeChild(iframe);
+                reject(new Error('Upload failed'));
+            };
+            
+            form.submit();
+        });
+    }
+
+    // Clear all logs from localStorage
+    function clearAllLogs() {
+        // Remove master log
+        localStorage.removeItem('asls_master');
+        
+        // Remove all daily logs
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+            if (key.startsWith('asls_')) {
+                localStorage.removeItem(key);
+            }
+        });
+    }
+
+    // Update loading message
+    function updateLoadingMessage(message, progress = '') {
+        document.getElementById('loadingMessage').textContent = message;
+        document.getElementById('loadingProgress').textContent = progress;
+    }
+
+    // Perform Fresh Start
+    async function performFreshStart() {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        
+        try {
+            // Show loading overlay
+            loadingOverlay.style.display = 'flex';
+            
+            // Get all logs
+            updateLoadingMessage('Checking for logs...');
+            const logs = getAllLogs();
+            
+            if (logs.length > 0) {
+                // Upload logs to Drive
+                updateLoadingMessage(`Uploading ${logs.length} logs to Google Drive...`, 'Please wait...');
+                await uploadLogsToDrive(logs);
+                
+                updateLoadingMessage('Upload complete!', 'Clearing local data...');
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Small delay for visibility
+            } else {
+                updateLoadingMessage('No logs found to upload.', 'Proceeding with fresh start...');
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
+            
+            // Clear all logs
+            updateLoadingMessage('Clearing all local data...');
+            clearAllLogs();
+            
+            // Final message
+            updateLoadingMessage('Fresh Start complete!', 'Refreshing page...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Refresh the page
+            window.location.reload();
+            
+        } catch (error) {
+            console.error('Fresh Start error:', error);
+            alert('❌ Error during Fresh Start: ' + error.message + '\n\nPlease try again or contact admin.');
+            loadingOverlay.style.display = 'none';
+        }
+    }
 
         // Initialize
         window.onload = function() {
@@ -492,6 +774,7 @@
         window.openLogin = openLogin;
         window.openLogout = openLogout;
         window.openAdminPanel = openAdminPanel;
+        window.confirmFreshStart = confirmFreshStart;
     </script>
 </body>
 </html>
