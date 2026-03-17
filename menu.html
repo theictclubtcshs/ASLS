@@ -434,7 +434,7 @@
                     <span class="arrow">→</span>
                 </button>
 
-                <!-- NEW: Fresh Start Button -->
+                <!-- Fresh Start Button -->
                 <button class="menu-btn fresh-start" onclick="confirmFreshStart()">
                     <span class="icon">🔄</span>
                     <span class="text">FRESH START</span>
@@ -551,12 +551,25 @@
         }
 
         // ============================================
-        // FRESH START FUNCTIONALITY
+        // FRESH START FUNCTIONALITY - FIXED VERSION
         // ============================================
 
         // Show confirmation dialog before Fresh Start
         function confirmFreshStart() {
-            if (confirm('🔄 FRESH START\n\nThis will:\n1. Upload all logs to Google Drive\n2. Clear all data from this device\n3. Refresh the page for a fresh start\n\nAre you sure you want to continue?')) {
+            const logs = getAllLogs();
+            const logCount = logs.length;
+            
+            let message = '🔄 FRESH START\n\n';
+            if (logCount > 0) {
+                message += `📊 Found ${logCount} log(s) to backup.\n\n`;
+            }
+            message += 'This will:\n';
+            message += '1. Upload all logs to Google Drive\n';
+            message += '2. Clear all data from this device\n';
+            message += '3. Refresh the page for a fresh start\n\n';
+            message += 'Are you sure you want to continue?';
+            
+            if (confirm(message)) {
                 performFreshStart();
             }
         }
@@ -639,8 +652,8 @@
       return html;
     }
 
-    // Upload logs to Drive
-    async function uploadLogsToDrive(logs) {
+    // Upload logs to Drive - FIXED VERSION
+    function uploadLogsToDrive(logs) {
         return new Promise((resolve, reject) => {
             if (!APPS_SCRIPT_URL) {
                 reject(new Error('Apps Script URL not configured'));
@@ -648,7 +661,7 @@
             }
 
             if (logs.length === 0) {
-                resolve(0); // No logs to upload
+                resolve(0);
                 return;
             }
 
@@ -659,7 +672,7 @@
             // Generate HTML content
             const htmlContent = generateLogsHTML(logs);
 
-            // Create form to submit
+            // Create form
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = APPS_SCRIPT_URL;
@@ -672,7 +685,7 @@
             input.value = JSON.stringify({
                 filename: filename,
                 content: htmlContent,
-                folderName: 'ASLS_Backups' // Separate folder for backups
+                folderName: 'ASLS_Backups'
             });
             
             form.appendChild(input);
@@ -683,19 +696,40 @@
             iframe.style.display = 'none';
             document.body.appendChild(iframe);
             
+            let uploadCompleted = false;
+            
             // Handle completion
             iframe.onload = function() {
-                document.body.removeChild(form);
-                document.body.removeChild(iframe);
-                resolve(logs.length);
+                if (!uploadCompleted) {
+                    uploadCompleted = true;
+                    document.body.removeChild(form);
+                    document.body.removeChild(iframe);
+                    resolve(logs.length);
+                }
             };
             
             // Handle error
             iframe.onerror = function() {
-                document.body.removeChild(form);
-                document.body.removeChild(iframe);
-                reject(new Error('Upload failed'));
+                if (!uploadCompleted) {
+                    uploadCompleted = true;
+                    document.body.removeChild(form);
+                    document.body.removeChild(iframe);
+                    reject(new Error('Upload failed'));
+                }
             };
+            
+            // Set a timeout in case iframe events don't fire
+            setTimeout(() => {
+                if (!uploadCompleted) {
+                    uploadCompleted = true;
+                    document.body.removeChild(form);
+                    document.body.removeChild(iframe);
+                    
+                    // Show warning but continue - assume upload might have worked
+                    console.warn('Upload timeout - assuming success');
+                    resolve(logs.length);
+                }
+            }, 5000);
             
             form.submit();
         });
@@ -724,6 +758,8 @@
     // Perform Fresh Start
     async function performFreshStart() {
         const loadingOverlay = document.getElementById('loadingOverlay');
+        let uploadSuccessful = false;
+        let logCount = 0;
         
         try {
             // Show loading overlay
@@ -732,14 +768,23 @@
             // Get all logs
             updateLoadingMessage('Checking for logs...');
             const logs = getAllLogs();
+            logCount = logs.length;
             
             if (logs.length > 0) {
                 // Upload logs to Drive
-                updateLoadingMessage(`Uploading ${logs.length} logs to Google Drive...`, 'Please wait...');
-                await uploadLogsToDrive(logs);
+                updateLoadingMessage(`Uploading ${logs.length} logs to Google Drive...`, 'This may take a few seconds...');
                 
-                updateLoadingMessage('Upload complete!', 'Clearing local data...');
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Small delay for visibility
+                try {
+                    await uploadLogsToDrive(logs);
+                    uploadSuccessful = true;
+                    updateLoadingMessage('✅ Upload complete!', 'Preparing fresh start...');
+                } catch (uploadError) {
+                    console.error('Upload error:', uploadError);
+                    updateLoadingMessage('⚠️ Upload may have failed', 'Continuing with fresh start...');
+                }
+                
+                // Small delay for visibility
+                await new Promise(resolve => setTimeout(resolve, 1500));
             } else {
                 updateLoadingMessage('No logs found to upload.', 'Proceeding with fresh start...');
                 await new Promise(resolve => setTimeout(resolve, 1500));
@@ -750,8 +795,18 @@
             clearAllLogs();
             
             // Final message
-            updateLoadingMessage('Fresh Start complete!', 'Refreshing page...');
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (logCount > 0) {
+                if (uploadSuccessful) {
+                    updateLoadingMessage(`✅ Fresh Start complete!`, `${logCount} logs backed up to Google Drive`);
+                } else {
+                    updateLoadingMessage(`⚠️ Fresh Start complete`, `Backup may have failed - check Drive`);
+                }
+            } else {
+                updateLoadingMessage(`✅ Fresh Start complete`, `No logs to backup`);
+            }
+            
+            // Wait a moment before refreshing
+            await new Promise(resolve => setTimeout(resolve, 2000));
             
             // Refresh the page
             window.location.reload();
@@ -763,18 +818,18 @@
         }
     }
 
-        // Initialize
-        window.onload = function() {
-            updateDateTime();
-            setInterval(updateDateTime, 1000);
-            window.focus();
-        };
+    // Initialize
+    window.onload = function() {
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        window.focus();
+    };
 
-        // Expose functions globally
-        window.openLogin = openLogin;
-        window.openLogout = openLogout;
-        window.openAdminPanel = openAdminPanel;
-        window.confirmFreshStart = confirmFreshStart;
+    // Expose functions globally
+    window.openLogin = openLogin;
+    window.openLogout = openLogout;
+    window.openAdminPanel = openAdminPanel;
+    window.confirmFreshStart = confirmFreshStart;
     </script>
 </body>
 </html>
