@@ -1363,18 +1363,24 @@
     let action = urlParams.get('action') || 'Log in';
     
     // Update UI based on action
+    // Update UI based on action
     function updateActionUI() {
       actionBtn.textContent = action;
       modeBadge.textContent = action;
       
+      // Remove any existing color classes first
+      leftPanel.classList.remove('login-bg', 'logout-bg');
+      
       if (action === 'Log in') {
         actionBtn.className = 'action-btn login';
         modeBadge.className = 'mode-badge login';
-        leftPanel.className = 'left-panel login-bg';
+        leftPanel.classList.add('login-bg');
+        leftPanel.style.backgroundColor = '#186E00'; // Fallback
       } else {
         actionBtn.className = 'action-btn logout';
         modeBadge.className = 'mode-badge logout';
-        leftPanel.className = 'left-panel logout-bg';
+        leftPanel.classList.add('logout-bg');
+        leftPanel.style.backgroundColor = '#c0392b'; // Fallback
       }
     }
     
