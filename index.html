@@ -41,12 +41,22 @@
 
     .left-panel {
       flex: 1;
+      /* Default background - will be changed by JavaScript */
       background: #186E00;
       color: white;
       padding: 40px;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      transition: background-color 0.3s ease;
+    }
+
+    .left-panel.login-bg {
+      background: #186E00; /* Green */
+    }
+
+    .left-panel.logout-bg {
+      background: #c0392b; /* Darker Red for better contrast */
     }
 
     .left-panel h1 {
@@ -249,12 +259,13 @@
     .mode-indicator {
       margin-top: 15px;
       padding: 10px;
-      background: #f0f0f0;
+      background: rgba(255,255,255,0.2);
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       font-size: 0.95rem;
+      backdrop-filter: blur(5px);
     }
 
     .mode-badge {
@@ -322,7 +333,8 @@
 </head>
 <body>
   <div class="container">
-    <div class="left-panel">
+    <!-- Left Panel with dynamic background color -->
+    <div class="left-panel" id="leftPanel">
       <h1>ASLS<br>VERSION 2.0</h1>
       <p>Automated Student Log System</p>
       <div class="stats">
@@ -1343,6 +1355,7 @@
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
     const modeBadge = document.getElementById('modeBadge');
+    const leftPanel = document.getElementById('leftPanel');
     
     const successOverlay = document.getElementById('successOverlay');
     const errorOverlay = document.getElementById('errorOverlay');
@@ -1359,9 +1372,11 @@
       if (action === 'Log in') {
         actionBtn.className = 'action-btn login';
         modeBadge.className = 'mode-badge login';
+        leftPanel.className = 'left-panel login-bg';
       } else {
         actionBtn.className = 'action-btn logout';
         modeBadge.className = 'mode-badge logout';
+        leftPanel.className = 'left-panel logout-bg';
       }
     }
     
