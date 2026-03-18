@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASLS - VERSION 2.0 2026</title>
+  <style>
+    /* COMPACT, FAST-LOADING CSS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      height: 90vh;
+      background: white;
+      border-radius: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      display: flex;
+      overflow: hidden;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .left-panel {
+      flex: 1;
+      color: white;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: background-color 0.3s ease;
+    }
+
+    .left-panel.login-bg {
+      background: #186E00 !important; /* Green */
+    }
+
+    .left-panel.logout-bg {
+      background: #c0392b !important; /* Darker Red for better contrast */
+    }
+
+    .left-panel h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .left-panel .mode-message {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      animation: pulseText 2s infinite;
+    }
+
+    @keyframes pulseText {
+      0% { opacity: 1; }
+      50% { opacity: 0.9; }
+      100% { opacity: 1; }
+    }
+
+    .left-panel p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      margin-bottom: 30px;
+    }
+
+    .stats {
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+
+    .right-panel {
+      flex: 1;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .camera-container {
+      flex: 1;
+      background: #f0f0f0;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    #video, #canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #canvas {
+      display: none;
+    }
+
+    .camera-status {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #f39c12;
+      animation: pulse 1.5s infinite;
+    }
+
+    .status-dot.ready {
+      background: #27ae60;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .input-area {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 15px;
+    }
+
+    .lrn-input {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .lrn-input input {
+      flex: 1;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      letter-spacing: 2px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .lrn-input input:focus {
+      outline: none;
+      border-color: #186E00;
+      box-shadow: 0 0 0 3px rgba(24,110,0,0.1);
+    }
+
+    .lrn-input input.error {
+      border-color: #e74c3c;
+    }
+
+    .lrn-input input:disabled {
+      background: #e0e0e0;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .lrn-input button {
+      padding: 15px 30px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .lrn-input button:hover:not(:disabled) {
+      background: #2980b9;
+      transform: translateY(-2px);
+    }
+
+    .lrn-input button:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+    }
+
+    .preview {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .preview img {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 3px solid #186E00;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    .action-btn.login {
+      background: #27ae60;
+      color: white;
+    }
+
+    .action-btn.logout {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .quick-stats {
+      margin-top: 15px;
+      display: flex;
+      justify-content: space-between;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    /* Mode indicator */
+    .mode-indicator {
+      margin-top: 15px;
+      padding: 10px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      backdrop-filter: blur(5px);
+    }
+
+    .mode-badge {
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .mode-badge.login {
+      background: #27ae60;
+      color: white;
+    }
+
+    .mode-badge.logout {
+      background: #e74c3c;
+      color: white;
+    }
+
+    /* Overlays - Minimal for speed */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .overlay-content {
+      text-align: center;
+      color: white;
+      padding: 40px;
+    }
+
+    .overlay-content h2 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+
+    .overlay-content .success {
+      color: #27ae60;
+    }
+
+    .overlay-content .error {
+      color: #e74c3c;
+    }
+
+    /* Fresh Start notification */
+    .fs-notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #186E00;
+      color: white;
+      padding: 20px 40px;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      z-index: 2000;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: slideDown 0.5s ease-out;
+    }
+
+    .fs-notification.warning {
+      background: #e67e22;
+    }
+
+    @keyframes slideDown {
+      from { top: -100px; opacity: 0; }
+      to { top: 20px; opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 5px;
+      margin-top: 15px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: white;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .left-panel {
+        padding: 20px;
+      }
+      .left-panel h1 {
+        font-size: 2rem;
+      }
+      .left-panel .mode-message {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Left Panel with dynamic background color -->
+    <div class="left-panel" id="leftPanel">
+      <h1>ASLS 2.0</h1>
+      <div class="mode-message" id="modeMessage">YOU ARE LOGGING IN</div>
+      <p>Automated Student Log System</p>
+      <div class="stats">
+        <div class="stat-item">
+          <span>📊 Today's Logs:</span>
+          <span id="todayCount">0</span>
+        </div>
+        <div class="stat-item">
+          <span>⏱️ Response Time:</span>
+          <span id="responseTime">&lt;100ms</span>
+        </div>
+        <div class="stat-item">
+          <span>💾 Local Cache:</span>
+          <span id="cacheSize">0 logs</span>
+        </div>
+      </div>
+      <!-- Current Mode Indicator -->
+      <div class="mode-indicator">
+        <span>Current Mode:</span>
+        <span class="mode-badge" id="modeBadge">LOG IN</span>
+      </div>
+    </div>
+    
+    <div class="right-panel">
+      <div class="camera-container">
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas"></canvas>
+        <div class="camera-status">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Initializing...</span>
+        </div>
+      </div>
+      
+      <div class="input-area">
+        <div class="lrn-input">
+          <input type="text" 
+                 id="lrn" 
+                 placeholder="12-digit LRN" 
+                 maxlength="12"
+                 inputmode="numeric"
+                 autocomplete="off">
+          <button onclick="handleCapture()" id="captureBtn">CAPTURE</button>
+        </div>
+        
+        <div class="preview" id="previewArea" style="display: none;">
+          <img id="previewImage" src="" alt="Preview">
+          <div class="action-buttons">
+            <button class="action-btn" id="actionBtn" onclick="applyLog()">LOG IN</button>
+          </div>
+        </div>
+        
+        <div class="quick-stats">
+          <span>📷 Camera Ready</span>
+          <span>⚡ Instant Save</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Minimal overlays -->
+  <div class="overlay" id="successOverlay">
+    <div class="overlay-content">
+      <h2 class="success" id="successTitle">✅ SUCCESS</h2>
+      <p id="successMessage"></p>
+    </div>
+  </div>
+
+  <div class="overlay" id="errorOverlay">
+    <div class="overlay-content">
+      <h2 class="error" id="errorTitle">❌ ERROR</h2>
+      <p id="errorMessage"></p>
+    </div>
+  </div>
+
+  <script src="students.js"></script>
+
+  <script src="students.js"></script>
+
+<script>
+    
+    // ✅ SAFE studentMap initialization (FIXED)
+    let studentMap = new Map();
+
+    function initializeStudentMap() {
+      if (typeof STUDENTS_DATA !== "undefined") {
+        studentMap.clear();
+        STUDENTS_DATA.forEach(s => studentMap.set(String(s.lrn), s));
+        console.log("✅ studentMap loaded:", studentMap.size);
+      } else {
+        console.error("❌ STUDENTS_DATA not loaded");
+      }
+    }
+
+    // Run immediately AND after load (double safety)
+    initializeStudentMap();
+    window.addEventListener("load", initializeStudentMap);
+
+    // DOM Elements
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let currentStream = null;
+    let capturedImage = null;
+    let isProcessing = false;
+    let isFreshStarting = false;
+    
+    const lrnInput = document.getElementById('lrn');
+    const captureBtn = document.getElementById('captureBtn');
+    const previewArea = document.getElementById('previewArea');
+    const previewImage = document.getElementById('previewImage');
+    const actionBtn = document.getElementById('actionBtn');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const modeBadge = document.getElementById('modeBadge');
+    const modeMessage = document.getElementById('modeMessage');
+    const leftPanel = document.getElementById('leftPanel');
+    
+    const successOverlay = document.getElementById('successOverlay');
+    const errorOverlay = document.getElementById('errorOverlay');
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    let action = urlParams.get('action') || 'Log in';
+
+    function findStudent(lrn) {
+      if (!studentMap || studentMap.size === 0) {
+        console.error("studentMap not ready");
+        return null;
+      }
+      return studentMap.get(String(lrn));
+    }
+
+    function handleCapture() {
+      if (isProcessing || isFreshStarting) return;
+      
+      const lrn = lrnInput.value.replace(/\D/g, '');
+
+      if (!lrn || lrn.length !== 12) {
+        showError('Enter valid 12-digit LRN');
+        return;
+      }
+      
+      const student = findStudent(lrn);
+      if (!student) {
+        showError('Student not found');
+        return;
+      }
+      
+      captureImage();
+    }
+
+    function captureImage() {
+      isProcessing = true;
+      captureBtn.disabled = true;
+      lrnInput.disabled = true;
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+
+      capturedImage = canvas.toDataURL('image/jpeg', 0.6);
+
+      previewImage.src = capturedImage;
+      previewArea.style.display = 'flex';
+
+      setTimeout(() => applyLog(), 200);
+    }
+
+    function applyLog() {
+      if (isFreshStarting) return;
+      
+      // ✅ FIXED LRN (IMPORTANT)
+      const lrn = lrnInput.value.replace(/\D/g, '');
+
+      const student = findStudent(lrn);
+      
+      if (!student) {
+        showError('Student not found');
+        resetCamera();
+        return;
+      }
+
+      const logEntry = {
+        timestamp: new Date().toISOString(),
+        lrn,
+        name: student.name,
+        action
+      };
+
+      console.log("✅ LOGGED:", logEntry);
+
+      showSuccess(`${student.name} ${action} successful!`);
+
+      resetCamera();
+      lrnInput.value = '';
+      lrnInput.focus();
+    }
+
+    function resetCamera() {
+      isProcessing = false;
+      captureBtn.disabled = false;
+      lrnInput.disabled = false;
+      previewArea.style.display = 'none';
+    }
+
+    function showSuccess(msg) {
+      document.getElementById('successMessage').textContent = msg;
+      successOverlay.style.display = 'flex';
+      setTimeout(() => successOverlay.style.display = 'none', 1500);
+    }
+
+    function showError(msg) {
+      document.getElementById('errorMessage').textContent = msg;
+      errorOverlay.style.display = 'flex';
+      setTimeout(() => errorOverlay.style.display = 'none', 1500);
+    }
+
+    async function initCamera() {
+      try {
+        currentStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = currentStream;
+        await video.play();
+
+        statusDot.classList.add('ready');
+        statusText.textContent = 'Ready';
+      } catch {
+        statusText.textContent = 'Camera error';
+      }
+    }
+
+    window.onload = function() {
+      initCamera();
+      lrnInput.focus();
+    };
+
+    window.handleCapture = handleCapture;
+    window.applyLog = applyLog;
+
+</script>
+</body>
+</html>
