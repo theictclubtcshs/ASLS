@@ -58,10 +58,19 @@
     }
 
     .left-panel h1 {
-      font-size: 3.5rem;
+      font-size: 3rem;
       font-weight: 800;
       line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .left-panel .mode-message {
+      font-size: 2rem;
+      font-weight: 600;
       margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
 
     .left-panel p {
@@ -316,6 +325,33 @@
       color: #e74c3c;
     }
 
+    /* Auto Fresh Start notification */
+    .auto-fs-notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #186E00;
+      color: white;
+      padding: 20px 40px;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      z-index: 2000;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: slideDown 0.5s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { top: -100px; opacity: 0; }
+      to { top: 20px; opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -326,6 +362,9 @@
       .left-panel h1 {
         font-size: 2rem;
       }
+      .left-panel .mode-message {
+        font-size: 1.5rem;
+      }
     }
   </style>
 </head>
@@ -333,7 +372,8 @@
   <div class="container">
     <!-- Left Panel with dynamic background color -->
     <div class="left-panel" id="leftPanel">
-      <h1>ASLS<br>VERSION 2.0</h1>
+      <h1>ASLS 2.0</h1>
+      <div class="mode-message" id="modeMessage">YOU ARE LOGGING IN</div>
       <p>Automated Student Log System</p>
       <div class="stats">
         <div class="stat-item">
@@ -414,7 +454,7 @@
     
     // CONFIGURATION
     const STUDENTS_DATA = [
-      // Your existing student data here (truncated for brevity)
+      // Your existing student data here (keeping first few for demo)
       { lrn: '400561180001', name: 'ALLAPITAN, JOAQUIN MIGUEL, QUILANG', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
       { lrn: '104385180002', name: 'ARESTA, KOJI, DE MATA', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
       { lrn: '102633180001', name: 'BURAC, LANCE AEDOR, AGGABAO', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
@@ -1353,6 +1393,7 @@
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
     const modeBadge = document.getElementById('modeBadge');
+    const modeMessage = document.getElementById('modeMessage');
     const leftPanel = document.getElementById('leftPanel');
     
     const successOverlay = document.getElementById('successOverlay');
@@ -1362,11 +1403,88 @@
     const urlParams = new URLSearchParams(window.location.search);
     let action = urlParams.get('action') || 'Log in';
     
-    // Update UI based on action
-    // Update UI based on action
+    // ============================================
+    // AUTO FRESH START DETECTION
+    // ============================================
+    
+    // Check log count and notify main window if needed
+    function checkLogCountAndNotify() {
+      try {
+        const logs = JSON.parse(localStorage.getItem('asls_master') || '[]');
+        const logCount = logs.length;
+        
+        console.log(`Current log count: ${logCount}/40`);
+        
+        // If 40 or more logs, notify main window
+        if (logCount >= 40) {
+          console.log('🎯 Reached 40 logs! Notifying main window...');
+          
+          // Try to find the main window (opener)
+          if (window.opener && !window.opener.closed) {
+            // Send message to main window
+            window.opener.postMessage({ type: 'AUTO_FRESH_START' }, '*');
+            
+            // Show notification in this window
+            showAutoFreshStartNotification();
+            
+            // Close this camera window after a short delay
+            setTimeout(() => {
+              window.close();
+            }, 3000);
+          }
+        }
+      } catch (e) {
+        console.error('Error checking log count:', e);
+      }
+    }
+    
+    // Show notification in camera window
+    function showAutoFreshStartNotification() {
+      const notification = document.createElement('div');
+      notification.className = 'auto-fs-notification';
+      notification.innerHTML = '🔄 System reached 40 logs! Auto-saving... Closing camera.';
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'fadeOut 0.5s ease-out';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 500);
+      }, 2500);
+    }
+    
+    // Listen for messages from main window
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'CLOSE_CAMERA') {
+        console.log('Received close command from main window');
+        
+        // Show notification
+        const notification = document.createElement('div');
+        notification.className = 'auto-fs-notification';
+        notification.innerHTML = '🔄 System performing Fresh Start... Closing camera.';
+        document.body.appendChild(notification);
+        
+        // Close after a moment
+        setTimeout(() => {
+          window.close();
+        }, 1500);
+      }
+    });
+    
+    // ============================================
+    // UPDATE UI BASED ON ACTION
+    // ============================================
+    
     function updateActionUI() {
       actionBtn.textContent = action;
       modeBadge.textContent = action;
+      
+      // Update the big mode message
+      if (action === 'Log in') {
+        modeMessage.textContent = 'YOU ARE LOGGING IN';
+      } else {
+        modeMessage.textContent = 'YOU ARE LOGGING OUT';
+      }
       
       // Remove any existing color classes first
       leftPanel.classList.remove('login-bg', 'logout-bg');
@@ -1417,6 +1535,9 @@
       
       // Update stats
       updateStats();
+      
+      // Check log count after saving
+      checkLogCountAndNotify();
       
       const end = performance.now();
       console.log(`✅ Saved in ${(end - start).toFixed(2)}ms`);
@@ -1624,6 +1745,9 @@
       
       // Update stats every second
       setInterval(updateStats, 1000);
+      
+      // Check log count on load
+      checkLogCountAndNotify();
     };
     
     window.onbeforeunload = function() {
