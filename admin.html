@@ -226,6 +226,26 @@
       transform: translateY(-3px);
     }
     
+    .sheet-btn {
+      background: #0F9D58;
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .sheet-btn:hover {
+      background: #0b8043;
+      transform: translateY(-3px);
+    }
+    
     .refresh-btn {
       background: #3498db;
       color: white;
@@ -607,6 +627,36 @@
       color: white;
       border-color: #186E00;
     }
+
+    /* Student data section */
+    .student-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 5px solid #0F9D58;
+    }
+
+    .student-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .student-info span {
+      font-size: 1.1rem;
+    }
+
+    .sync-status {
+      background: #e8f5e9;
+      color: #0F9D58;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
@@ -622,7 +672,7 @@
                placeholder="Enter password" 
                maxlength="20"
                autocomplete="off"
-               autofocus> <!-- AUTOFOCUS ATTRIBUTE ADDED -->
+               autofocus>
         <div class="password-strength">
           <div class="strength-bar" id="strengthBar"></div>
         </div>
@@ -644,12 +694,30 @@
       <div class="header">
         <div>
           <h1>📊 ASLS Admin Panel</h1>
-          <p>Manage student logs</p>
+          <p>Manage student logs and database</p>
         </div>
         <div class="btn-group">
+          <!-- NEW: Edit Student Data Button -->
+          <button class="sheet-btn" onclick="openStudentSheet()">
+            📗 EDIT STUDENT DATA
+          </button>
           <button class="drive-btn" onclick="uploadToDrive()" id="driveBtn">☁️ UPLOAD TO DRIVE</button>
           <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
           <button class="delete-mode-btn" id="deleteModeBtn" onclick="toggleDeleteMode()">🗑️ Delete Mode</button>
+        </div>
+      </div>
+
+      <!-- NEW: Student Database Info Section -->
+      <div class="student-section">
+        <div class="student-info">
+          <span style="font-size: 2rem;">📗</span>
+          <div>
+            <strong style="font-size: 1.2rem;">Student Database</strong>
+            <p style="color: #666; margin-top: 5px;">Edit students in Google Sheets, then sync to GitHub</p>
+          </div>
+        </div>
+        <div class="sync-status" id="syncStatus">
+          <span>🔄 Click button to edit</span>
         </div>
       </div>
       
@@ -755,11 +823,21 @@
 
   <script>
     // ============================================
-    // PASSWORD PROTECTION WITH AUTO FOCUS
+    // CONFIGURATION - EDIT THESE!
+    // ============================================
+    
+    // Your Google Sheet URL - REPLACE WITH YOUR ACTUAL SHEET URL
+    const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1YEZR6BwtTHdfjsNguA-fo0d5cnLEglUJo2BnXgNCPvU/edit?usp=sharing';
+    
+    // Your Apps Script Web App URL
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYJvrOY7VuFSI0zozHPMWojzr3WfD-fom7zn9CG4lyQfLNSdXDnHXhNyZqUvHi1fiAPw/exec';
+    
+    // ============================================
+    // PASSWORD PROTECTION
     // ============================================
     
     // Set your admin password here
-    const ADMIN_PASSWORD = 'ictwatchyourback.'; // CHANGE THIS TO YOUR DESIRED PASSWORD
+    const ADMIN_PASSWORD = 'ictwatchyourback.';
     
     const passwordInput = document.getElementById('passwordInput');
     const enterBtn = document.getElementById('enterBtn');
@@ -770,54 +848,41 @@
     
     // Force focus on password input when page loads
     window.addEventListener('load', function() {
-      // Small delay to ensure DOM is fully loaded
       setTimeout(() => {
         passwordInput.focus();
       }, 100);
     });
     
-    // Also try to focus immediately
     passwordInput.focus();
     
-    // Enable/disable enter button based on input
     passwordInput.addEventListener('input', function() {
       const hasValue = this.value.length > 0;
       enterBtn.disabled = !hasValue;
       
-      // Simple strength indicator
       const strength = Math.min(this.value.length * 10, 100);
       strengthBar.style.width = strength + '%';
     });
     
-    // Allow Enter key to submit
     passwordInput.addEventListener('keypress', function(e) {
       if (e.key === 'Enter' && this.value.length > 0) {
         checkPassword();
       }
     });
     
-    // Check password function
     function checkPassword() {
       const enteredPassword = passwordInput.value;
       
       if (enteredPassword === ADMIN_PASSWORD) {
-        // Correct password - show main content
         passwordOverlay.style.display = 'none';
         mainContent.classList.add('visible');
-        
-        // Initialize the admin panel
         loadData();
-        
-        // Optional: Show success message
         console.log('✅ Admin access granted');
       } else {
-        // Wrong password - show error
         passwordError.textContent = '❌ Incorrect password. Please try again.';
         passwordInput.value = '';
-        passwordInput.focus(); // Return focus to input field
+        passwordInput.focus();
         strengthBar.style.width = '0%';
         
-        // Shake animation for error
         passwordInput.style.animation = 'shake 0.5s';
         setTimeout(() => {
           passwordInput.style.animation = '';
@@ -837,16 +902,33 @@
     document.head.appendChild(style);
     
     // ============================================
-    // ASLS ADMIN PANEL - FIXED DELETE FUNCTIONALITY
+    // NEW FUNCTION: Open Google Sheet
+    // ============================================
+    
+    function openStudentSheet() {
+      if (GOOGLE_SHEET_URL === 'YOUR_GOOGLE_SHEET_URL_HERE') {
+        alert('⚠️ Please configure your Google Sheet URL in the script first!');
+        return;
+      }
+      
+      // Open the Google Sheet in a new tab
+      window.open(GOOGLE_SHEET_URL, '_blank');
+      
+      // Update status
+      document.getElementById('syncStatus').innerHTML = 
+        '<span style="color: #0F9D58;">✅ Sheet opened - Make your edits then sync to GitHub</span>';
+    }
+    
+    // ============================================
+    // ASLS ADMIN PANEL
     // ============================================
     
     let allLogs = [];
     let filteredLogs = [];
     let currentPage = 1;
     const logsPerPage = 50;
-    let APPS_SCRIPT_URL = '';
     let deleteMode = false;
-    let selectedIndices = new Set(); // Stores indices from filteredLogs
+    let selectedIndices = new Set();
     
     // Load data from localStorage
     function loadData() {
@@ -861,7 +943,6 @@
         const savedUrl = localStorage.getItem('asls_script_url');
         if (savedUrl) {
           document.getElementById('scriptUrl').value = savedUrl;
-          APPS_SCRIPT_URL = savedUrl;
         }
       } catch (e) {
         console.error('Error loading logs:', e);
@@ -934,7 +1015,6 @@
       }
     }
     
-    // Toggle select all on current page
     function toggleSelectAll() {
       const selectAll = document.getElementById('selectAllCheckbox').checked;
       const start = (currentPage - 1) * logsPerPage;
@@ -954,7 +1034,6 @@
       renderTable();
     }
     
-    // Toggle single selection
     function toggleSelection(index) {
       if (selectedIndices.has(index)) {
         selectedIndices.delete(index);
@@ -965,13 +1044,11 @@
       renderTable();
     }
     
-    // Update selection UI
     function updateSelectionUI() {
       const count = selectedIndices.size;
       document.getElementById('selectedCount').textContent = count + ' selected';
       document.getElementById('deleteSelectedBtn').disabled = count === 0;
       
-      // Update select all checkbox
       const start = (currentPage - 1) * logsPerPage;
       const end = Math.min(start + logsPerPage, filteredLogs.length);
       let allSelected = true;
@@ -984,7 +1061,6 @@
       document.getElementById('selectAllCheckbox').checked = allSelected && end > start;
     }
     
-    // Confirm delete selected
     function confirmDeleteSelected() {
       if (selectedIndices.size === 0) return;
       
@@ -994,7 +1070,6 @@
       document.getElementById('confirmModal').style.display = 'flex';
     }
     
-    // Confirm delete single
     function confirmDeleteSingle(index) {
       selectedIndices.clear();
       selectedIndices.add(index);
@@ -1005,42 +1080,29 @@
       document.getElementById('confirmModal').style.display = 'flex';
     }
     
-    // FIXED: Delete selected logs
     function deleteSelected() {
-      // Convert selectedIndices (filteredLogs indices) to actual log objects
       const logsToDelete = Array.from(selectedIndices).map(index => filteredLogs[index]);
       
-      // Filter out the logs to delete from allLogs
       allLogs = allLogs.filter(log => {
-        // Check if this log is in the logsToDelete array
         return !logsToDelete.some(deleteLog => 
           deleteLog.timestamp === log.timestamp && 
           deleteLog.lrn === log.lrn
         );
       });
       
-      // Save to localStorage
       localStorage.setItem('asls_master', JSON.stringify(allLogs));
-      
-      // Also update daily logs
       updateDailyLogs();
-      
-      // Refresh data
       loadData();
       closeConfirmModal();
       
-      // Show success message
       alert(`✅ Successfully deleted ${logsToDelete.length} log(s)!`);
     }
     
-    // Close confirm modal
     function closeConfirmModal() {
       document.getElementById('confirmModal').style.display = 'none';
     }
     
-    // Update daily logs in localStorage
     function updateDailyLogs() {
-      // Group by date and period
       const byDate = {};
       allLogs.forEach(log => {
         const date = log.timestamp.split('T')[0];
@@ -1050,13 +1112,11 @@
         byDate[key].push(log);
       });
       
-      // Save each daily log
       Object.keys(byDate).forEach(key => {
         localStorage.setItem(`asls_${key}`, JSON.stringify(byDate[key]));
       });
     }
     
-    // Render table
     function renderTable() {
       const start = (currentPage - 1) * logsPerPage;
       const end = start + logsPerPage;
@@ -1082,7 +1142,6 @@
           </td>`;
         }
         
-        // Escape quotes for HTML attributes
         const safePhoto = log.photo ? log.photo.replace(/'/g, "&apos;").replace(/"/g, "&quot;") : '';
         
         html += `
@@ -1105,7 +1164,6 @@
       if (deleteMode) updateSelectionUI();
     }
     
-    // Pagination
     function renderPagination() {
       const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
       if (totalPages <= 1) {
@@ -1125,13 +1183,11 @@
       renderTable();
     }
     
-    // View photo
     function viewPhoto(src) {
       document.getElementById('modalImage').src = src;
       document.getElementById('photoModal').style.display = 'flex';
     }
     
-    // Test connection
     function testConnection() {
       const url = document.getElementById('scriptUrl').value.trim();
       const status = document.getElementById('driveStatus');
@@ -1141,12 +1197,10 @@
         return;
       }
       
-      APPS_SCRIPT_URL = url;
       localStorage.setItem('asls_script_url', url);
       status.innerHTML = '✅ URL saved! Ready to upload.';
     }
     
-    // Generate HTML file from logs
     function generateLogsHTML() {
       const now = new Date();
       
@@ -1213,9 +1267,10 @@
       return html;
     }
     
-    // Upload to Drive
     function uploadToDrive() {
-      if (!APPS_SCRIPT_URL) {
+      const scriptUrl = document.getElementById('scriptUrl').value.trim();
+      
+      if (!scriptUrl) {
         alert('Please test connection first');
         return;
       }
@@ -1228,19 +1283,16 @@
       const status = document.getElementById('driveStatus');
       status.innerHTML = '⏳ Generating HTML file...';
       
-      // Generate filename with timestamp
       const now = new Date();
       const filename = `ASLS_Logs_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}.html`;
       
-      // Generate HTML content
       const htmlContent = generateLogsHTML();
       
       status.innerHTML = '⏳ Uploading ' + allLogs.length + ' logs to Drive...';
       
-      // Create form to submit
       const form = document.createElement('form');
       form.method = 'POST';
-      form.action = APPS_SCRIPT_URL;
+      form.action = scriptUrl;
       form.target = 'upload_iframe';
       form.style.display = 'none';
       
@@ -1261,7 +1313,6 @@
       iframe.style.display = 'none';
       document.body.appendChild(iframe);
       
-      // Handle completion
       iframe.onload = function() {
         status.innerHTML = `✅ Upload complete!<br>
                            File: ${filename}<br>
@@ -1269,7 +1320,6 @@
                            Folder: AttendanceASLS<br><br>
                            <strong>Check your Google Drive now!</strong>`;
         
-        // Clean up
         setTimeout(() => {
           document.body.removeChild(form);
           document.body.removeChild(iframe);
@@ -1278,9 +1328,6 @@
       
       form.submit();
     }
-    
-    // Initialize will be called after password success
-    // window.onload is removed because we call loadData() after password
   </script>
 </body>
 </html>
