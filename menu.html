@@ -586,6 +586,18 @@
             window.open(ADMIN_PANEL_URL, '_blank');
         }
 
+        // Close camera window if open
+        function closeCameraWindow() {
+            if (cameraWindow && !cameraWindow.closed) {
+                try {
+                    cameraWindow.close();
+                    console.log('Camera window closed');
+                } catch (e) {
+                    console.log('Could not close camera window:', e);
+                }
+            }
+        }
+
         // ============================================
         // AUTO FRESH START AT 40 LOGS
         // ============================================
@@ -598,7 +610,7 @@
                 
                 console.log(`Current log count: ${logCount}/40`);
                 
-                // If exactly 40 logs, trigger auto Fresh Start
+                // If 40 or more logs, trigger auto Fresh Start
                 if (logCount >= 40) {
                     console.log('🎯 Reached 40 logs! Auto-triggering Fresh Start...');
                     autoFreshStart();
@@ -611,6 +623,9 @@
         // Auto Fresh Start function (no confirmation)
         function autoFreshStart() {
             const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            // CLOSE CAMERA WINDOW FIRST!
+            closeCameraWindow();
             
             // Show warning notification
             const notification = document.createElement('div');
@@ -712,6 +727,8 @@
             message += 'Are you sure you want to continue?';
             
             if (confirm(message)) {
+                // CLOSE CAMERA WINDOW FIRST!
+                closeCameraWindow();
                 performFreshStart();
             }
         }
