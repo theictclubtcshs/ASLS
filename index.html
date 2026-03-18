@@ -114,12 +114,17 @@
       overflow: hidden;
       position: relative;
       margin-bottom: 20px;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     #video, #canvas {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      display: block;
     }
 
     #canvas {
@@ -150,6 +155,10 @@
 
     .status-dot.ready {
       background: #27ae60;
+    }
+
+    .status-dot.error {
+      background: #e74c3c;
     }
 
     @keyframes pulse {
@@ -382,6 +391,12 @@
       transition: width 0.3s;
     }
 
+    .no-camera-message {
+      text-align: center;
+      color: #666;
+      padding: 20px;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -410,8 +425,8 @@
           <span id="todayCount">0</span>
         </div>
         <div class="stat-item">
-          <span>⏱️ Response Time:</span>
-          <span id="responseTime">&lt;100ms</span>
+          <span>⏱️ Status:</span>
+          <span id="responseTime">Initializing...</span>
         </div>
         <div class="stat-item">
           <span>💾 Local Cache:</span>
@@ -425,8 +440,8 @@
     </div>
     
     <div class="right-panel">
-      <div class="camera-container">
-        <video id="video" autoplay playsinline></video>
+      <div class="camera-container" id="cameraContainer">
+        <video id="video" autoplay playsinline style="display: none;"></video>
         <canvas id="canvas"></canvas>
         <div class="camera-status">
           <span class="status-dot" id="statusDot"></span>
@@ -442,18 +457,18 @@
                  maxlength="12"
                  inputmode="numeric"
                  autocomplete="off">
-          <button onclick="handleCapture()" id="captureBtn">CAPTURE</button>
+          <button onclick="handleCapture()" id="captureBtn" disabled>CAPTURE</button>
         </div>
         
         <div class="preview" id="previewArea" style="display: none;">
           <img id="previewImage" src="" alt="Preview">
           <div class="action-buttons">
-            <button class="action-btn" id="actionBtn" onclick="applyLog()">LOG IN</button>
+            <button class="action-btn" id="actionBtn" onclick="applyLog()" disabled>LOG IN</button>
           </div>
         </div>
         
         <div class="quick-stats">
-          <span>📷 Camera Ready</span>
+          <span>📷 <span id="cameraIndicator">Waiting for camera...</span></span>
           <span>⚡ Instant Save</span>
         </div>
       </div>
@@ -498,10 +513,12 @@
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
+    const cameraContainer = document.getElementById('cameraContainer');
     let currentStream = null;
     let capturedImage = null;
     let isProcessing = false;
     let isFreshStarting = false;
+    let cameraInitialized = false;
     
     const lrnInput = document.getElementById('lrn');
     const captureBtn = document.getElementById('captureBtn');
@@ -510,9 +527,11 @@
     const actionBtn = document.getElementById('actionBtn');
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
+    const cameraIndicator = document.getElementById('cameraIndicator');
     const modeBadge = document.getElementById('modeBadge');
     const modeMessage = document.getElementById('modeMessage');
     const leftPanel = document.getElementById('leftPanel');
+    const responseTime = document.getElementById('responseTime');
     
     const successOverlay = document.getElementById('successOverlay');
     const errorOverlay = document.getElementById('errorOverlay');
@@ -531,6 +550,7 @@
         const logCount = logs.length;
         
         console.log(`Current log count: ${logCount}/40`);
+        responseTime.textContent = `${logCount}/40 logs`;
         
         if (logCount >= 40 && !isFreshStarting) {
           console.log('🎯 Reached 40 logs! Triggering Fresh Start...');
@@ -582,8 +602,10 @@
               document.body.removeChild(notification);
               
               isFreshStarting = false;
-              lrnInput.disabled = false;
-              captureBtn.disabled = false;
+              if (cameraInitialized) {
+                lrnInput.disabled = false;
+                captureBtn.disabled = false;
+              }
               lrnInput.focus();
               
               updateStats();
@@ -604,8 +626,10 @@
             setTimeout(() => {
               document.body.removeChild(notification);
               isFreshStarting = false;
-              lrnInput.disabled = false;
-              captureBtn.disabled = false;
+              if (cameraInitialized) {
+                lrnInput.disabled = false;
+                captureBtn.disabled = false;
+              }
               lrnInput.focus();
               updateStats();
             }, 500);
@@ -847,31 +871,81 @@
     async function initCamera() {
       try {
         statusText.textContent = 'Requesting camera...';
+        cameraIndicator.textContent = 'Requesting camera...';
         
+        // Check if browser supports getUserMedia
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Browser does not support camera access');
+        }
+        
+        // Stop any existing stream
         if (currentStream) {
           currentStream.getTracks().forEach(t => t.stop());
         }
         
+        // Request camera with basic constraints
         currentStream = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: 'user' },
+          video: true,
           audio: false 
         });
         
+        // Set video source
         video.srcObject = currentStream;
-        await video.play();
         
+        // Wait for video to be ready
+        await new Promise((resolve) => {
+          video.onloadedmetadata = () => {
+            video.play();
+            resolve();
+          };
+        });
+        
+        // Show video
+        video.style.display = 'block';
+        
+        // Update status
         statusDot.className = 'status-dot ready';
         statusText.textContent = 'Ready';
+        cameraIndicator.textContent = 'Camera ready';
+        cameraInitialized = true;
+        
+        // Enable inputs
         captureBtn.disabled = false;
+        lrnInput.disabled = false;
+        
+        console.log('✅ Camera initialized successfully');
         
       } catch (error) {
+        console.error('Camera error:', error);
+        
+        // Update UI to show error
+        statusDot.className = 'status-dot error';
         statusText.textContent = 'Camera error';
+        cameraIndicator.textContent = 'Camera unavailable';
+        
+        // Show error message in camera container
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'no-camera-message';
+        errorMsg.innerHTML = `
+          <p>❌ Camera not available</p>
+          <p style="font-size: 0.9rem;">${error.message}</p>
+          <p style="font-size: 0.8rem; margin-top: 10px;">You can still enter LRN manually</p>
+        `;
+        cameraContainer.appendChild(errorMsg);
+        
+        // Disable capture button but keep input enabled
         captureBtn.disabled = true;
+        lrnInput.disabled = false;
+        lrnInput.focus();
       }
     }
     
     function handleCapture() {
       if (isProcessing || isFreshStarting) return;
+      if (!cameraInitialized) {
+        showError('Camera not ready');
+        return;
+      }
       
       const lrn = lrnInput.value.trim();
       if (!lrn || lrn.length !== 12 || !/^\d+$/.test(lrn)) {
@@ -896,20 +970,30 @@
       captureBtn.disabled = true;
       lrnInput.disabled = true;
       
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      capturedImage = canvas.toDataURL('image/jpeg', 0.6);
-      
-      previewImage.src = capturedImage;
-      previewArea.style.display = 'flex';
-      actionBtn.disabled = false;
-      
-      setTimeout(() => {
-        if (!isProcessing || isFreshStarting) return;
-        applyLog();
-      }, 200);
+      try {
+        // Capture photo
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Compress image quickly
+        capturedImage = canvas.toDataURL('image/jpeg', 0.6);
+        
+        previewImage.src = capturedImage;
+        previewArea.style.display = 'flex';
+        actionBtn.disabled = false;
+        
+        // Auto-apply after 500ms (increased for reliability)
+        setTimeout(() => {
+          if (!isProcessing || isFreshStarting) return;
+          applyLog();
+        }, 500);
+        
+      } catch (error) {
+        console.error('Capture error:', error);
+        showError('Failed to capture image');
+        resetCamera();
+      }
     }
     
     async function applyLog() {
@@ -951,7 +1035,7 @@
     
     function resetCamera() {
       isProcessing = false;
-      if (!isFreshStarting) {
+      if (!isFreshStarting && cameraInitialized) {
         captureBtn.disabled = false;
         lrnInput.disabled = false;
       }
@@ -959,7 +1043,9 @@
       previewArea.style.display = 'none';
       capturedImage = null;
       
-      video.style.display = 'block';
+      if (cameraInitialized) {
+        video.style.display = 'block';
+      }
       canvas.style.display = 'none';
     }
     
@@ -979,10 +1065,12 @@
       }, 1500);
     }
     
+    // ========== INPUT HANDLERS ==========
+    
     lrnInput.addEventListener('input', function(e) {
       this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
       
-      if (this.value.length === 12 && !isProcessing && !isFreshStarting) {
+      if (this.value.length === 12 && !isProcessing && !isFreshStarting && cameraInitialized) {
         handleCapture();
       }
     });
@@ -993,6 +1081,8 @@
         handleCapture();
       }
     });
+    
+    // ========== EXPORT FUNCTION ==========
     
     window.exportLogs = function() {
       const master = JSON.parse(localStorage.getItem('asls_master') || '[]');
@@ -1009,10 +1099,20 @@
       showSuccess(`Exported ${master.length} logs`);
     };
     
+    // ========== INIT ==========
+    
     window.onload = function() {
-      initCamera();
+      console.log('Page loaded, initializing...');
       updateStats();
-      lrnInput.focus();
+      updateActionUI();
+      
+      // Try to initialize camera
+      initCamera().catch(console.error);
+      
+      // Focus input regardless of camera
+      setTimeout(() => {
+        lrnInput.focus();
+      }, 500);
       
       setInterval(updateStats, 1000);
       checkLogCountAndTriggerFreshStart();
@@ -1025,6 +1125,7 @@
       }
     };
     
+    // Expose functions globally
     window.handleCapture = handleCapture;
     window.applyLog = applyLog;
   </script>
