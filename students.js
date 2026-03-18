@@ -1,7 +1,7 @@
 // ============================================
 // ASLS STUDENT DATABASE
 // Auto-generated from Google Sheets (Multiple Grades)
-// Last updated: 3/18/2026, 8:18:36 PM
+// Last updated: 3/18/2026, 8:19:39 PM
 // Total students: 1724
 // ============================================
 
@@ -725,7 +725,7 @@ const STUDENTS_DATA = [
     { lrn: '104405130037', name: 'PALATTAO RAZIELA YUMA NARAG', sex: 'FEMALE', grade: '7', section: 'VESALIUS' },
     { lrn: '104405130037', name: 'PALATTAO RAZIELA YUMA NARAG', sex: 'FEMALE', grade: '12', section: 'VESALIUS' },
     { lrn: '104406121025', name: 'DOMINGO LEONEL FERNANDEZ', sex: 'MALE', grade: '7', section: 'VESALIUS' },
-    { lrn: '104406121025', name: 'DOMINGO LEONEL FERNANDEZ', sex: 'MALE', grade: '12', section: 'VESALIUS' },
+    { lrn: '104406121029', name: 'DOMINGO LEONEL FERNANDEZ', sex: 'MALE', grade: '12', section: 'VESALIUS' },
     { lrn: '104406121037', name: 'MANABAL XHARI LEWIS HAYDEN DASAYON', sex: 'MALE', grade: '7', section: 'MENDELEEV' },
     { lrn: '104406121037', name: 'MANABAL XHARI LEWIS HAYDEN DASAYON', sex: 'MALE', grade: '12', section: 'MENDELEEV' },
     { lrn: '104406121042', name: 'ADDUN ALLAYSSA NOELLE SANTOS', sex: 'FEMALE', grade: '7', section: 'DA VINCI' },
