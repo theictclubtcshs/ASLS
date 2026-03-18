@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASLS - Student Database Editor</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 30px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      color: #186E00;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h1 small {
+      font-size: 1rem;
+      color: #666;
+      font-weight: normal;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: #186E00;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0f4f00;
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background: #27ae60;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #219a52;
+      transform: translateY(-2px);
+    }
+
+    .btn-warning {
+      background: #e67e22;
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background: #d35400;
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: #7f8c8d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #6c7a7a;
+      transform: translateY(-2px);
+    }
+
+    .search-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 300px;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: #186E00;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #186E00;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: 15px;
+      border: 1px solid #e0e0e0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1000px;
+    }
+
+    th {
+      background: #186E00;
+      color: white;
+      padding: 15px 10px;
+      text-align: left;
+    }
+
+    td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #ecf0f1;
+    }
+
+    tr:hover {
+      background: #f8f9fa;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+    }
+
+    .edit-btn, .delete-btn {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .edit-btn {
+      background: #3498db;
+      color: white;
+    }
+
+    .delete-btn {
+      background: #e74c3c;
+      color: white;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 40px;
+      border-radius: 30px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-content h2 {
+      color: #186E00;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #666;
+      font-weight: 600;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #186E00;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .page-btn {
+      padding: 8px 15px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .page-btn.active {
+      background: #186E00;
+      color: white;
+      border-color: #186E00;
+    }
+
+    .export-data {
+      background: #2c3e50;
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .warning {
+      background: #fff3cd;
+      color: #856404;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>
+      📝 ASLS Student Database Editor
+      <small>Edit students.js file</small>
+    </h1>
+
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="showAddModal()">
+        ➕ Add New Student
+      </button>
+      <button class="btn btn-success" onclick="exportData()">
+        💾 Generate students.js
+      </button>
+      <button class="btn btn-warning" onclick="importData()">
+        📂 Import Current File
+      </button>
+      <button class="btn btn-secondary" onclick="window.location.reload()">
+        🔄 Refresh
+      </button>
+    </div>
+
+    <div class="search-section">
+      <input type="text" id="searchInput" class="search-box" 
+             placeholder="🔍 Search by LRN, name, grade, or section..." 
+             onkeyup="filterStudents()">
+      <select id="gradeFilter" class="search-box" style="min-width: 150px;" onchange="filterStudents()">
+        <option value="all">All Grades</option>
+        <option value="7">Grade 7</option>
+        <option value="8">Grade 8</option>
+        <option value="9">Grade 9</option>
+        <option value="10">Grade 10</option>
+        <option value="11">Grade 11</option>
+        <option value="12">Grade 12</option>
+      </select>
+    </div>
+
+    <div class="stats-grid" id="stats">
+      <div class="stat-card">
+        <div class="stat-value" id="totalStudents">0</div>
+        <div class="stat-label">Total Students</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="maleCount">0</div>
+        <div class="stat-label">Male</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="femaleCount">0</div>
+        <div class="stat-label">Female</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="gradeCount">0</div>
+        <div class="stat-label">Grade Levels</div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>LRN</th>
+            <th>Name</th>
+            <th>Sex</th>
+            <th>Grade</th>
+            <th>Section</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="studentsTableBody">
+          <tr><td colspan="6" style="text-align: center; padding: 50px;">Loading students...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination" id="pagination"></div>
+
+    <div class="warning">
+      ⚠️ After editing, click "Generate students.js" and replace your existing students.js file with the downloaded one.
+    </div>
+
+    <div class="export-data" id="exportData"></div>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div class="modal" id="studentModal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Add New Student</h2>
+      
+      <div class="form-group">
+        <label>LRN (12 digits)</label>
+        <input type="text" id="lrnInput" maxlength="12" placeholder="12-digit LRN">
+      </div>
+
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="nameInput" placeholder="LAST NAME, FIRST NAME, MIDDLE">
+      </div>
+
+      <div class="form-group">
+        <label>Sex</label>
+        <select id="sexInput">
+          <option value="MALE">MALE</option>
+          <option value="FEMALE">FEMALE</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Grade</label>
+        <select id="gradeInput">
+          <option value="7">Grade 7</option>
+          <option value="8">Grade 8</option>
+          <option value="9">Grade 9</option>
+          <option value="10">Grade 10</option>
+          <option value="11">Grade 11</option>
+          <option value="12">Grade 12</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Section</label>
+        <input type="text" id="sectionInput" placeholder="Section name">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-success" onclick="saveStudent()">💾 Save</button>
+        <button class="btn btn-secondary" onclick="closeModal()">✕ Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // STUDENT DATABASE
+    // ============================================
+    
+    let students = [];
+    let filteredStudents = [];
+    let currentPage = 1;
+    let editingIndex = -1;
+    const rowsPerPage = 20;
+
+    // Initialize with sample data if none exists
+    function initializeData() {
+      // Try to load from localStorage first
+      const saved = localStorage.getItem('asls_students_editor');
+      if (saved) {
+        students = JSON.parse(saved);
+      } else {
+        // Default sample data
+        students = [
+          { lrn: '400561180001', name: 'ALLAPITAN, JOAQUIN MIGUEL, QUILANG', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' }
+        ];
+      }
+      filteredStudents = [...students];
+      updateStats();
+      renderTable();
+    }
+
+    // Update statistics
+    function updateStats() {
+      document.getElementById('totalStudents').textContent = students.length;
+      document.getElementById('maleCount').textContent = students.filter(s => s.sex === 'MALE').length;
+      document.getElementById('femaleCount').textContent = students.filter(s => s.sex === 'FEMALE').length;
+      
+      const grades = new Set(students.map(s => s.grade));
+      document.getElementById('gradeCount').textContent = grades.size;
+    }
+
+    // Filter students based on search
+    function filterStudents() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const gradeFilter = document.getElementById('gradeFilter').value;
+      
+      filteredStudents = students.filter(s => {
+        const matchesSearch = 
+          s.lrn.toLowerCase().includes(searchTerm) ||
+          s.name.toLowerCase().includes(searchTerm) ||
+          s.section.toLowerCase().includes(searchTerm);
+        
+        const matchesGrade = gradeFilter === 'all' || s.grade === gradeFilter;
+        
+        return matchesSearch && matchesGrade;
+      });
+      
+      currentPage = 1;
+      renderTable();
+    }
+
+    // Render table with pagination
+    function renderTable() {
+      const start = (currentPage - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+      const pageStudents = filteredStudents.slice(start, end);
+      
+      if (filteredStudents.length === 0) {
+        document.getElementById('studentsTableBody').innerHTML = 
+          '<tr><td colspan="6" style="text-align:center; padding:50px;">No students found</td></tr>';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+      
+      let html = '';
+      pageStudents.forEach((s, idx) => {
+        const actualIndex = students.findIndex(stud => 
+          stud.lrn === s.lrn && stud.name === s.name
+        );
+        
+        html += `
+          <tr>
+            <td><strong>${s.lrn}</strong></td>
+            <td>${s.name}</td>
+            <td>${s.sex}</td>
+            <td>${s.grade}</td>
+            <td>${s.section}</td>
+            <td class="action-buttons">
+              <button class="edit-btn" onclick="editStudent(${actualIndex})">✏️ Edit</button>
+              <button class="delete-btn" onclick="deleteStudent(${actualIndex})">🗑️ Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+      
+      document.getElementById('studentsTableBody').innerHTML = html;
+      renderPagination();
+    }
+
+    // Render pagination
+    function renderPagination() {
+      const totalPages = Math.ceil(filteredStudents.length / rowsPerPage);
+      if (totalPages <= 1) {
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+      
+      let html = '';
+      for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+      }
+      document.getElementById('pagination').innerHTML = html;
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      renderTable();
+    }
+
+    // Show add modal
+    function showAddModal() {
+      editingIndex = -1;
+      document.getElementById('modalTitle').textContent = 'Add New Student';
+      document.getElementById('lrnInput').value = '';
+      document.getElementById('nameInput').value = '';
+      document.getElementById('sexInput').value = 'MALE';
+      document.getElementById('gradeInput').value = '7';
+      document.getElementById('sectionInput').value = '';
+      document.getElementById('studentModal').style.display = 'flex';
+    }
+
+    // Edit student
+    function editStudent(index) {
+      editingIndex = index;
+      const s = students[index];
+      
+      document.getElementById('modalTitle').textContent = 'Edit Student';
+      document.getElementById('lrnInput').value = s.lrn;
+      document.getElementById('nameInput').value = s.name;
+      document.getElementById('sexInput').value = s.sex;
+      document.getElementById('gradeInput').value = s.grade;
+      document.getElementById('sectionInput').value = s.section;
+      document.getElementById('studentModal').style.display = 'flex';
+    }
+
+    // Save student (add or edit)
+    function saveStudent() {
+      const lrn = document.getElementById('lrnInput').value.trim();
+      const name = document.getElementById('nameInput').value.trim();
+      const sex = document.getElementById('sexInput').value;
+      const grade = document.getElementById('gradeInput').value;
+      const section = document.getElementById('sectionInput').value.trim();
+      
+      // Validation
+      if (!lrn || lrn.length !== 12 || !/^\d+$/.test(lrn)) {
+        alert('❌ Please enter a valid 12-digit LRN');
+        return;
+      }
+      
+      if (!name) {
+        alert('❌ Please enter student name');
+        return;
+      }
+      
+      if (!section) {
+        alert('❌ Please enter section');
+        return;
+      }
+      
+      // Check for duplicate LRN (except when editing same student)
+      const duplicate = students.find((s, i) => s.lrn === lrn && i !== editingIndex);
+      if (duplicate) {
+        alert('❌ LRN already exists!');
+        return;
+      }
+      
+      const studentData = { lrn, name, sex, grade, section };
+      
+      if (editingIndex === -1) {
+        // Add new
+        students.push(studentData);
+      } else {
+        // Update existing
+        students[editingIndex] = studentData;
+      }
+      
+      // Save to localStorage
+      localStorage.setItem('asls_students_editor', JSON.stringify(students));
+      
+      // Refresh
+      filteredStudents = [...students];
+      filterStudents(); // Re-apply filters
+      updateStats();
+      closeModal();
+      
+      alert(`✅ Student ${editingIndex === -1 ? 'added' : 'updated'} successfully!`);
+    }
+
+    // Delete student
+    function deleteStudent(index) {
+      if (confirm(`Are you sure you want to delete ${students[index].name}?`)) {
+        students.splice(index, 1);
+        localStorage.setItem('asls_students_editor', JSON.stringify(students));
+        filteredStudents = [...students];
+        filterStudents();
+        updateStats();
+        alert('✅ Student deleted successfully!');
+      }
+    }
+
+    // Close modal
+    function closeModal() {
+      document.getElementById('studentModal').style.display = 'none';
+    }
+
+    // Export as students.js file
+    function exportData() {
+      // Format the data as a JavaScript file
+      let jsContent = '// ============================================\n';
+      jsContent += '// ASLS STUDENT DATABASE\n';
+      jsContent += '// Generated by Student Editor\n';
+      jsContent += '// Last updated: ' + new Date().toLocaleString() + '\n';
+      jsContent += '// ============================================\n\n';
+      jsContent += 'const STUDENTS_DATA = [\n';
+      
+      students.forEach((s, i) => {
+        const comma = i < students.length - 1 ? ',' : '';
+        jsContent += `    { lrn: '${s.lrn}', name: '${s.name}', sex: '${s.sex}', grade: '${s.grade}', section: '${s.section}' }${comma}\n`;
+      });
+      
+      jsContent += '];\n';
+      
+      // Show in preview
+      const exportDiv = document.getElementById('exportData');
+      exportDiv.style.display = 'block';
+      exportDiv.textContent = jsContent;
+      
+      // Create download
+      const blob = new Blob([jsContent], { type: 'text/javascript' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'students.js';
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      alert('✅ students.js file downloaded! Replace your existing file with this one.');
+    }
+
+    // Import from existing students.js (paste here)
+    function importData() {
+      const exportDiv = document.getElementById('exportData');
+      exportDiv.style.display = 'block';
+      exportDiv.textContent = 'Paste your existing students.js content here and I\'ll parse it...\n\n' +
+        'Example format:\n' +
+        'const STUDENTS_DATA = [\n' +
+        '  { lrn: \'400561180001\', name: \'NAME\', sex: \'MALE\', grade: \'7\', section: \'SECTION\' }\n' +
+        '];';
+      
+      // Make it editable
+      exportDiv.contentEditable = true;
+      exportDiv.style.backgroundColor = '#fff';
+      exportDiv.style.color = '#333';
+      
+      // Add parse button
+      const parseBtn = document.createElement('button');
+      parseBtn.className = 'btn btn-success';
+      parseBtn.textContent = 'Parse Imported Data';
+      parseBtn.onclick = parseImportedData;
+      exportDiv.parentNode.insertBefore(parseBtn, exportDiv.nextSibling);
+    }
+
+    // Parse imported data
+    function parseImportedData() {
+      const content = document.getElementById('exportData').textContent;
+      
+      try {
+        // Extract the array part
+        const match = content.match(/\[\s*\{.*\}\s*\]/s);
+        if (!match) throw new Error('Could not find student data array');
+        
+        // Use Function constructor to safely evaluate
+        const data = new Function(`return ${match[0]}`)();
+        
+        if (Array.isArray(data)) {
+          students = data;
+          localStorage.setItem('asls_students_editor', JSON.stringify(students));
+          filteredStudents = [...students];
+          filterStudents();
+          updateStats();
+          alert(`✅ Imported ${students.length} students successfully!`);
+          
+          document.getElementById('exportData').contentEditable = false;
+          document.getElementById('exportData').style.display = 'none';
+        }
+      } catch (e) {
+        alert('❌ Error parsing data: ' + e.message);
+      }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('studentModal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    };
+
+    // Initialize
+    initializeData();
+
+    // Expose functions globally
+    window.showAddModal = showAddModal;
+    window.editStudent = editStudent;
+    window.deleteStudent = deleteStudent;
+    window.saveStudent = saveStudent;
+    window.closeModal = closeModal;
+    window.filterStudents = filterStudents;
+    window.goToPage = goToPage;
+    window.exportData = exportData;
+    window.importData = importData;
+    window.parseImportedData = parseImportedData;
+  </script>
+</body>
+</html>
