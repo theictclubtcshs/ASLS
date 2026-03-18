@@ -898,7 +898,7 @@
     function handleCapture() {
       if (isProcessing || isFreshStarting) return;
       
-      const lrn = lrnInput.value.trim();
+      const lrn = lrnInput.value.replace(/\D/g, '');
       if (!lrn || lrn.length !== 12 || !/^\d+$/.test(lrn)) {
         showError('Enter valid 12-digit LRN');
         lrnInput.classList.add('error');
