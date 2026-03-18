@@ -65,12 +65,19 @@
     }
 
     .left-panel .mode-message {
-      font-size: 2rem;
-      font-weight: 600;
+      font-size: 2.2rem;
+      font-weight: 700;
       margin-bottom: 20px;
       text-transform: uppercase;
       letter-spacing: 2px;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      animation: pulseText 2s infinite;
+    }
+
+    @keyframes pulseText {
+      0% { opacity: 1; }
+      50% { opacity: 0.9; }
+      100% { opacity: 1; }
     }
 
     .left-panel p {
@@ -182,6 +189,12 @@
 
     .lrn-input input.error {
       border-color: #e74c3c;
+    }
+
+    .lrn-input input:disabled {
+      background: #e0e0e0;
+      cursor: not-allowed;
+      opacity: 0.7;
     }
 
     .lrn-input button {
@@ -325,8 +338,8 @@
       color: #e74c3c;
     }
 
-    /* Auto Fresh Start notification */
-    .auto-fs-notification {
+    /* Fresh Start notification */
+    .fs-notification {
       position: fixed;
       top: 20px;
       left: 50%;
@@ -342,6 +355,10 @@
       animation: slideDown 0.5s ease-out;
     }
 
+    .fs-notification.warning {
+      background: #e67e22;
+    }
+
     @keyframes slideDown {
       from { top: -100px; opacity: 0; }
       to { top: 20px; opacity: 1; }
@@ -350,6 +367,23 @@
     @keyframes fadeOut {
       from { opacity: 1; }
       to { opacity: 0; }
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 5px;
+      margin-top: 15px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: white;
+      width: 0%;
+      transition: width 0.3s;
     }
 
     @media (max-width: 768px) {
@@ -1384,6 +1418,7 @@
     let currentStream = null;
     let capturedImage = null;
     let isProcessing = false;
+    let isFreshStarting = false;
     
     const lrnInput = document.getElementById('lrn');
     const captureBtn = document.getElementById('captureBtn');
@@ -1407,69 +1442,263 @@
     // AUTO FRESH START DETECTION
     // ============================================
     
-    // Check log count and notify main window if needed
-    function checkLogCountAndNotify() {
+    // Check log count and trigger Fresh Start if needed
+    function checkLogCountAndTriggerFreshStart() {
       try {
         const logs = JSON.parse(localStorage.getItem('asls_master') || '[]');
         const logCount = logs.length;
         
         console.log(`Current log count: ${logCount}/40`);
         
-        // If 40 or more logs, notify main window
-        if (logCount >= 40) {
-          console.log('🎯 Reached 40 logs! Notifying main window...');
-          
-          // Try to find the main window (opener)
-          if (window.opener && !window.opener.closed) {
-            // Send message to main window
-            window.opener.postMessage({ type: 'AUTO_FRESH_START' }, '*');
-            
-            // Show notification in this window
-            showAutoFreshStartNotification();
-            
-            // Close this camera window after a short delay
-            setTimeout(() => {
-              window.close();
-            }, 3000);
-          }
+        // If 40 or more logs, trigger Fresh Start
+        if (logCount >= 40 && !isFreshStarting) {
+          console.log('🎯 Reached 40 logs! Triggering Fresh Start...');
+          triggerFreshStart(logs);
         }
       } catch (e) {
         console.error('Error checking log count:', e);
       }
     }
     
-    // Show notification in camera window
-    function showAutoFreshStartNotification() {
+    // Trigger Fresh Start in this window
+    function triggerFreshStart(logs) {
+      isFreshStarting = true;
+      
+      // Disable all inputs
+      lrnInput.disabled = true;
+      captureBtn.disabled = true;
+      if (actionBtn) actionBtn.disabled = true;
+      
+      // Show Fresh Start notification with progress
       const notification = document.createElement('div');
-      notification.className = 'auto-fs-notification';
-      notification.innerHTML = '🔄 System reached 40 logs! Auto-saving... Closing camera.';
+      notification.className = 'fs-notification warning';
+      notification.innerHTML = `
+        <div>🔄 SYSTEM REACHED 40 LOGS!</div>
+        <div style="font-size: 1rem; margin-top: 10px;">Auto-saving to Google Drive...</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="fsProgress"></div>
+        </div>
+        <div style="font-size: 0.9rem; margin-top: 10px;" id="fsStatus">Preparing...</div>
+      `;
       document.body.appendChild(notification);
       
-      setTimeout(() => {
-        notification.style.animation = 'fadeOut 0.5s ease-out';
-        setTimeout(() => {
-          document.body.removeChild(notification);
-        }, 500);
-      }, 2500);
+      const progressFill = document.getElementById('fsProgress');
+      const fsStatus = document.getElementById('fsStatus');
+      
+      // Step 1: Upload to Drive
+      fsStatus.textContent = 'Uploading to Google Drive...';
+      progressFill.style.width = '30%';
+      
+      // Use the same upload function from main menu
+      uploadLogsToDrive(logs)
+        .then(() => {
+          fsStatus.textContent = 'Upload complete! Clearing local data...';
+          progressFill.style.width = '70%';
+          
+          // Step 2: Clear local storage
+          clearAllLogs();
+          
+          fsStatus.textContent = 'Fresh Start complete! Resuming in 3 seconds...';
+          progressFill.style.width = '100%';
+          
+          // Step 3: Re-enable inputs after delay
+          setTimeout(() => {
+            // Remove notification
+            notification.style.animation = 'fadeOut 0.5s ease-out';
+            setTimeout(() => {
+              document.body.removeChild(notification);
+              
+              // Re-enable inputs
+              isFreshStarting = false;
+              lrnInput.disabled = false;
+              captureBtn.disabled = false;
+              lrnInput.focus();
+              
+              // Update stats
+              updateStats();
+              
+            }, 500);
+          }, 3000);
+        })
+        .catch(error => {
+          console.error('Fresh Start upload error:', error);
+          fsStatus.textContent = 'Upload failed - continuing anyway...';
+          progressFill.style.width = '100%';
+          progressFill.style.background = '#e74c3c';
+          
+          // Still clear and reset
+          clearAllLogs();
+          
+          setTimeout(() => {
+            notification.style.animation = 'fadeOut 0.5s ease-out';
+            setTimeout(() => {
+              document.body.removeChild(notification);
+              isFreshStarting = false;
+              lrnInput.disabled = false;
+              captureBtn.disabled = false;
+              lrnInput.focus();
+              updateStats();
+            }, 500);
+          }, 3000);
+        });
     }
     
-    // Listen for messages from main window
-    window.addEventListener('message', function(event) {
-      if (event.data && event.data.type === 'CLOSE_CAMERA') {
-        console.log('Received close command from main window');
+    // Upload logs to Drive (simplified version)
+    function uploadLogsToDrive(logs) {
+      return new Promise((resolve, reject) => {
+        const APPS_SCRIPT_URL = localStorage.getItem('asls_script_url') || 
+          'https://script.google.com/macros/s/AKfycbxYJvrOY7VuFSI0zozHPMWojzr3WfD-fom7zn9CG4lyQfLNSdXDnHXhNyZqUvHi1fiAPw/exec';
         
-        // Show notification
-        const notification = document.createElement('div');
-        notification.className = 'auto-fs-notification';
-        notification.innerHTML = '🔄 System performing Fresh Start... Closing camera.';
-        document.body.appendChild(notification);
+        if (!APPS_SCRIPT_URL || logs.length === 0) {
+          resolve(0);
+          return;
+        }
         
-        // Close after a moment
+        // Generate filename
+        const now = new Date();
+        const filename = `ASLS_Backup_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}.html`;
+        
+        // Generate HTML content
+        const htmlContent = generateLogsHTML(logs);
+        
+        // Create iframe and form
+        const iframe = document.createElement('iframe');
+        iframe.name = 'fs_upload_iframe';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = APPS_SCRIPT_URL;
+        form.target = 'fs_upload_iframe';
+        form.style.display = 'none';
+        
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'data';
+        input.value = JSON.stringify({
+          filename: filename,
+          content: htmlContent,
+          folderName: 'AttendanceASLS'
+        });
+        
+        form.appendChild(input);
+        document.body.appendChild(form);
+        
+        let completed = false;
+        
+        iframe.onload = function() {
+          if (!completed) {
+            completed = true;
+            setTimeout(() => {
+              document.body.removeChild(form);
+              document.body.removeChild(iframe);
+            }, 1000);
+            resolve(logs.length);
+          }
+        };
+        
+        iframe.onerror = function() {
+          if (!completed) {
+            completed = true;
+            document.body.removeChild(form);
+            document.body.removeChild(iframe);
+            reject(new Error('Upload failed'));
+          }
+        };
+        
         setTimeout(() => {
-          window.close();
-        }, 1500);
-      }
-    });
+          if (!completed) {
+            completed = true;
+            document.body.removeChild(form);
+            document.body.removeChild(iframe);
+            resolve(logs.length);
+          }
+        }, 8000);
+        
+        form.submit();
+      });
+    }
+    
+    // Generate HTML file from logs
+    function generateLogsHTML(logs) {
+      const now = new Date();
+      
+      let html = `<!DOCTYPE html>
+<html>
+<head>
+  <title>ASLS Logs Backup - ${now.toLocaleDateString()}</title>
+  <style>
+    body { font-family: Arial; margin: 30px; background: #f5f5f5; }
+    h1 { color: #186E00; border-bottom: 3px solid #186E00; padding-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+    th { background: #186E00; color: white; padding: 12px; text-align: left; }
+    td { padding: 12px; border-bottom: 1px solid #ddd; }
+    img { width: 100px; height: 100px; object-fit: cover; border-radius: 5px; border: 2px solid #186E00; }
+    .login { background: #d4edda; color: #155724; padding: 5px 10px; border-radius: 20px; }
+    .logout { background: #f8d7da; color: #721c24; padding: 5px 10px; border-radius: 20px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0; }
+    .stat-card { background: white; padding: 20px; border-radius: 10px; text-align: center; }
+    .stat-value { font-size: 2rem; font-weight: bold; color: #186E00; }
+  </style>
+</head>
+<body>
+  <h1>📊 ASLS Logs Backup</h1>
+  <p>Generated: ${now.toLocaleString()}</p>
+  <p><strong>Reason:</strong> Auto Fresh Start - 40 Logs Reached</p>
+  
+  <div class="stats">
+    <div class="stat-card"><div class="stat-value">${logs.length}</div><div>Total Logs</div></div>
+    <div class="stat-card"><div class="stat-value">${new Set(logs.map(l => l.lrn)).size}</div><div>Unique Students</div></div>
+    <div class="stat-card"><div class="stat-value">${logs.filter(l => l.action === 'Log in').length}</div><div>Logins</div></div>
+    <div class="stat-card"><div class="stat-value">${logs.filter(l => l.action === 'Log out').length}</div><div>Logouts</div></div>
+  </div>
+  
+  <table>
+    <tr>
+      <th>Date/Time</th>
+      <th>Photo</th>
+      <th>Name</th>
+      <th>LRN</th>
+      <th>Sex</th>
+      <th>Grade</th>
+      <th>Section</th>
+      <th>Action</th>
+    </tr>`;
+      
+      logs.forEach(log => {
+        const d = new Date(log.timestamp);
+        html += `<tr>
+          <td>${d.toLocaleString()}</td>
+          <td>${log.photo && log.photo !== 'no-photo' ? `<img src="${log.photo}">` : 'No photo'}</td>
+          <td>${log.name}</td>
+          <td>${log.lrn}</td>
+          <td>${log.sex || ''}</td>
+          <td>${log.grade || ''}</td>
+          <td>${log.section || ''}</td>
+          <td><span class="${log.action === 'Log in' ? 'login' : 'logout'}">${log.action}</span></td>
+        </tr>`;
+      });
+      
+      html += `</table>
+<p style="margin-top: 30px; color: #666;">Generated by ASLS Auto Fresh Start</p>
+</body>
+</html>`;
+      
+      return html;
+    }
+    
+    // Clear all logs from localStorage
+    function clearAllLogs() {
+      localStorage.removeItem('asls_master');
+      
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('asls_')) {
+          localStorage.removeItem(key);
+        }
+      });
+    }
     
     // ============================================
     // UPDATE UI BASED ON ACTION
@@ -1519,6 +1748,8 @@
     
     // INSTANT save to localStorage
     function saveLogLocally(logEntry) {
+      if (isFreshStarting) return false;
+      
       const start = performance.now();
       
       // Master log (all entries)
@@ -1537,7 +1768,7 @@
       updateStats();
       
       // Check log count after saving
-      checkLogCountAndNotify();
+      checkLogCountAndTriggerFreshStart();
       
       const end = performance.now();
       console.log(`✅ Saved in ${(end - start).toFixed(2)}ms`);
@@ -1589,7 +1820,7 @@
     }
     
     function handleCapture() {
-      if (isProcessing) return;
+      if (isProcessing || isFreshStarting) return;
       
       const lrn = lrnInput.value.trim();
       if (!lrn || lrn.length !== 12 || !/^\d+$/.test(lrn)) {
@@ -1628,12 +1859,14 @@
       
       // Auto-apply after 200ms
       setTimeout(() => {
-        if (!isProcessing) return;
+        if (!isProcessing || isFreshStarting) return;
         applyLog();
       }, 200);
     }
     
     async function applyLog() {
+      if (isFreshStarting) return;
+      
       const lrn = lrnInput.value.trim();
       const student = findStudent(lrn);
       
@@ -1674,8 +1907,10 @@
     
     function resetCamera() {
       isProcessing = false;
-      captureBtn.disabled = false;
-      lrnInput.disabled = false;
+      if (!isFreshStarting) {
+        captureBtn.disabled = false;
+        lrnInput.disabled = false;
+      }
       actionBtn.disabled = true;
       previewArea.style.display = 'none';
       capturedImage = null;
@@ -1707,7 +1942,7 @@
       // Only allow numbers
       this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
       
-      if (this.value.length === 12 && !isProcessing) {
+      if (this.value.length === 12 && !isProcessing && !isFreshStarting) {
         handleCapture();
       }
     });
@@ -1747,7 +1982,10 @@
       setInterval(updateStats, 1000);
       
       // Check log count on load
-      checkLogCountAndNotify();
+      checkLogCountAndTriggerFreshStart();
+      
+      // Check every 30 seconds
+      setInterval(checkLogCountAndTriggerFreshStart, 30000);
     };
     
     window.onbeforeunload = function() {
