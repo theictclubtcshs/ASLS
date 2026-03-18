@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ASLS - VERSION 2.0 2026</title>
   <style>
-    /* COMPACT, FAST-LOADING CSS */
+    /* COMPACT, FAST-LOADING CSS - FULLY RESTORED */
     * {
       margin: 0;
       padding: 0;
@@ -54,7 +54,7 @@
     }
 
     .left-panel.logout-bg {
-      background: #c0392b !important; /* Darker Red for better contrast */
+      background: #c0392b !important; /* Darker Red */
     }
 
     .left-panel h1 {
@@ -224,6 +224,7 @@
       display: flex;
       gap: 10px;
       align-items: center;
+      margin-top: 10px;
     }
 
     .preview img {
@@ -305,7 +306,7 @@
       color: white;
     }
 
-    /* Overlays - Minimal for speed */
+    /* Overlays */
     .overlay {
       position: fixed;
       top: 0;
@@ -481,30 +482,35 @@
     </div>
   </div>
 
+  <!-- Load student database -->
   <script src="students.js"></script>
 
-  <script src="students.js"></script>
-
-<script>
+  <script>
+    // ============================================
+    // STUDENT DATABASE SETUP
+    // ============================================
     
-    // ✅ SAFE studentMap initialization (FIXED)
     let studentMap = new Map();
 
     function initializeStudentMap() {
-      if (typeof STUDENTS_DATA !== "undefined") {
+      if (typeof STUDENTS_DATA !== "undefined" && STUDENTS_DATA.length > 0) {
         studentMap.clear();
         STUDENTS_DATA.forEach(s => studentMap.set(String(s.lrn), s));
-        console.log("✅ studentMap loaded:", studentMap.size);
+        console.log(`✅ Loaded ${studentMap.size} students`);
+        document.getElementById('responseTime').textContent = `${studentMap.size} students`;
       } else {
         console.error("❌ STUDENTS_DATA not loaded");
+        document.getElementById('responseTime').textContent = 'No data';
       }
     }
 
-    // Run immediately AND after load (double safety)
+    // Initialize immediately
     initializeStudentMap();
-    window.addEventListener("load", initializeStudentMap);
-
+    
+    // ============================================
     // DOM Elements
+    // ============================================
+    
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -523,13 +529,86 @@
     const modeBadge = document.getElementById('modeBadge');
     const modeMessage = document.getElementById('modeMessage');
     const leftPanel = document.getElementById('leftPanel');
+    const todayCount = document.getElementById('todayCount');
+    const cacheSize = document.getElementById('cacheSize');
     
     const successOverlay = document.getElementById('successOverlay');
     const errorOverlay = document.getElementById('errorOverlay');
     
+    // Get action from URL
     const urlParams = new URLSearchParams(window.location.search);
     let action = urlParams.get('action') || 'Log in';
-
+    
+    // ============================================
+    // UPDATE UI BASED ON ACTION
+    // ============================================
+    
+    function updateActionUI() {
+      actionBtn.textContent = action;
+      modeBadge.textContent = action;
+      
+      if (action === 'Log in') {
+        modeMessage.textContent = 'YOU ARE LOGGING IN';
+        actionBtn.className = 'action-btn login';
+        modeBadge.className = 'mode-badge login';
+        leftPanel.classList.add('login-bg');
+        leftPanel.classList.remove('logout-bg');
+      } else {
+        modeMessage.textContent = 'YOU ARE LOGGING OUT';
+        actionBtn.className = 'action-btn logout';
+        modeBadge.className = 'mode-badge logout';
+        leftPanel.classList.add('logout-bg');
+        leftPanel.classList.remove('login-bg');
+      }
+    }
+    
+    // ============================================
+    // LOCAL STORAGE FUNCTIONS
+    // ============================================
+    
+    function getTodayPath() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const period = now.getHours() >= 12 ? 'PM' : 'AM';
+      return `${year}-${month}-${day}-${period}`;
+    }
+    
+    function saveLogLocally(logEntry) {
+      if (isFreshStarting) return false;
+      
+      // Master log
+      let masterLog = JSON.parse(localStorage.getItem('asls_master') || '[]');
+      masterLog.push(logEntry);
+      if (masterLog.length > 10000) masterLog = masterLog.slice(-10000);
+      localStorage.setItem('asls_master', JSON.stringify(masterLog));
+      
+      // Daily log
+      const today = getTodayPath();
+      let dailyLog = JSON.parse(localStorage.getItem(`asls_${today}`) || '[]');
+      dailyLog.push(logEntry);
+      localStorage.setItem(`asls_${today}`, JSON.stringify(dailyLog));
+      
+      // Update stats
+      updateStats();
+      
+      return true;
+    }
+    
+    function updateStats() {
+      const master = JSON.parse(localStorage.getItem('asls_master') || '[]');
+      const today = getTodayPath();
+      const daily = JSON.parse(localStorage.getItem(`asls_${today}`) || '[]');
+      
+      if (todayCount) todayCount.textContent = daily.length;
+      if (cacheSize) cacheSize.textContent = master.length + ' logs';
+    }
+    
+    // ============================================
+    // STUDENT LOOKUP
+    // ============================================
+    
     function findStudent(lrn) {
       if (!studentMap || studentMap.size === 0) {
         console.error("studentMap not ready");
@@ -537,7 +616,38 @@
       }
       return studentMap.get(String(lrn));
     }
-
+    
+    // ============================================
+    // CAMERA FUNCTIONS
+    // ============================================
+    
+    async function initCamera() {
+      try {
+        statusText.textContent = 'Requesting camera...';
+        
+        if (currentStream) {
+          currentStream.getTracks().forEach(t => t.stop());
+        }
+        
+        currentStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: 'user' },
+          audio: false 
+        });
+        
+        video.srcObject = currentStream;
+        await video.play();
+        
+        statusDot.className = 'status-dot ready';
+        statusText.textContent = 'Ready';
+        captureBtn.disabled = false;
+        
+      } catch (error) {
+        statusText.textContent = 'Camera error';
+        statusDot.className = 'status-dot';
+        captureBtn.disabled = true;
+      }
+    }
+    
     function handleCapture() {
       if (isProcessing || isFreshStarting) return;
       
@@ -545,41 +655,48 @@
 
       if (!lrn || lrn.length !== 12) {
         showError('Enter valid 12-digit LRN');
+        lrnInput.classList.add('error');
+        setTimeout(() => lrnInput.classList.remove('error'), 1500);
         return;
       }
       
       const student = findStudent(lrn);
       if (!student) {
         showError('Student not found');
+        lrnInput.classList.add('error');
+        setTimeout(() => lrnInput.classList.remove('error'), 1500);
         return;
       }
       
       captureImage();
     }
-
+    
     function captureImage() {
       isProcessing = true;
       captureBtn.disabled = true;
       lrnInput.disabled = true;
 
+      // Ensure video dimensions are available
+      if (video.videoWidth === 0) {
+        setTimeout(captureImage, 100);
+        return;
+      }
+
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       capturedImage = canvas.toDataURL('image/jpeg', 0.6);
 
       previewImage.src = capturedImage;
       previewArea.style.display = 'flex';
-
-      setTimeout(() => applyLog(), 200);
+      actionBtn.disabled = false;
     }
-
+    
     function applyLog() {
       if (isFreshStarting) return;
       
-      // ✅ FIXED LRN (IMPORTANT)
       const lrn = lrnInput.value.replace(/\D/g, '');
-
       const student = findStudent(lrn);
       
       if (!student) {
@@ -588,62 +705,96 @@
         return;
       }
 
+      const now = new Date();
       const logEntry = {
-        timestamp: new Date().toISOString(),
-        lrn,
+        timestamp: now.toISOString(),
+        time: now.toLocaleTimeString(),
+        date: now.toLocaleDateString(),
+        period: now.getHours() >= 12 ? 'PM' : 'AM',
+        lrn: lrn,
         name: student.name,
-        action
+        sex: student.sex || 'N/A',
+        grade: student.grade || 'N/A',
+        section: student.section || 'N/A',
+        action: action,
+        photo: capturedImage || 'no-photo',
+        status: 'verified'
       };
 
-      console.log("✅ LOGGED:", logEntry);
-
+      saveLogLocally(logEntry);
       showSuccess(`${student.name} ${action} successful!`);
 
       resetCamera();
       lrnInput.value = '';
       lrnInput.focus();
     }
-
+    
     function resetCamera() {
       isProcessing = false;
-      captureBtn.disabled = false;
-      lrnInput.disabled = false;
+      if (!isFreshStarting) {
+        captureBtn.disabled = false;
+        lrnInput.disabled = false;
+      }
+      actionBtn.disabled = true;
       previewArea.style.display = 'none';
+      capturedImage = null;
     }
-
+    
     function showSuccess(msg) {
       document.getElementById('successMessage').textContent = msg;
       successOverlay.style.display = 'flex';
       setTimeout(() => successOverlay.style.display = 'none', 1500);
     }
-
+    
     function showError(msg) {
       document.getElementById('errorMessage').textContent = msg;
       errorOverlay.style.display = 'flex';
       setTimeout(() => errorOverlay.style.display = 'none', 1500);
     }
-
-    async function initCamera() {
-      try {
-        currentStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = currentStream;
-        await video.play();
-
-        statusDot.classList.add('ready');
-        statusText.textContent = 'Ready';
-      } catch {
-        statusText.textContent = 'Camera error';
+    
+    // ============================================
+    // INPUT HANDLERS
+    // ============================================
+    
+    lrnInput.addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
+      
+      if (this.value.length === 12 && !isProcessing && !isFreshStarting) {
+        handleCapture();
       }
-    }
-
+    });
+    
+    lrnInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleCapture();
+      }
+    });
+    
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    
     window.onload = function() {
+      updateActionUI();
       initCamera();
+      updateStats();
       lrnInput.focus();
+      
+      // Update stats every second
+      setInterval(updateStats, 1000);
     };
-
+    
+    window.onbeforeunload = function() {
+      if (currentStream) {
+        currentStream.getTracks().forEach(t => t.stop());
+      }
+    };
+    
+    // Expose functions globally
     window.handleCapture = handleCapture;
     window.applyLog = applyLog;
-
-</script>
+    
+  </script>
 </body>
 </html>
