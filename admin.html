@@ -175,7 +175,6 @@
       display: block;
     }
     
-    /* Rest of your existing styles */
     .container {
       max-width: 1400px;
       margin: 0 auto;
@@ -209,7 +208,7 @@
       flex-wrap: wrap;
     }
     
-    .drive-btn {
+    .upload-btn {
       background: #4285F4;
       color: white;
       border: none;
@@ -219,9 +218,12 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
     
-    .drive-btn:hover {
+    .upload-btn:hover {
       background: #3367D6;
       transform: translateY(-3px);
     }
@@ -297,46 +299,32 @@
       text-transform: uppercase;
     }
     
-    .drive-section {
-      background: #4285F4;
-      color: white;
+    .action-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       padding: 30px;
       border-radius: 20px;
       margin-bottom: 30px;
-    }
-    
-    .drive-input-group {
       display: flex;
-      gap: 15px;
-      margin: 20px 0;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
     }
     
-    .drive-input {
-      flex: 1;
-      min-width: 400px;
-      padding: 15px;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
+    .action-section h2 {
+      font-size: 1.8rem;
+      margin-bottom: 5px;
     }
     
-    .test-btn {
-      background: white;
-      color: #4285F4;
-      border: none;
-      padding: 15px 30px;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
+    .action-section p {
+      opacity: 0.9;
     }
     
     .status-box {
-      background: rgba(255,255,255,0.1);
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 15px;
+      background: rgba(255,255,255,0.2);
+      padding: 15px 25px;
+      border-radius: 50px;
+      font-size: 1rem;
+      backdrop-filter: blur(5px);
     }
     
     .search-section {
@@ -628,7 +616,6 @@
       border-color: #186E00;
     }
 
-    /* Student data section */
     .student-section {
       background: #f8f9fa;
       padding: 20px;
@@ -656,6 +643,11 @@
       padding: 5px 15px;
       border-radius: 20px;
       font-size: 0.9rem;
+    }
+
+    .upload-status {
+      font-size: 1rem;
+      font-weight: 500;
     }
   </style>
 </head>
@@ -697,17 +689,15 @@
           <p>Manage student logs and database</p>
         </div>
         <div class="btn-group">
-          <!-- NEW: Edit Student Data Button -->
           <button class="sheet-btn" onclick="openStudentSheet()">
             📗 EDIT STUDENT DATA
           </button>
-          <button class="drive-btn" onclick="uploadToDrive()" id="driveBtn">☁️ UPLOAD TO DRIVE</button>
           <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
           <button class="delete-mode-btn" id="deleteModeBtn" onclick="toggleDeleteMode()">🗑️ Delete Mode</button>
         </div>
       </div>
 
-      <!-- NEW: Student Database Info Section -->
+      <!-- Student Database Info Section -->
       <div class="student-section">
         <div class="student-info">
           <span style="font-size: 2rem;">📗</span>
@@ -719,6 +709,20 @@
         <div class="sync-status" id="syncStatus">
           <span>🔄 Click button to edit</span>
         </div>
+      </div>
+      
+      <!-- NEW: Simplified Upload Section -->
+      <div class="action-section">
+        <div>
+          <h2>☁️ Google Drive Backup</h2>
+          <p>Upload all logs to Google Drive with one click</p>
+          <div class="upload-status" id="uploadStatus">
+            📊 Ready to upload <span id="uploadLogCount">0</span> logs
+          </div>
+        </div>
+        <button class="upload-btn" onclick="uploadToDrive()" id="uploadBtn">
+          ☁️ UPLOAD LOGS TO DRIVE
+        </button>
       </div>
       
       <div class="stats-grid" id="stats">
@@ -737,20 +741,6 @@
         <div class="stat-card">
           <div class="stat-label">Unique Students</div>
           <div class="stat-value" id="uniqueStudents">0</div>
-        </div>
-      </div>
-      
-      <div class="drive-section">
-        <h2>☁️ Upload to Google Drive</h2>
-        <div class="drive-input-group">
-          <input type="text" id="scriptUrl" class="drive-input" 
-                 placeholder="Paste your Apps Script URL here"
-                 value="https://script.google.com/macros/s/AKfycbxYJvrOY7VuFSI0zozHPMWojzr3WfD-fom7zn9CG4lyQfLNSdXDnHXhNyZqUvHi1fiAPw/exec">
-          <button class="test-btn" onclick="testConnection()">✓ Test</button>
-          <button class="drive-btn" onclick="uploadToDrive()">☁️ UPLOAD TO DRIVE</button>
-        </div>
-        <div class="status-box" id="driveStatus">
-          ⚡ Ready to upload. Click Test first, then Upload.
         </div>
       </div>
       
@@ -827,16 +817,15 @@
     // ============================================
     
     // Your Google Sheet URL - REPLACE WITH YOUR ACTUAL SHEET URL
-    const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1YEZR6BwtTHdfjsNguA-fo0d5cnLEglUJo2BnXgNCPvU/edit?usp=sharing';
+    const GOOGLE_SHEET_URL = 'YOUR_GOOGLE_SHEET_URL_HERE';
     
-    // Your Apps Script Web App URL
+    // Your Apps Script Web App URL (hardcoded - no input field needed)
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYJvrOY7VuFSI0zozHPMWojzr3WfD-fom7zn9CG4lyQfLNSdXDnHXhNyZqUvHi1fiAPw/exec';
     
     // ============================================
     // PASSWORD PROTECTION
     // ============================================
     
-    // Set your admin password here
     const ADMIN_PASSWORD = 'ictwatchyourback.';
     
     const passwordInput = document.getElementById('passwordInput');
@@ -846,7 +835,6 @@
     const passwordError = document.getElementById('passwordError');
     const strengthBar = document.getElementById('strengthBar');
     
-    // Force focus on password input when page loads
     window.addEventListener('load', function() {
       setTimeout(() => {
         passwordInput.focus();
@@ -890,7 +878,6 @@
       }
     }
     
-    // Add shake animation
     const style = document.createElement('style');
     style.textContent = `
       @keyframes shake {
@@ -902,7 +889,7 @@
     document.head.appendChild(style);
     
     // ============================================
-    // NEW FUNCTION: Open Google Sheet
+    // OPEN GOOGLE SHEET
     // ============================================
     
     function openStudentSheet() {
@@ -911,10 +898,8 @@
         return;
       }
       
-      // Open the Google Sheet in a new tab
       window.open(GOOGLE_SHEET_URL, '_blank');
       
-      // Update status
       document.getElementById('syncStatus').innerHTML = 
         '<span style="color: #0F9D58;">✅ Sheet opened - Make your edits then sync to GitHub</span>';
     }
@@ -930,7 +915,6 @@
     let deleteMode = false;
     let selectedIndices = new Set();
     
-    // Load data from localStorage
     function loadData() {
       try {
         allLogs = JSON.parse(localStorage.getItem('asls_master') || '[]');
@@ -939,17 +923,14 @@
         filterLogs();
         exitDeleteMode();
         
-        // Load saved URL
-        const savedUrl = localStorage.getItem('asls_script_url');
-        if (savedUrl) {
-          document.getElementById('scriptUrl').value = savedUrl;
-        }
+        // Update upload status with log count
+        document.getElementById('uploadLogCount').textContent = allLogs.length;
+        
       } catch (e) {
         console.error('Error loading logs:', e);
       }
     }
     
-    // Update statistics
     function updateStats() {
       const total = allLogs.length;
       const today = new Date().toISOString().split('T')[0];
@@ -961,9 +942,9 @@
       document.getElementById('todayLogs').textContent = todayLogs;
       document.getElementById('storageUsed').textContent = size.toFixed(2) + ' MB';
       document.getElementById('uniqueStudents').textContent = uniqueStudents;
+      document.getElementById('uploadLogCount').textContent = total;
     }
     
-    // Filter logs
     function filterLogs() {
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
       const actionFilter = document.getElementById('actionFilter').value;
@@ -985,7 +966,6 @@
       if (deleteMode) updateSelectionUI();
     }
     
-    // Toggle delete mode
     function toggleDeleteMode() {
       deleteMode = !deleteMode;
       selectedIndices.clear();
@@ -1188,19 +1168,6 @@
       document.getElementById('photoModal').style.display = 'flex';
     }
     
-    function testConnection() {
-      const url = document.getElementById('scriptUrl').value.trim();
-      const status = document.getElementById('driveStatus');
-      
-      if (!url) {
-        status.innerHTML = '❌ Please enter a URL';
-        return;
-      }
-      
-      localStorage.setItem('asls_script_url', url);
-      status.innerHTML = '✅ URL saved! Ready to upload.';
-    }
-    
     function generateLogsHTML() {
       const now = new Date();
       
@@ -1268,31 +1235,31 @@
     }
     
     function uploadToDrive() {
-      const scriptUrl = document.getElementById('scriptUrl').value.trim();
-      
-      if (!scriptUrl) {
-        alert('Please test connection first');
-        return;
-      }
+      const uploadBtn = document.getElementById('uploadBtn');
+      const uploadStatus = document.getElementById('uploadStatus');
       
       if (allLogs.length === 0) {
         alert('No logs to upload');
         return;
       }
       
-      const status = document.getElementById('driveStatus');
-      status.innerHTML = '⏳ Generating HTML file...';
+      // Disable button during upload
+      uploadBtn.disabled = true;
+      uploadBtn.style.opacity = '0.5';
+      uploadBtn.innerHTML = '⏳ UPLOADING...';
+      
+      uploadStatus.innerHTML = '⏳ Generating HTML file...';
       
       const now = new Date();
       const filename = `ASLS_Logs_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}.html`;
       
       const htmlContent = generateLogsHTML();
       
-      status.innerHTML = '⏳ Uploading ' + allLogs.length + ' logs to Drive...';
+      uploadStatus.innerHTML = '⏳ Uploading ' + allLogs.length + ' logs to Drive...';
       
       const form = document.createElement('form');
       form.method = 'POST';
-      form.action = scriptUrl;
+      form.action = APPS_SCRIPT_URL;
       form.target = 'upload_iframe';
       form.style.display = 'none';
       
@@ -1314,16 +1281,22 @@
       document.body.appendChild(iframe);
       
       iframe.onload = function() {
-        status.innerHTML = `✅ Upload complete!<br>
-                           File: ${filename}<br>
-                           Logs: ${allLogs.length}<br>
-                           Folder: AttendanceASLS<br><br>
-                           <strong>Check your Google Drive now!</strong>`;
+        uploadStatus.innerHTML = `✅ Upload complete! File: ${filename}`;
+        uploadBtn.disabled = false;
+        uploadBtn.style.opacity = '1';
+        uploadBtn.innerHTML = '☁️ UPLOAD LOGS TO DRIVE';
         
         setTimeout(() => {
           document.body.removeChild(form);
           document.body.removeChild(iframe);
         }, 1000);
+      };
+      
+      iframe.onerror = function() {
+        uploadStatus.innerHTML = '❌ Upload failed. Please try again.';
+        uploadBtn.disabled = false;
+        uploadBtn.style.opacity = '1';
+        uploadBtn.innerHTML = '☁️ UPLOAD LOGS TO DRIVE';
       };
       
       form.submit();
