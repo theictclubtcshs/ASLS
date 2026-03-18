@@ -360,6 +360,27 @@
             }
         }
 
+        /* Auto Fresh Start animations */
+        @keyframes slideDown {
+            from {
+                top: -100px;
+                opacity: 0;
+            }
+            to {
+                top: 20px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
         @media (max-width: 480px) {
             .logo-container {
                 width: 100px;
@@ -523,7 +544,7 @@
             document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
         }
 
-        // Open login page
+        // Open login page with log count check
         let cameraWindow = null;
 
         function openLogin() {
@@ -531,9 +552,15 @@
         
             if (!cameraWindow || cameraWindow.closed) {
                 cameraWindow = window.open(url, 'ASLS_CAMERA', 'width=900,height=700');
+                
+                // Check log count after opening camera (with slight delay)
+                setTimeout(checkLogCountAndAutoFreshStart, 1000);
             } else {
                 cameraWindow.location.href = url;
                 cameraWindow.focus();
+                
+                // Check log count after focusing
+                setTimeout(checkLogCountAndAutoFreshStart, 1000);
             }
         }
         
@@ -542,15 +569,127 @@
         
             if (!cameraWindow || cameraWindow.closed) {
                 cameraWindow = window.open(url, 'ASLS_CAMERA', 'width=900,height=700');
+                
+                // Check log count after opening camera (with slight delay)
+                setTimeout(checkLogCountAndAutoFreshStart, 1000);
             } else {
                 cameraWindow.location.href = url;
                 cameraWindow.focus();
+                
+                // Check log count after focusing
+                setTimeout(checkLogCountAndAutoFreshStart, 1000);
             }
         }
 
         // Open Admin Panel
         function openAdminPanel() {
             window.open(ADMIN_PANEL_URL, '_blank');
+        }
+
+        // ============================================
+        // AUTO FRESH START AT 40 LOGS
+        // ============================================
+
+        // Check log count and auto Fresh Start if needed
+        function checkLogCountAndAutoFreshStart() {
+            try {
+                const logs = JSON.parse(localStorage.getItem('asls_master') || '[]');
+                const logCount = logs.length;
+                
+                console.log(`Current log count: ${logCount}/40`);
+                
+                // If exactly 40 logs, trigger auto Fresh Start
+                if (logCount >= 40) {
+                    console.log('🎯 Reached 40 logs! Auto-triggering Fresh Start...');
+                    autoFreshStart();
+                }
+            } catch (e) {
+                console.error('Error checking log count:', e);
+            }
+        }
+
+        // Auto Fresh Start function (no confirmation)
+        function autoFreshStart() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            // Show warning notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #186E00;
+                color: white;
+                padding: 20px 40px;
+                border-radius: 50px;
+                font-size: 1.2rem;
+                font-weight: bold;
+                z-index: 10000;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                animation: slideDown 0.5s ease-out;
+            `;
+            notification.innerHTML = '🔄 System reached 40 logs! Auto-saving to Google Drive...';
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'fadeOut 0.5s ease-out';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 3000);
+            
+            // Show loading overlay
+            loadingOverlay.style.display = 'flex';
+            
+            // Perform Fresh Start WITHOUT confirmation
+            performAutoFreshStart();
+        }
+
+        // Auto Fresh Start without confirmation
+        async function performAutoFreshStart() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            try {
+                // Get all logs
+                updateLoadingMessage('📊 Found 40 logs...', 'Auto-saving to Google Drive...');
+                const logs = getAllLogs();
+                const logCount = logs.length;
+                
+                if (logs.length > 0) {
+                    // Upload logs to Drive
+                    updateLoadingMessage(`Uploading ${logs.length} logs to Google Drive...`, 'Please wait...');
+                    
+                    try {
+                        await uploadLogsToDrive(logs);
+                        updateLoadingMessage('✅ Auto-save complete!', 'Clearing local data...');
+                    } catch (uploadError) {
+                        console.error('Upload error:', uploadError);
+                        updateLoadingMessage('⚠️ Auto-save may have failed', 'Continuing with cleanup...');
+                    }
+                    
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
+                
+                // Clear all logs
+                updateLoadingMessage('Clearing local data for fresh start...');
+                clearAllLogs();
+                
+                // Final message
+                updateLoadingMessage('✅ Auto Fresh Start complete!', 'System is ready for new logs');
+                
+                // Wait before refreshing
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Refresh the page
+                window.location.reload();
+                
+            } catch (error) {
+                console.error('Auto Fresh Start error:', error);
+                alert('❌ Error during auto Fresh Start: ' + error.message);
+                loadingOverlay.style.display = 'none';
+            }
         }
 
         // ============================================
@@ -845,6 +984,12 @@
         
         // Verify URL is set
         console.log('Fresh Start URL configured:', APPS_SCRIPT_URL);
+        
+        // Check log count on page load
+        checkLogCountAndAutoFreshStart();
+        
+        // Also check every 30 seconds (in case logs were added from another tab)
+        setInterval(checkLogCountAndAutoFreshStart, 30000);
     };
 
     // Expose functions globally
