@@ -50,11 +50,11 @@
     }
 
     .left-panel.login-bg {
-      background: #186E00 !important;
+      background: #186E00 !important; /* Green */
     }
 
     .left-panel.logout-bg {
-      background: #c0392b !important;
+      background: #c0392b !important; /* Darker Red for better contrast */
     }
 
     .left-panel h1 {
@@ -114,17 +114,12 @@
       overflow: hidden;
       position: relative;
       margin-bottom: 20px;
-      min-height: 300px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
     #video, #canvas {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: block;
     }
 
     #canvas {
@@ -155,10 +150,6 @@
 
     .status-dot.ready {
       background: #27ae60;
-    }
-
-    .status-dot.error {
-      background: #e74c3c;
     }
 
     @keyframes pulse {
@@ -284,6 +275,7 @@
       font-size: 0.9rem;
     }
 
+    /* Mode indicator */
     .mode-indicator {
       margin-top: 15px;
       padding: 10px;
@@ -313,6 +305,7 @@
       color: white;
     }
 
+    /* Overlays - Minimal for speed */
     .overlay {
       position: fixed;
       top: 0;
@@ -345,6 +338,7 @@
       color: #e74c3c;
     }
 
+    /* Fresh Start notification */
     .fs-notification {
       position: fixed;
       top: 20px;
@@ -375,6 +369,7 @@
       to { opacity: 0; }
     }
 
+    /* Progress bar */
     .progress-bar {
       width: 100%;
       height: 10px;
@@ -389,12 +384,6 @@
       background: white;
       width: 0%;
       transition: width 0.3s;
-    }
-
-    .no-camera-message {
-      text-align: center;
-      color: #666;
-      padding: 20px;
     }
 
     @media (max-width: 768px) {
@@ -415,6 +404,7 @@
 </head>
 <body>
   <div class="container">
+    <!-- Left Panel with dynamic background color -->
     <div class="left-panel" id="leftPanel">
       <h1>ASLS 2.0</h1>
       <div class="mode-message" id="modeMessage">YOU ARE LOGGING IN</div>
@@ -425,14 +415,15 @@
           <span id="todayCount">0</span>
         </div>
         <div class="stat-item">
-          <span>⏱️ Status:</span>
-          <span id="responseTime">Initializing...</span>
+          <span>⏱️ Response Time:</span>
+          <span id="responseTime">&lt;100ms</span>
         </div>
         <div class="stat-item">
           <span>💾 Local Cache:</span>
           <span id="cacheSize">0 logs</span>
         </div>
       </div>
+      <!-- Current Mode Indicator -->
       <div class="mode-indicator">
         <span>Current Mode:</span>
         <span class="mode-badge" id="modeBadge">LOG IN</span>
@@ -440,8 +431,8 @@
     </div>
     
     <div class="right-panel">
-      <div class="camera-container" id="cameraContainer">
-        <video id="video" autoplay playsinline style="display: none;"></video>
+      <div class="camera-container">
+        <video id="video" autoplay playsinline></video>
         <canvas id="canvas"></canvas>
         <div class="camera-status">
           <span class="status-dot" id="statusDot"></span>
@@ -457,24 +448,25 @@
                  maxlength="12"
                  inputmode="numeric"
                  autocomplete="off">
-          <button onclick="handleCapture()" id="captureBtn" disabled>CAPTURE</button>
+          <button onclick="handleCapture()" id="captureBtn">CAPTURE</button>
         </div>
         
         <div class="preview" id="previewArea" style="display: none;">
           <img id="previewImage" src="" alt="Preview">
           <div class="action-buttons">
-            <button class="action-btn" id="actionBtn" onclick="applyLog()" disabled>LOG IN</button>
+            <button class="action-btn" id="actionBtn" onclick="applyLog()">LOG IN</button>
           </div>
         </div>
         
         <div class="quick-stats">
-          <span>📷 <span id="cameraIndicator">Waiting for camera...</span></span>
+          <span>📷 Camera Ready</span>
           <span>⚡ Instant Save</span>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Minimal overlays -->
   <div class="overlay" id="successOverlay">
     <div class="overlay-content">
       <h2 class="success" id="successTitle">✅ SUCCESS</h2>
@@ -489,36 +481,24 @@
     </div>
   </div>
 
-  <!-- LOAD STUDENT DATABASE FROM EXTERNAL FILE -->
   <script src="students.js"></script>
   
   <script>
-    // ============================================
-    // ULTRA-FAST LOCAL STORAGE SYSTEM
-    // ============================================
     
-    // STUDENTS_DATA is now loaded from external file!
-    // Just make sure it exists, if not, use empty array
-    if (typeof STUDENTS_DATA === 'undefined') {
-      console.error('STUDENTS_DATA not found! Make sure students.js is loaded properly.');
-      var STUDENTS_DATA = []; // Fallback empty array
-    }
+    ];
     
     // Fast lookup using Map (O(1) constant time)
     const studentMap = new Map();
     STUDENTS_DATA.forEach(s => studentMap.set(s.lrn, s));
-    console.log(`✅ Loaded ${STUDENTS_DATA.length} students from external file`);
     
     // DOM Elements
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const cameraContainer = document.getElementById('cameraContainer');
     let currentStream = null;
     let capturedImage = null;
     let isProcessing = false;
     let isFreshStarting = false;
-    let cameraInitialized = false;
     
     const lrnInput = document.getElementById('lrn');
     const captureBtn = document.getElementById('captureBtn');
@@ -527,11 +507,9 @@
     const actionBtn = document.getElementById('actionBtn');
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
-    const cameraIndicator = document.getElementById('cameraIndicator');
     const modeBadge = document.getElementById('modeBadge');
     const modeMessage = document.getElementById('modeMessage');
     const leftPanel = document.getElementById('leftPanel');
-    const responseTime = document.getElementById('responseTime');
     
     const successOverlay = document.getElementById('successOverlay');
     const errorOverlay = document.getElementById('errorOverlay');
@@ -544,14 +522,15 @@
     // AUTO FRESH START DETECTION
     // ============================================
     
+    // Check log count and trigger Fresh Start if needed
     function checkLogCountAndTriggerFreshStart() {
       try {
         const logs = JSON.parse(localStorage.getItem('asls_master') || '[]');
         const logCount = logs.length;
         
         console.log(`Current log count: ${logCount}/40`);
-        responseTime.textContent = `${logCount}/40 logs`;
         
+        // If 40 or more logs, trigger Fresh Start
         if (logCount >= 40 && !isFreshStarting) {
           console.log('🎯 Reached 40 logs! Triggering Fresh Start...');
           triggerFreshStart(logs);
@@ -561,13 +540,16 @@
       }
     }
     
+    // Trigger Fresh Start in this window
     function triggerFreshStart(logs) {
       isFreshStarting = true;
       
+      // Disable all inputs
       lrnInput.disabled = true;
       captureBtn.disabled = true;
       if (actionBtn) actionBtn.disabled = true;
       
+      // Show Fresh Start notification with progress
       const notification = document.createElement('div');
       notification.className = 'fs-notification warning';
       notification.innerHTML = `
@@ -583,31 +565,36 @@
       const progressFill = document.getElementById('fsProgress');
       const fsStatus = document.getElementById('fsStatus');
       
+      // Step 1: Upload to Drive
       fsStatus.textContent = 'Uploading to Google Drive...';
       progressFill.style.width = '30%';
       
+      // Use the same upload function from main menu
       uploadLogsToDrive(logs)
         .then(() => {
           fsStatus.textContent = 'Upload complete! Clearing local data...';
           progressFill.style.width = '70%';
           
+          // Step 2: Clear local storage
           clearAllLogs();
           
           fsStatus.textContent = 'Fresh Start complete! Resuming in 3 seconds...';
           progressFill.style.width = '100%';
           
+          // Step 3: Re-enable inputs after delay
           setTimeout(() => {
+            // Remove notification
             notification.style.animation = 'fadeOut 0.5s ease-out';
             setTimeout(() => {
               document.body.removeChild(notification);
               
+              // Re-enable inputs
               isFreshStarting = false;
-              if (cameraInitialized) {
-                lrnInput.disabled = false;
-                captureBtn.disabled = false;
-              }
+              lrnInput.disabled = false;
+              captureBtn.disabled = false;
               lrnInput.focus();
               
+              // Update stats
               updateStats();
               
             }, 500);
@@ -619,6 +606,7 @@
           progressFill.style.width = '100%';
           progressFill.style.background = '#e74c3c';
           
+          // Still clear and reset
           clearAllLogs();
           
           setTimeout(() => {
@@ -626,10 +614,8 @@
             setTimeout(() => {
               document.body.removeChild(notification);
               isFreshStarting = false;
-              if (cameraInitialized) {
-                lrnInput.disabled = false;
-                captureBtn.disabled = false;
-              }
+              lrnInput.disabled = false;
+              captureBtn.disabled = false;
               lrnInput.focus();
               updateStats();
             }, 500);
@@ -637,6 +623,7 @@
         });
     }
     
+    // Upload logs to Drive (simplified version)
     function uploadLogsToDrive(logs) {
       return new Promise((resolve, reject) => {
         const APPS_SCRIPT_URL = localStorage.getItem('asls_script_url') || 
@@ -647,11 +634,14 @@
           return;
         }
         
+        // Generate filename
         const now = new Date();
         const filename = `ASLS_Backup_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}.html`;
         
+        // Generate HTML content
         const htmlContent = generateLogsHTML(logs);
         
+        // Create iframe and form
         const iframe = document.createElement('iframe');
         iframe.name = 'fs_upload_iframe';
         iframe.style.display = 'none';
@@ -710,6 +700,7 @@
       });
     }
     
+    // Generate HTML file from logs
     function generateLogsHTML(logs) {
       const now = new Date();
       
@@ -777,6 +768,7 @@
       return html;
     }
     
+    // Clear all logs from localStorage
     function clearAllLogs() {
       localStorage.removeItem('asls_master');
       
@@ -796,31 +788,35 @@
       actionBtn.textContent = action;
       modeBadge.textContent = action;
       
+      // Update the big mode message
       if (action === 'Log in') {
         modeMessage.textContent = 'YOU ARE LOGGING IN';
       } else {
         modeMessage.textContent = 'YOU ARE LOGGING OUT';
       }
       
+      // Remove any existing color classes first
       leftPanel.classList.remove('login-bg', 'logout-bg');
       
       if (action === 'Log in') {
         actionBtn.className = 'action-btn login';
         modeBadge.className = 'mode-badge login';
         leftPanel.classList.add('login-bg');
-        leftPanel.style.backgroundColor = '#186E00';
+        leftPanel.style.backgroundColor = '#186E00'; // Fallback
       } else {
         actionBtn.className = 'action-btn logout';
         modeBadge.className = 'mode-badge logout';
         leftPanel.classList.add('logout-bg');
-        leftPanel.style.backgroundColor = '#c0392b';
+        leftPanel.style.backgroundColor = '#c0392b'; // Fallback
       }
     }
     
+    // Initial UI update
     updateActionUI();
     
     // ========== FAST LOCAL STORAGE ==========
     
+    // Get today's path
     function getTodayPath() {
       const now = new Date();
       const year = now.getFullYear();
@@ -830,22 +826,28 @@
       return `${year}-${month}-${day}-${period}`;
     }
     
+    // INSTANT save to localStorage
     function saveLogLocally(logEntry) {
       if (isFreshStarting) return false;
       
       const start = performance.now();
       
+      // Master log (all entries)
       let masterLog = JSON.parse(localStorage.getItem('asls_master') || '[]');
       masterLog.push(logEntry);
-      if (masterLog.length > 10000) masterLog = masterLog.slice(-10000);
+      if (masterLog.length > 10000) masterLog = masterLog.slice(-10000); // Keep last 10k
       localStorage.setItem('asls_master', JSON.stringify(masterLog));
       
+      // Daily log
       const today = getTodayPath();
       let dailyLog = JSON.parse(localStorage.getItem(`asls_${today}`) || '[]');
       dailyLog.push(logEntry);
       localStorage.setItem(`asls_${today}`, JSON.stringify(dailyLog));
       
+      // Update stats
       updateStats();
+      
+      // Check log count after saving
       checkLogCountAndTriggerFreshStart();
       
       const end = performance.now();
@@ -853,6 +855,7 @@
       return true;
     }
     
+    // Update stats
     function updateStats() {
       const master = JSON.parse(localStorage.getItem('asls_master') || '[]');
       const today = getTodayPath();
@@ -861,6 +864,8 @@
       document.getElementById('todayCount').textContent = daily.length;
       document.getElementById('cacheSize').textContent = master.length + ' logs';
     }
+    
+    // ========== FAST STUDENT LOOKUP ==========
     
     function findStudent(lrn) {
       return studentMap.get(lrn);
@@ -871,81 +876,31 @@
     async function initCamera() {
       try {
         statusText.textContent = 'Requesting camera...';
-        cameraIndicator.textContent = 'Requesting camera...';
         
-        // Check if browser supports getUserMedia
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          throw new Error('Browser does not support camera access');
-        }
-        
-        // Stop any existing stream
         if (currentStream) {
           currentStream.getTracks().forEach(t => t.stop());
         }
         
-        // Request camera with basic constraints
         currentStream = await navigator.mediaDevices.getUserMedia({ 
-          video: true,
+          video: { facingMode: 'user' },
           audio: false 
         });
         
-        // Set video source
         video.srcObject = currentStream;
+        await video.play();
         
-        // Wait for video to be ready
-        await new Promise((resolve) => {
-          video.onloadedmetadata = () => {
-            video.play();
-            resolve();
-          };
-        });
-        
-        // Show video
-        video.style.display = 'block';
-        
-        // Update status
         statusDot.className = 'status-dot ready';
         statusText.textContent = 'Ready';
-        cameraIndicator.textContent = 'Camera ready';
-        cameraInitialized = true;
-        
-        // Enable inputs
         captureBtn.disabled = false;
-        lrnInput.disabled = false;
-        
-        console.log('✅ Camera initialized successfully');
         
       } catch (error) {
-        console.error('Camera error:', error);
-        
-        // Update UI to show error
-        statusDot.className = 'status-dot error';
         statusText.textContent = 'Camera error';
-        cameraIndicator.textContent = 'Camera unavailable';
-        
-        // Show error message in camera container
-        const errorMsg = document.createElement('div');
-        errorMsg.className = 'no-camera-message';
-        errorMsg.innerHTML = `
-          <p>❌ Camera not available</p>
-          <p style="font-size: 0.9rem;">${error.message}</p>
-          <p style="font-size: 0.8rem; margin-top: 10px;">You can still enter LRN manually</p>
-        `;
-        cameraContainer.appendChild(errorMsg);
-        
-        // Disable capture button but keep input enabled
         captureBtn.disabled = true;
-        lrnInput.disabled = false;
-        lrnInput.focus();
       }
     }
     
     function handleCapture() {
       if (isProcessing || isFreshStarting) return;
-      if (!cameraInitialized) {
-        showError('Camera not ready');
-        return;
-      }
       
       const lrn = lrnInput.value.trim();
       if (!lrn || lrn.length !== 12 || !/^\d+$/.test(lrn)) {
@@ -970,30 +925,23 @@
       captureBtn.disabled = true;
       lrnInput.disabled = true;
       
-      try {
-        // Capture photo
-        canvas.width = video.videoWidth || 640;
-        canvas.height = video.videoHeight || 480;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        // Compress image quickly
-        capturedImage = canvas.toDataURL('image/jpeg', 0.6);
-        
-        previewImage.src = capturedImage;
-        previewArea.style.display = 'flex';
-        actionBtn.disabled = false;
-        
-        // Auto-apply after 500ms (increased for reliability)
-        setTimeout(() => {
-          if (!isProcessing || isFreshStarting) return;
-          applyLog();
-        }, 500);
-        
-      } catch (error) {
-        console.error('Capture error:', error);
-        showError('Failed to capture image');
-        resetCamera();
-      }
+      // Capture photo
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Compress image quickly (reduce quality for speed)
+      capturedImage = canvas.toDataURL('image/jpeg', 0.6);
+      
+      previewImage.src = capturedImage;
+      previewArea.style.display = 'flex';
+      actionBtn.disabled = false;
+      
+      // Auto-apply after 200ms
+      setTimeout(() => {
+        if (!isProcessing || isFreshStarting) return;
+        applyLog();
+      }, 200);
     }
     
     async function applyLog() {
@@ -1008,6 +956,7 @@
         return;
       }
       
+      // Create log entry (fast, no compression)
       const now = new Date();
       const logEntry = {
         timestamp: now.toISOString(),
@@ -1024,10 +973,13 @@
         status: 'verified'
       };
       
+      // INSTANT save to localStorage
       saveLogLocally(logEntry);
       
+      // Show success
       showSuccess(`${student.name} ${action} successful!`);
       
+      // Reset for next student
       resetCamera();
       lrnInput.value = '';
       lrnInput.focus();
@@ -1035,7 +987,7 @@
     
     function resetCamera() {
       isProcessing = false;
-      if (!isFreshStarting && cameraInitialized) {
+      if (!isFreshStarting) {
         captureBtn.disabled = false;
         lrnInput.disabled = false;
       }
@@ -1043,9 +995,8 @@
       previewArea.style.display = 'none';
       capturedImage = null;
       
-      if (cameraInitialized) {
-        video.style.display = 'block';
-      }
+      // Show video again
+      video.style.display = 'block';
       canvas.style.display = 'none';
     }
     
@@ -1065,12 +1016,13 @@
       }, 1500);
     }
     
-    // ========== INPUT HANDLERS ==========
+    // ========== BARCODE SCANNER OPTIMIZATION ==========
     
     lrnInput.addEventListener('input', function(e) {
+      // Only allow numbers
       this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
       
-      if (this.value.length === 12 && !isProcessing && !isFreshStarting && cameraInitialized) {
+      if (this.value.length === 12 && !isProcessing && !isFreshStarting) {
         handleCapture();
       }
     });
@@ -1082,7 +1034,7 @@
       }
     });
     
-    // ========== EXPORT FUNCTION ==========
+    // ========== EXPORT FUNCTION (for admin) ==========
     
     window.exportLogs = function() {
       const master = JSON.parse(localStorage.getItem('asls_master') || '[]');
@@ -1102,20 +1054,17 @@
     // ========== INIT ==========
     
     window.onload = function() {
-      console.log('Page loaded, initializing...');
+      initCamera();
       updateStats();
-      updateActionUI();
+      lrnInput.focus();
       
-      // Try to initialize camera
-      initCamera().catch(console.error);
-      
-      // Focus input regardless of camera
-      setTimeout(() => {
-        lrnInput.focus();
-      }, 500);
-      
+      // Update stats every second
       setInterval(updateStats, 1000);
+      
+      // Check log count on load
       checkLogCountAndTriggerFreshStart();
+      
+      // Check every 30 seconds
       setInterval(checkLogCountAndTriggerFreshStart, 30000);
     };
     
@@ -1125,7 +1074,7 @@
       }
     };
     
-    // Expose functions globally
+    // Expose functions
     window.handleCapture = handleCapture;
     window.applyLog = applyLog;
   </script>
