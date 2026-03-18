@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASLS - Student Database Manager</title>
+    <title>ASLS - Google Sheets Sync</title>
     <style>
         * {
             margin: 0;
@@ -13,254 +13,269 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0F9D58 0%, #4285F4 100%);
             min-height: 100vh;
             padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
+            max-width: 800px;
+            width: 100%;
             background: white;
             border-radius: 30px;
-            padding: 30px;
+            padding: 40px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
         h1 {
-            color: #186E00;
+            color: #0F9D58;
+            font-size: 2.5rem;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .instructions {
-            background: #e8f5e9;
-            padding: 20px;
-            border-radius: 15px;
+        .subtitle {
+            color: #666;
             margin-bottom: 30px;
-            border-left: 5px solid #186E00;
+            font-size: 1.1rem;
         }
 
-        .instructions ol {
-            margin-left: 20px;
-            margin-top: 10px;
+        .sheet-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 2px dashed #0F9D58;
         }
 
-        .instructions li {
-            margin: 10px 0;
+        .sheet-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 18px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-green {
+            background: #0F9D58;
+            color: white;
+        }
+
+        .btn-green:hover {
+            background: #0b8043;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(15,157,88,0.3);
+        }
+
+        .btn-blue {
+            background: #4285F4;
+            color: white;
+        }
+
+        .btn-blue:hover {
+            background: #3367D6;
+            transform: translateY(-2px);
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            display: block;
+        }
+
+        .steps {
+            background: #e8f5e9;
+            padding: 25px;
+            border-radius: 20px;
+            margin: 30px 0;
         }
 
         .step {
-            color: #186E00;
-            font-weight: bold;
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: flex-start;
         }
 
-        .github-btn {
-            display: inline-block;
-            background: #2b3137;
+        .step-number {
+            width: 35px;
+            height: 35px;
+            background: #0F9D58;
             color: white;
-            padding: 15px 30px;
-            border-radius: 10px;
-            text-decoration: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
-            margin: 10px 0;
-        }
-
-        .github-btn:hover {
-            background: #1a1f22;
+            flex-shrink: 0;
         }
 
         .preview {
-            background: #f5f5f5;
+            background: #2d2d2d;
+            color: #fff;
             padding: 20px;
             border-radius: 15px;
-            margin: 20px 0;
-        }
-
-        .student-list {
-            max-height: 300px;
+            font-family: monospace;
+            max-height: 200px;
             overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 10px;
-        }
-
-        .student-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .student-item:hover {
-            background: #f9f9f9;
-        }
-
-        .add-form {
-            background: #f0f7ff;
-            padding: 20px;
-            border-radius: 15px;
             margin: 20px 0;
         }
 
-        input, select {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-
-        button {
-            background: #186E00;
+        .copy-btn {
+            background: #3498db;
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
-            width: 100%;
-        }
-
-        button:hover {
-            background: #0f4f00;
-        }
-
-        .note {
-            background: #fff3cd;
-            color: #856404;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📝 ASLS Student Database Manager</h1>
-        
-        <div class="instructions">
-            <h3>📋 How to Update Students (Simple Steps):</h3>
-            <ol>
-                <li><span class="step">1.</span> Click the GitHub button below</li>
-                <li><span class="step">2.</span> Find the <code>students.js</code> file</li>
-                <li><span class="step">3.</span> Click the pencil icon ✏️ to edit</li>
-                <li><span class="step">4.</span> Add your new student in this format:</li>
-            </ol>
+        <h1>
+            📊 Google Sheets → GitHub Sync
+            <span style="font-size: 1rem; color: #666;">One-click update</span>
+        </h1>
+        <p class="subtitle">Edit in Google Sheets, click sync, updates automatically on GitHub</p>
+
+        <div class="sheet-section">
+            <div class="sheet-icon">📗</div>
+            <h2 style="margin-bottom: 20px;">Step 1: Edit Google Sheet</h2>
+            <p style="margin-bottom: 25px;">All changes made in the Google Sheet will be synced to GitHub</p>
             
-            <pre style="background: #2d2d2d; color: #fff; padding: 15px; border-radius: 10px; margin: 15px 0;">
-{ lrn: '123456789012', name: 'LAST, FIRST, MIDDLE', sex: 'MALE', grade: '7', section: 'SECTION' }</pre>
-            
-            <p><strong>Example:</strong> Add a comma after the last student, then paste the new line</p>
-            
-            <a href="https://github.com/theictclubtcshs/ASLS" target="_blank" class="github-btn">
-                🔗 Open GitHub Repository
+            <a href="YOUR_GOOGLE_SHEET_LINK_HERE" target="_blank" class="btn btn-green" style="text-decoration: none;">
+                📗 OPEN GOOGLE SHEET
             </a>
         </div>
 
-        <div class="preview">
-            <h3>📊 Current Student Format:</h3>
-            <div class="student-list" id="studentList">
-                Loading...
+        <div style="text-align: center; margin: 20px 0;">
+            <span style="background: #f0f0f0; padding: 10px 20px; border-radius: 50px;">⬇️ Then click sync below ⬇️</span>
+        </div>
+
+        <button class="btn btn-blue" onclick="syncToGitHub()" style="width: 100%; justify-content: center;">
+            🔄 SYNC TO GITHUB
+        </button>
+
+        <div id="status" class="status"></div>
+
+        <div class="steps">
+            <h3 style="margin-bottom: 20px; color: #0F9D58;">📋 How it works:</h3>
+            
+            <div class="step">
+                <div class="step-number">1</div>
+                <div><strong>Edit Google Sheet</strong> - Add, edit, or delete students in the spreadsheet</div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div><strong>Click Sync Button</strong> - One click updates everything</div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div><strong>Automatic GitHub Update</strong> - students.js is regenerated and pushed to GitHub</div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">4</div>
+                <div><strong>Live in 1-2 minutes</strong> - Website updates automatically</div>
             </div>
         </div>
 
-        <div class="add-form">
-            <h3>✏️ Quick Format Helper</h3>
-            <p>Fill this form to generate the correct code format:</p>
-            
-            <input type="text" id="lrn" placeholder="12-digit LRN (e.g., 400561180001)" maxlength="12">
-            <input type="text" id="lastName" placeholder="Last Name">
-            <input type="text" id="firstName" placeholder="First Name">
-            <input type="text" id="middleName" placeholder="Middle Name (or leave empty)">
-            
-            <select id="sex">
-                <option value="MALE">MALE</option>
-                <option value="FEMALE">FEMALE</option>
-            </select>
-            
-            <select id="grade">
-                <option value="7">Grade 7</option>
-                <option value="8">Grade 8</option>
-                <option value="9">Grade 9</option>
-                <option value="10">Grade 10</option>
-                <option value="11">Grade 11</option>
-                <option value="12">Grade 12</option>
-            </select>
-            
-            <input type="text" id="section" placeholder="Section (e.g., ARCHIMEDES)">
-            
-            <button onclick="generateCode()">📋 Generate Code</button>
-            
-            <div id="result" style="margin-top: 20px; background: #2d2d2d; color: #fff; padding: 15px; border-radius: 10px; display: none;"></div>
+        <div class="preview" id="preview">
+            Waiting for sync...
         </div>
 
-        <div class="note">
-            <strong>⚠️ Note:</strong> Changes take 1-2 minutes to appear on the live site after saving on GitHub.
-        </div>
+        <button class="copy-btn" onclick="copyToClipboard()" style="display: none;" id="copyBtn">
+            📋 Copy students.js content
+        </button>
     </div>
 
     <script>
-        // Sample student data for preview
-        const sampleStudents = [
-            { lrn: '400561180001', name: 'ALLAPITAN, JOAQUIN MIGUEL, QUILANG', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
-            { lrn: '104385180002', name: 'ARESTA, KOJI, DE MATA', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
-        ];
+        // ============================================
+        // GOOGLE APPS SCRIPT WEB APP URL
+        // ============================================
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMknrZnGPMIGg3HBfhPFuOtPMQ_fYZTNHi3ZX0FNCYatUtkOIFFrnbY16Xet1vN6BR/exec';
 
-        function loadPreview() {
-            const list = document.getElementById('studentList');
-            let html = '';
-            sampleStudents.forEach(s => {
-                html += `<div class="student-item">
-                    <span><strong>${s.lrn}</strong> - ${s.name}</span>
-                    <span>${s.grade} - ${s.section}</span>
-                </div>`;
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.className = 'status ' + type;
+            status.textContent = message;
+        }
+
+        async function syncToGitHub() {
+            showStatus('🔄 Syncing with Google Sheets...', 'info');
+            
+            try {
+                const response = await fetch(APPS_SCRIPT_URL);
+                const data = await response.text();
+                
+                // Try to parse if it's JSON
+                try {
+                    const jsonData = JSON.parse(data);
+                    if (jsonData.success) {
+                        showStatus('✅ Sync successful! ' + jsonData.message, 'success');
+                        
+                        // Show preview
+                        document.getElementById('preview').textContent = jsonData.preview;
+                        document.getElementById('copyBtn').style.display = 'inline-block';
+                    } else {
+                        showStatus('❌ Error: ' + jsonData.error, 'error');
+                    }
+                } catch (e) {
+                    // If not JSON, show raw response
+                    showStatus('✅ Sync completed!', 'success');
+                    document.getElementById('preview').textContent = data;
+                }
+                
+            } catch (error) {
+                showStatus('❌ Connection error: ' + error.message, 'error');
+            }
+        }
+
+        function copyToClipboard() {
+            const preview = document.getElementById('preview').textContent;
+            navigator.clipboard.writeText(preview).then(() => {
+                alert('✅ Copied to clipboard!');
             });
-            html += `<div class="student-item" style="color: #186E00; font-style: italic;">
-                ... and more (view on GitHub to see all)
-            </div>`;
-            list.innerHTML = html;
         }
-
-        function generateCode() {
-            const lrn = document.getElementById('lrn').value;
-            const lastName = document.getElementById('lastName').value.toUpperCase();
-            const firstName = document.getElementById('firstName').value.toUpperCase();
-            const middleName = document.getElementById('middleName').value.toUpperCase();
-            const sex = document.getElementById('sex').value;
-            const grade = document.getElementById('grade').value;
-            const section = document.getElementById('section').value.toUpperCase();
-
-            if (!lrn || lrn.length !== 12) {
-                alert('Please enter a valid 12-digit LRN');
-                return;
-            }
-
-            if (!lastName || !firstName || !section) {
-                alert('Please fill in all required fields');
-                return;
-            }
-
-            // Format name: LAST, FIRST, MIDDLE
-            let fullName = lastName;
-            if (firstName) fullName += ', ' + firstName;
-            if (middleName) fullName += ', ' + middleName;
-            else fullName += ', -';
-
-            const codeLine = `{ lrn: '${lrn}', name: '${fullName}', sex: '${sex}', grade: '${grade}', section: '${section}' }`;
-
-            const result = document.getElementById('result');
-            result.style.display = 'block';
-            result.innerHTML = `
-                <p style="color: #0f0; margin-bottom: 10px;">✅ Copy this line:</p>
-                <code style="word-break: break-all;">${codeLine}</code>
-                <p style="color: #ff0; margin-top: 15px;">📝 Add this to students.js between the brackets [ ]</p>
-                <p style="color: #fff; font-size: 0.9rem; margin-top: 10px;">Don't forget to add a comma after the previous student!</p>
-            `;
-        }
-
-        window.onload = loadPreview;
     </script>
 </body>
 </html>
