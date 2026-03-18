@@ -1,7 +1,7 @@
 // ============================================
 // ASLS STUDENT DATABASE
 // Auto-generated from Google Sheets
-// Last updated: 3/18/2026, 8:04:55 PM
+// Last updated: 3/18/2026, 8:05:34 PM
 // ============================================
 
 const STUDENTS_DATA = [
@@ -777,7 +777,7 @@ const STUDENTS_DATA = [
     { lrn: '400561152888', name: 'DANGA DANE ANGELO GUTIERREZ', sex: 'MALE', grade: '12', section: 'Vesalius' },
     { lrn: '104390140063', name: 'DELA CRUZ EMANUEL REDON', sex: 'MALE', grade: '12', section: 'Vesalius' },
     { lrn: '400561152849', name: 'DICIANO KYLE ANGELO TUMALIUAN', sex: 'MALE', grade: '12', section: 'Vesalius' },
-    { lrn: '104406121025', name: 'DOMINGO LEONEL FERNANDEZ', sex: 'MALE', grade: '12', section: 'Vesalius' },
+    { lrn: '104406121026', name: 'DOMINGO LEONEL FERNANDEZ', sex: 'MALE', grade: '12', section: 'Vesalius' },
     { lrn: '104406121126', name: 'ESCOBAR BRYAN ANDREI BRIONES', sex: 'MALE', grade: '12', section: 'Vesalius' },
     { lrn: '104406140086', name: 'GUMABAY ARDWIN KENNETH QUILAY', sex: 'MALE', grade: '12', section: 'Vesalius' },
     { lrn: '400561152891', name: 'MALANA BRYAN ADRIEL CARAG', sex: 'MALE', grade: '12', section: 'Vesalius' },
