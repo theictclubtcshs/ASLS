@@ -1,8 +1,8 @@
 // ============================================
 // ASLS STUDENT DATABASE
 // Auto-generated from Google Sheets (Multiple Grades)
-// Last updated: 6/7/2026, 8:33:30 PM
-// Total students: 927
+// Last updated: 6/7/2026, 8:33:54 PM
+// Total students: 928
 // ============================================
 
 const STUDENTS_DATA = [
@@ -813,6 +813,7 @@ const STUDENTS_DATA = [
     { lrn: '409654180002', name: 'UGADDAN, ROUX CHARLI MARTHEA C.', sex: 'FEMALE', grade: '8', section: 'DESCARTES' },
     { lrn: '409654190004', name: 'BARREO, PRINCESS ATASHA', sex: 'FEMALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '409654190012', name: 'Soriano Marius', sex: 'MALE', grade: '7', section: 'JOULE' },
+    { lrn: '409654190050', name: 'Calubaquib Ken', sex: 'MALE', grade: '7', section: 'JOULE' },
     { lrn: '415005215003', name: 'SALVADOR, JANUS ADRIEL B.', sex: 'MALE', grade: '10', section: 'EINSTEIN' },
     { lrn: '415008150043', name: 'PAMITTAN, CARLE DYLAN, U.', sex: 'MALE', grade: '9', section: 'MOSELEY' },
     { lrn: '415008150048', name: 'CASTRO, JANINE ELYZHA REYN, V.', sex: 'FEMALE', grade: '9', section: 'LAVOISIER' },
