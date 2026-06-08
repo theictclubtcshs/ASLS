@@ -1,7 +1,7 @@
 // ============================================
 // ASLS STUDENT DATABASE
 // Auto-generated from Google Sheets (Multiple Grades)
-// Last updated: 6/8/2026, 8:45:47 PM
+// Last updated: 6/9/2026, 5:10:08 AM
 // Total students: 929
 // ============================================
 
@@ -212,7 +212,7 @@ const STUDENTS_DATA = [
     { lrn: '104392190049', name: 'Calonia Kairos', sex: 'MALE', grade: '7', section: 'BERNOULLI' },
     { lrn: '104392190062', name: 'ASINO, KURT NATHANIEL', sex: 'MALE', grade: '7', section: 'GALILEO' },
     { lrn: '104392190068', name: 'Apiado Yuanpaulo', sex: 'MALE', grade: '7', section: 'BERNOULLI' },
-    { lrn: '104392190992', name: 'Solanzo Julienne', sex: 'FEMALE', grade: '7', section: 'JOULE' },
+    { lrn: '104392190092', name: 'Solanzo Julienne', sex: 'FEMALE', grade: '7', section: 'JOULE' },
     { lrn: '104392200106', name: 'MANALANG, CHARLES', sex: 'MALE', grade: '8', section: 'FERMAT' },
     { lrn: '104393140082', name: 'NARAG, JOSIEL MAE L.', sex: 'FEMALE', grade: '12', section: 'MENDELEEV' },
     { lrn: '104393140099', name: '- TULAUAN, KAYE LOUISIANA C.', sex: 'FEMALE', grade: '12', section: 'VESALIUS' },
