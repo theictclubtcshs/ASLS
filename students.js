@@ -1,8 +1,8 @@
 // ============================================
 // ASLS STUDENT DATABASE
 // Auto-generated from Google Sheets (Multiple Grades)
-// Last updated: 6/9/2026, 2:10:40 PM
-// Total students: 928
+// Last updated: 6/9/2026, 2:26:43 PM
+// Total students: 929
 // ============================================
 
 const STUDENTS_DATA = [
@@ -201,6 +201,7 @@ const STUDENTS_DATA = [
     { lrn: '104392180021', name: 'PUZON, ALTHEA CASSANDRA', sex: 'FEMALE', grade: '8', section: 'EUCLID' },
     { lrn: '104392180022', name: 'QUILANG, CHARI MARY DARIA', sex: 'FEMALE', grade: '8', section: 'FERMAT' },
     { lrn: '104392180070', name: 'GUMARU, KING LAWRENCE G.', sex: 'MALE', grade: '8', section: 'FERMAT' },
+    { lrn: '104392180112', name: 'LABRADORES, JHERION', sex: 'MALE', grade: '8', section: 'DESCARTES' },
     { lrn: '104392180160', name: 'PABLO, LIAN', sex: 'MALE', grade: '8', section: 'EUCLID' },
     { lrn: '104392180170', name: 'SORIANO, CHOLINE JOANNA P.', sex: 'FEMALE', grade: '8', section: 'FERMAT' },
     { lrn: '104392180193', name: 'MABAZZA, EURYDICE AYESHA T.', sex: 'FEMALE', grade: '8', section: 'DESCARTES' },
