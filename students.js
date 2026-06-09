@@ -1,7 +1,7 @@
 // ============================================
 // ASLS STUDENT DATABASE
 // Auto-generated from Google Sheets (Multiple Grades)
-// Last updated: 6/9/2026, 2:26:43 PM
+// Last updated: 6/9/2026, 5:24:52 PM
 // Total students: 929
 // ============================================
 
@@ -721,6 +721,7 @@ const STUDENTS_DATA = [
     { lrn: '400561180066', name: 'TAGARUMA, ERICKA CLARE', sex: 'FEMALE', grade: '8', section: 'FERMAT' },
     { lrn: '400561180067', name: 'VIERNES, MA. ADALEI A.', sex: 'FEMALE', grade: '8', section: 'PYTHAGORAS' },
     { lrn: '400561190012', name: 'GUZMAN, THOM ALVER', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
+    { lrn: '400561190013', name: 'JIMENEZ, FREEDOM PASTOR', sex: 'MALE', grade: '7', section: 'GALILEO' },
     { lrn: '400561190020', name: 'CABASAG, REESE CLIO', sex: 'FEMALE', grade: '7', section: 'GALILEO' },
     { lrn: '400561190021', name: 'Castillo Rose', sex: 'FEMALE', grade: '7', section: 'BERNOULLI' },
     { lrn: '400561190023', name: 'DANNIG, LHLOE RICHAINE', sex: 'FEMALE', grade: '7', section: 'GALILEO' },
@@ -732,7 +733,6 @@ const STUDENTS_DATA = [
     { lrn: '400561190063', name: 'DAYAG, JAE DOMINIQUE', sex: 'FEMALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '400561190067', name: 'Garcia Franchesca', sex: 'FEMALE', grade: '7', section: 'JOULE' },
     { lrn: '400561190069', name: 'ORDO?A, KATHERYNE ANGELA', sex: 'FEMALE', grade: '7', section: 'ARCHIMEDES' },
-    { lrn: '400561190130', name: 'JIMENEZ, FREEDOM PASTOR', sex: 'MALE', grade: '7', section: 'GALILEO' },
     { lrn: '400561220049', name: 'LEONARDO, CLARE NICOLE T.', sex: 'FEMALE', grade: '8', section: 'DESCARTES' },
     { lrn: '400562100090', name: 'SOLIS, PIO BENJAMIN', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '400562150008', name: 'APIDOS, GIADA ALBA C.', sex: 'FEMALE', grade: '9', section: 'PASCAL' },
