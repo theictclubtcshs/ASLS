@@ -1,8 +1,8 @@
 // ============================================
 // ASLS STUDENT DATABASE
 // Auto-generated from Google Sheets (Multiple Grades)
-// Last updated: 6/9/2026, 5:24:52 PM
-// Total students: 929
+// Last updated: 6/9/2026, 8:59:25 PM
+// Total students: 930
 // ============================================
 
 const STUDENTS_DATA = [
@@ -13,13 +13,14 @@ const STUDENTS_DATA = [
     { lrn: '100994180017', name: 'REVOCAL, JOVE', sex: 'MALE', grade: '8', section: 'EUCLID' },
     { lrn: '100994180021', name: 'Panganiban Briannah', sex: 'FEMALE', grade: '7', section: 'BERNOULLI' },
     { lrn: '100994180028', name: 'DAYAG, KARA LOUISSE B.', sex: 'FEMALE', grade: '8', section: 'DESCARTES' },
+    { lrn: '100994180032', name: 'QUIZZAGAN, GABRIELLE KATE', sex: 'FEMALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '102060150054', name: 'BALTAZAR, CHUNLI T.', sex: 'FEMALE', grade: '11', section: 'ALLIED HEALTH I' },
     { lrn: '102311140115', name: 'PAZZIUAGAN, ARTEM DOMINIC A.', sex: 'MALE', grade: '12', section: 'VESALIUS' },
-    { lrn: '102349190009', name: 'ESPEJO, JULIA CZARINA', sex: 'FEMALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '102359140049', name: 'SALES, FRANCIS REUBEN C.', sex: 'MALE', grade: '12', section: 'MENDELEEV' },
     { lrn: '102359150059', name: 'GUIYAB, AYESSA MAXEEN', sex: 'FEMALE', grade: '12', section: 'DA VINCI' },
     { lrn: '102359160025', name: 'TABANGCURA, YVAJAYE P.', sex: 'FEMALE', grade: '10', section: 'EINSTEIN' },
     { lrn: '102359170044', name: 'ESPEJO, KATHRINA', sex: 'FEMALE', grade: '9', section: 'LAVOISIER' },
+    { lrn: '102359190009', name: 'ESPEJO, JULIA CZARINA', sex: 'FEMALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '102360180047', name: 'PIZARRO, CHELZY JOY T.', sex: 'FEMALE', grade: '8', section: 'EUCLID' },
     { lrn: '102361150009', name: 'DELA ROSA, KEITH DANIEL L.', sex: 'MALE', grade: '11', section: 'ENGINEERING' },
     { lrn: '102363190041', name: 'Molina Kurztein', sex: 'FEMALE', grade: '7', section: 'JOULE' },
@@ -482,9 +483,9 @@ const STUDENTS_DATA = [
     { lrn: '104406190013', name: 'CALLANGAN, DOMYNAH SEB', sex: 'FEMALE', grade: '7', section: 'GALILEO' },
     { lrn: '104406190020', name: 'Guiriba Jhenrick Xyrille', sex: 'FEMALE', grade: '7', section: 'BERNOULLI' },
     { lrn: '104406190028', name: 'Salva Jacobina', sex: 'FEMALE', grade: '7', section: 'JOULE' },
-    { lrn: '104406190031', name: 'LOVIDA, DARHEL BRIX', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
+    { lrn: '104406190032', name: 'LOVIDA, DARHEL BRIX', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '104406190034', name: 'CORPUZ, SEAN TIMOTHY', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
-    { lrn: '104406190069', name: 'ZINGAPAN, BRYLLE TIMOTHY', sex: 'FEMALE', grade: '7', section: 'ARCHIMEDES' },
+    { lrn: '104406190069', name: 'ZINGAPAN, BRYLLE TIMOTHY', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '104406190081', name: 'CABANG, MA. THEA', sex: 'FEMALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '104406190090', name: 'Acain Scarlet', sex: 'FEMALE', grade: '7', section: 'JOULE' },
     { lrn: '104406190091', name: 'AGGABAO, MAXINE JULIANNA', sex: 'FEMALE', grade: '7', section: 'ARCHIMEDES' },
@@ -734,7 +735,6 @@ const STUDENTS_DATA = [
     { lrn: '400561190067', name: 'Garcia Franchesca', sex: 'FEMALE', grade: '7', section: 'JOULE' },
     { lrn: '400561190069', name: 'ORDO?A, KATHERYNE ANGELA', sex: 'FEMALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '400561220049', name: 'LEONARDO, CLARE NICOLE T.', sex: 'FEMALE', grade: '8', section: 'DESCARTES' },
-    { lrn: '400562100090', name: 'SOLIS, PIO BENJAMIN', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '400562150008', name: 'APIDOS, GIADA ALBA C.', sex: 'FEMALE', grade: '9', section: 'PASCAL' },
     { lrn: '400562150016', name: 'TIANGCO, ALTHEA B.', sex: 'FEMALE', grade: '9', section: 'DALTON' },
     { lrn: '400562150030', name: 'PAGADUAN, LOUIS ANDREZ', sex: 'MALE', grade: '11', section: 'ALLIED HEALTH II' },
@@ -792,6 +792,7 @@ const STUDENTS_DATA = [
     { lrn: '400562180088', name: 'RAMIREZ, MARY RYAN', sex: 'FEMALE', grade: '8', section: 'DESCARTES' },
     { lrn: '400562180090', name: 'VALDEZ, MIA KATHERINE C.', sex: 'FEMALE', grade: '8', section: 'EUCLID' },
     { lrn: '400562180093', name: 'FAINZAN,NIAL ZACHARY E.', sex: 'MALE', grade: '9', section: 'LAVOISIER' },
+    { lrn: '400562190009', name: 'SOLIS, PIO BENJAMIN', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '400562190021', name: 'Echavari Alaynnah', sex: 'FEMALE', grade: '7', section: 'BERNOULLI' },
     { lrn: '400562190024', name: 'Santiago Anne', sex: 'FEMALE', grade: '7', section: 'JOULE' },
     { lrn: '400562190027', name: 'Paschal Lorinn', sex: 'FEMALE', grade: '7', section: 'JOULE' },
@@ -909,7 +910,7 @@ const STUDENTS_DATA = [
     { lrn: '417011180005', name: 'GONZAGA, CRAIG MATTHEW S.', sex: 'MALE', grade: '8', section: 'PYTHAGORAS' },
     { lrn: '417011180025', name: 'AGUSTIN, CALEB YNIGO', sex: 'MALE', grade: '8', section: 'DESCARTES' },
     { lrn: '417011190001', name: 'ANDRES, MARIA ATHENA PEARL', sex: 'FEMALE', grade: '7', section: 'GALILEO' },
-    { lrn: '417011190013', name: 'BACUD, KRISTOF KEN', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
+    { lrn: '417011190010', name: 'BACUD, KRISTOF KEN', sex: 'MALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '417013150004', name: 'CARAG, JAIYANA KAMILAH', sex: 'FEMALE', grade: '9', section: 'PASCAL' },
     { lrn: '417013150007', name: 'UI, ERIN DANIELLE T.', sex: 'FEMALE', grade: '8', section: 'EUCLID' },
     { lrn: '417013150020', name: 'BACOLOR, MARIENKROON V.', sex: 'FEMALE', grade: '12', section: 'VESALIUS' },
