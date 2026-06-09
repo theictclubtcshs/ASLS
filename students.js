@@ -1,8 +1,8 @@
 // ============================================
 // ASLS STUDENT DATABASE
 // Auto-generated from Google Sheets (Multiple Grades)
-// Last updated: 6/9/2026, 5:10:08 AM
-// Total students: 929
+// Last updated: 6/9/2026, 2:10:40 PM
+// Total students: 928
 // ============================================
 
 const STUDENTS_DATA = [
@@ -32,7 +32,7 @@ const STUDENTS_DATA = [
     { lrn: '102423150022', name: 'FUGABAN, JOISE I.', sex: 'FEMALE', grade: '11', section: 'ALLIED HEALTH I' },
     { lrn: '102431140005', name: 'MALLILLIN, JYACINTH RAE ?.', sex: 'FEMALE', grade: '12', section: 'MENDELEEV' },
     { lrn: '102431160021', name: 'PATRONO, CYANNE SHARMILAH SELEIZA R.', sex: 'FEMALE', grade: '10', section: 'EINSTEIN' },
-    { lrn: '102487800010', name: 'CENTENO, ZHAON KREUTZNAER C.', sex: 'MALE', grade: '8', section: 'DESCARTES' },
+    { lrn: '102487180001', name: 'CENTENO, ZHAON KREUTZNAER C.', sex: 'MALE', grade: '8', section: 'DESCARTES' },
     { lrn: '102499150020', name: 'PLANAS, ETHEL A.', sex: 'FEMALE', grade: '11', section: 'ALLIED HEALTH I' },
     { lrn: '102505150004', name: 'ALIPIO, FRANCES ANGELIQUE J.', sex: 'FEMALE', grade: '12', section: 'MENDELEEV' },
     { lrn: '102505190016', name: 'FLAVIANO, GEWEL JOY LACARMDEL', sex: 'FEMALE', grade: '7', section: 'GALILEO' },
@@ -201,7 +201,6 @@ const STUDENTS_DATA = [
     { lrn: '104392180021', name: 'PUZON, ALTHEA CASSANDRA', sex: 'FEMALE', grade: '8', section: 'EUCLID' },
     { lrn: '104392180022', name: 'QUILANG, CHARI MARY DARIA', sex: 'FEMALE', grade: '8', section: 'FERMAT' },
     { lrn: '104392180070', name: 'GUMARU, KING LAWRENCE G.', sex: 'MALE', grade: '8', section: 'FERMAT' },
-    { lrn: '104392180112', name: 'LABRADORES, JHERION', sex: 'MALE', grade: '8', section: 'DESCARTES' },
     { lrn: '104392180160', name: 'PABLO, LIAN', sex: 'MALE', grade: '8', section: 'EUCLID' },
     { lrn: '104392180170', name: 'SORIANO, CHOLINE JOANNA P.', sex: 'FEMALE', grade: '8', section: 'FERMAT' },
     { lrn: '104392180193', name: 'MABAZZA, EURYDICE AYESHA T.', sex: 'FEMALE', grade: '8', section: 'DESCARTES' },
