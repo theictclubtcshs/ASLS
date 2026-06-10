@@ -1,8 +1,8 @@
 // ============================================
 // ASLS STUDENT DATABASE
 // Auto-generated from Google Sheets (Multiple Grades)
-// Last updated: 6/10/2026, 2:59:47 PM
-// Total students: 930
+// Last updated: 6/10/2026, 4:44:45 PM
+// Total students: 931
 // ============================================
 
 const STUDENTS_DATA = [
@@ -303,6 +303,7 @@ const STUDENTS_DATA = [
     { lrn: '104400180111', name: 'RAZON, YOJAN DENNY A.', sex: 'MALE', grade: '8', section: 'PYTHAGORAS' },
     { lrn: '104400180162', name: 'DECENA, TIFFANY', sex: 'FEMALE', grade: '8', section: 'FERMAT' },
     { lrn: '104400180170', name: 'DELOS SANTOS, ZAHARA', sex: 'FEMALE', grade: '8', section: 'PYTHAGORAS' },
+    { lrn: '104400180255', name: 'GUMABAY, AETHAN ZAYNE R.', sex: 'MALE', grade: '8', section: 'PYTHAGORAS' },
     { lrn: '104400190022', name: 'SIBAL, JOHN CHRISTIAN', sex: 'MALE', grade: '7', section: 'GALILEO' },
     { lrn: '104400190041', name: 'ANIAG, ZANDRA JAE', sex: 'FEMALE', grade: '7', section: 'GALILEO' },
     { lrn: '104400190044', name: 'Bishokarma Krishan', sex: 'MALE', grade: '7', section: 'JOULE' },
