@@ -1,7 +1,7 @@
 // ============================================
 // ASLS STUDENT DATABASE
 // Auto-generated from Google Sheets (Multiple Grades)
-// Last updated: 6/10/2026, 4:49:25 PM
+// Last updated: 6/15/2026, 6:29:44 AM
 // Total students: 931
 // ============================================
 
@@ -377,6 +377,7 @@ const STUDENTS_DATA = [
     { lrn: '104402190137', name: 'Salva Francheska', sex: 'FEMALE', grade: '7', section: 'BERNOULLI' },
     { lrn: '104402190142', name: 'Pagulayan,Andrea', sex: 'FEMALE', grade: '7', section: 'BERNOULLI' },
     { lrn: '104402190151', name: 'ACAIN, PRINCESS NI?A', sex: 'FEMALE', grade: '7', section: 'GALILEO' },
+    { lrn: '104403140036', name: 'TUNGCUL, LEMMUEL JHONNE CARLO', sex: 'MALE', grade: '12', section: 'MENDELEEV' },
     { lrn: '104403150034', name: 'ESCOBAR, ANA MARIE N.', sex: 'FEMALE', grade: '11', section: 'ALLIED HEALTH I' },
     { lrn: '104403150037', name: 'MALLILLIN, SHAIRA M.', sex: 'FEMALE', grade: '11', section: 'ALLIED HEALTH I' },
     { lrn: '104403170039', name: 'CASIBANG, KEITHLEEN ALIYAH', sex: 'FEMALE', grade: '9', section: 'DALTON' },
@@ -815,8 +816,8 @@ const STUDENTS_DATA = [
     { lrn: '408091170005', name: 'HERNANDEZ, KEN ZYMON J.', sex: 'MALE', grade: '9', section: 'DALTON' },
     { lrn: '409654180002', name: 'UGADDAN, ROUX CHARLI MARTHEA C.', sex: 'FEMALE', grade: '8', section: 'DESCARTES' },
     { lrn: '409654190004', name: 'BARREO, PRINCESS ATASHA', sex: 'FEMALE', grade: '7', section: 'ARCHIMEDES' },
+    { lrn: '409654190005', name: 'Calubaquib Ken', sex: 'MALE', grade: '7', section: 'JOULE' },
     { lrn: '409654190012', name: 'Soriano Marius', sex: 'MALE', grade: '7', section: 'JOULE' },
-    { lrn: '409654190050', name: 'Calubaquib Ken', sex: 'MALE', grade: '7', section: 'JOULE' },
     { lrn: '415005215003', name: 'SALVADOR, JANUS ADRIEL B.', sex: 'MALE', grade: '10', section: 'EINSTEIN' },
     { lrn: '415008150043', name: 'PAMITTAN, CARLE DYLAN, U.', sex: 'MALE', grade: '9', section: 'MOSELEY' },
     { lrn: '415008150048', name: 'CASTRO, JANINE ELYZHA REYN, V.', sex: 'FEMALE', grade: '9', section: 'LAVOISIER' },
@@ -832,7 +833,6 @@ const STUDENTS_DATA = [
     { lrn: '415016190006', name: 'Garcia Summer', sex: 'FEMALE', grade: '7', section: 'BERNOULLI' },
     { lrn: '415021150005', name: 'MATEO, MARIA JAN YVON A.', sex: 'FEMALE', grade: '10', section: 'CURIE' },
     { lrn: '415021150039', name: '- TORZAR, JOELLA ZYRIE', sex: 'FEMALE', grade: '12', section: 'VESALIUS' },
-    { lrn: '415021150058', name: 'TUNGCUL, LEMMUEL JHONNE CARLO', sex: 'MALE', grade: '12', section: 'MENDELEEV' },
     { lrn: '415034150013', name: 'CABAUATAN, GABRIELLE JADE D.', sex: 'FEMALE', grade: '10', section: 'NEWTON' },
     { lrn: '415034150019', name: '- ESGUERRA, ERICA MARU P.', sex: 'FEMALE', grade: '12', section: 'DA VINCI' },
     { lrn: '415037150018', name: 'AGABIN, DON MICHAEL E.', sex: 'MALE', grade: '11', section: 'ALLIED HEALTH II' },
