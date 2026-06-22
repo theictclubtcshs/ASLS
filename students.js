@@ -1,8 +1,8 @@
 // ============================================
 // ASLS STUDENT DATABASE
 // Auto-generated from Google Sheets (Multiple Grades)
-// Last updated: 6/22/2026, 10:21:08 AM
-// Total students: 931
+// Last updated: 6/22/2026, 10:23:18 AM
+// Total students: 932
 // ============================================
 
 const STUDENTS_DATA = [
@@ -582,6 +582,7 @@ const STUDENTS_DATA = [
     { lrn: '400555160003', name: 'CARAG, LUKE CLARENCE N.', sex: 'MALE', grade: '8', section: 'PYTHAGORAS' },
     { lrn: '400555160007', name: 'SALVATIERRA, RASHELLE', sex: 'FEMALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '400555160008', name: 'MALLILLIN, VICTOR MACKENZIE AGUILAR', sex: 'MALE', grade: '10', section: 'CURIE' },
+    { lrn: '400556115327', name: 'TUMANENG, VINCE', sex: 'MALE', grade: '10', section: 'FARADAY' },
     { lrn: '400556160007', name: 'TUMALIUAN, JOSEPH RATZ ANGELO G.', sex: 'MALE', grade: '10', section: 'EINSTEIN' },
     { lrn: '400556190009', name: 'Sibal Prince', sex: 'MALE', grade: '7', section: 'JOULE' },
     { lrn: '400557150025', name: 'BATTUNG, MARYEL AKHINA', sex: 'FEMALE', grade: '9', section: 'PASCAL' },
