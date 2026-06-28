@@ -7,6 +7,54 @@
     <link rel="icon" type="image/png" href="Logo.png">
     
     <style>
+
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 99999;
+            padding-top: 50px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+        }
+        
+        .modal-content {
+            display: block;
+            margin: auto;
+            max-width: 90%;
+            max-height: 85vh;
+            border-radius: 10px;
+            animation: zoomIn 0.3s ease;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close-modal:hover {
+            color: #ccc;
+        }
+        
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -70,6 +118,62 @@
             font-weight: 600;
         }
 
+        /* Debug Panel */
+        .debug-panel {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .debug-panel.active {
+            display: block;
+        }
+
+        .debug-panel .debug-line {
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .debug-panel .debug-line.error {
+            color: #e74c3c;
+        }
+
+        .debug-panel .debug-line.success {
+            color: #2ecc71;
+        }
+
+        .debug-panel .debug-line.info {
+            color: #3498db;
+        }
+
+        .debug-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .debug-toggle:hover {
+            transform: scale(1.1);
+        }
+
         /* Filter Section - Primary */
         .filters-primary {
             display: grid;
@@ -85,22 +189,6 @@
         .filters-primary .filter-group label {
             color: #1b5e20;
             font-weight: 700;
-        }
-
-        /* Filter Section - Secondary */
-        .filters-secondary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            display: none;
-        }
-
-        .filters-secondary.active {
-            display: grid;
         }
 
         .filter-group {
@@ -360,6 +448,43 @@
             align-items: center;
         }
 
+        /* Status Message */
+        .status-message {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .status-message.active {
+            display: block;
+        }
+
+        .status-message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #3498db;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #27ae60;
+        }
+
+        .status-message.warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #f39c12;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #e74c3c;
+        }
+
         /* Results */
         .results {
             margin-top: 30px;
@@ -480,15 +605,6 @@
             color: #721c24;
         }
 
-        .section-badge {
-            background: #e8f4fd;
-            color: #186E00;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
         .no-data {
             text-align: center;
             padding: 60px 20px;
@@ -561,39 +677,11 @@
             width: 0%;
         }
 
-        .status-badge {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        .status-badge.success {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-badge.warning {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-badge.danger {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .status-badge.info {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
+        /* Responsive */
         @media (max-width: 768px) {
             .container { padding: 15px; }
             .header h1 { font-size: 1.8rem; }
             .filters-primary { grid-template-columns: 1fr 1fr; }
-            .filters-secondary { grid-template-columns: 1fr 1fr; }
             .filter-actions { flex-direction: column; }
             .filter-actions button { width: 100%; }
             .stats { grid-template-columns: 1fr 1fr; }
@@ -601,11 +689,11 @@
             th, td { padding: 8px; }
             .file-item { flex-wrap: wrap; }
             .file-item .file-info { width: 100%; margin-top: 5px; }
+            .debug-toggle { bottom: 10px; right: 10px; width: 40px; height: 40px; font-size: 1.2rem; }
         }
 
         @media (max-width: 480px) {
             .filters-primary { grid-template-columns: 1fr; }
-            .filters-secondary { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -614,16 +702,18 @@
 <div class="container">
     <!-- Header -->
     <div class="header">
-        <h1>📊 ASLS Attendance Compiler</h1>
-        <p>Select date and time, then compile attendance from uploaded files</p>
+        <h1>ASLS Attendance Compiler</h1>
+        <p>Select date and time, then Generate Attendance Sheet </p>
         <div class="sub-info">
-            <span>📁 Multiple Computers</span>
-            <span>⚡ Quick Filter First</span>
-            <span>📋 Mixed Data → Organized</span>
+            <span>ICT Club</span>
+            <span>Tuguegarao City Science High School</span>
         </div>
     </div>
 
-    <!-- PRIMARY FILTERS - Year, Month, Day, Time -->
+    <!-- Status Message -->
+    <div class="status-message" id="statusMessage"></div>
+
+    <!-- PRIMARY FILTERS -->
     <div class="filters-primary">
         <div class="filter-group">
             <label for="yearFilter">📅 Year <span style="color:#c0392b;font-weight:700;">*</span></label>
@@ -668,8 +758,8 @@
         </div>
     </div>
 
-    <!-- SECONDARY FILTERS - Grade, Section -->
-    <div class="filters-secondary" id="secondaryFilters">
+    <!-- SECONDARY FILTERS -->
+    <div class="filters-primary" style="background:#f8f9fa;border-color:#e0e0e0;display:none;" id="secondaryFilters">
         <div class="filter-group">
             <label for="gradeFilter">📚 Grade Level</label>
             <select id="gradeFilter">
@@ -694,22 +784,19 @@
     <!-- Section Chips -->
     <div class="section-chips" id="sectionChips"></div>
 
-    <!-- Status Message -->
-    <div id="statusMessage" style="margin-bottom: 15px;"></div>
-
     <!-- Action Buttons -->
     <div class="filter-actions">
-        <button class="btn-primary" onclick="searchAndSync()">
-            🔍 Search & Sync Files
-        </button>
-        <button class="btn-success" onclick="compileAttendance()" id="compileBtn" disabled>
-            📊 Compile Attendance
+        <button class="btn-primary" onclick="searchSyncAndCompile()">
+            Generate Attendance Report
         </button>
         <button class="btn-secondary" onclick="downloadCompiled()" id="downloadBtn" disabled>
-            ⬇️ Download Report
+             Download Report
         </button>
         <button class="btn-danger" onclick="clearResults()">
-            🗑️ Clear
+             Clear
+        </button>
+        <button class="btn-warning" onclick="testConnection()">
+             Test Connection 
         </button>
     </div>
 
@@ -749,6 +836,18 @@
     </div>
 </div>
 
+<!-- Debug Panel -->
+<div class="debug-panel" id="debugPanel">
+    <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+        <strong>🔍 Debug Console</strong>
+        <span onclick="document.getElementById('debugPanel').classList.remove('active')" style="cursor:pointer;">✕</span>
+    </div>
+    <div id="debugContent"></div>
+</div>
+
+<!-- Debug Toggle Button -->
+<button class="debug-toggle" onclick="toggleDebug()">🐛</button>
+
 <!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-content">
@@ -762,12 +861,46 @@
     </div>
 </div>
 
+<!-- IMAGE MODAL -->
+<div id="imageModal" class="image-modal">
+
+    <span class="close-modal" onclick="closeImageModal()">
+        &times;
+    </span>
+
+    <img id="modalImage" class="modal-content">
+
+</div>
+    
 <script>
 // ============================================
 // CONFIGURATION - UPDATE WITH YOUR URL!
 // ============================================
+    
+function openImageModal(imageSrc) {
 
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyyTV8gBNionkuCkjcbdzOlo-N7oXrA4gamdh5QtRwogWhRGzczdr5pXc62xWbzTDSwPw/exec';
+    document.getElementById('imageModal').style.display = 'block';
+
+    document.getElementById('modalImage').src = imageSrc;
+}
+
+function closeImageModal() {
+
+    document.getElementById('imageModal').style.display = 'none';
+}
+
+// Close when clicking outside image
+window.onclick = function(event) {
+
+    const modal = document.getElementById('imageModal');
+
+    if (event.target === modal) {
+        closeImageModal();
+    }
+}
+    
+// REPLACE THIS WITH YOUR DEPLOYED APPS SCRIPT URL
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-FfH5jH4dyCvuzDn4ZRGgVHGrKo7jHKPgKmbOEx2XaHy3zPrw8gKrPXXbcUV-KQVnIg/exec';
 
 const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 
                 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
@@ -782,6 +915,29 @@ let compiledData = [];
 let allSections = new Set();
 let allRecords = [];
 let hasSearched = false;
+
+// ============================================
+// DEBUG HELPER
+// ============================================
+
+function debugLog(message, type = 'info') {
+    const panel = document.getElementById('debugContent');
+    const time = new Date().toLocaleTimeString();
+    const line = document.createElement('div');
+    line.className = `debug-line ${type}`;
+    line.textContent = `[${time}] ${message}`;
+    panel.appendChild(line);
+    panel.scrollTop = panel.scrollHeight;
+    console.log(`[${type.toUpperCase()}]`, message);
+}
+
+function toggleDebug() {
+    const panel = document.getElementById('debugPanel');
+    panel.classList.toggle('active');
+    if (panel.classList.contains('active')) {
+        debugLog('🔍 Debug panel opened');
+    }
+}
 
 // ============================================
 // UI HELPERS
@@ -804,6 +960,19 @@ function updateLoading(message, progress) {
 
 function hideLoading() {
     document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+function showStatus(message, type = 'info') {
+    const container = document.getElementById('statusMessage');
+    container.className = `status-message active ${type}`;
+    container.textContent = message;
+    debugLog(message, type);
+}
+
+function clearStatus() {
+    const container = document.getElementById('statusMessage');
+    container.className = 'status-message';
+    container.textContent = '';
 }
 
 function showNotification(message, type = 'info') {
@@ -839,33 +1008,6 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
-function showStatus(message, type = 'info') {
-    const container = document.getElementById('statusMessage');
-    const colors = {
-        info: '#d1ecf1',
-        success: '#d4edda',
-        warning: '#fff3cd',
-        danger: '#f8d7da'
-    };
-    const textColors = {
-        info: '#0c5460',
-        success: '#155724',
-        warning: '#856404',
-        danger: '#721c24'
-    };
-    container.innerHTML = `
-        <div style="padding: 15px 20px; background: ${colors[type] || colors.info}; 
-                    border-radius: 10px; color: ${textColors[type] || textColors.info};
-                    font-weight: 500; border-left: 4px solid ${type === 'success' ? '#27ae60' : type === 'warning' ? '#f39c12' : type === 'danger' ? '#e74c3c' : '#3498db'};">
-            ${message}
-        </div>
-    `;
-}
-
-function clearStatus() {
-    document.getElementById('statusMessage').innerHTML = '';
-}
-
 // Add keyframe animations
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
@@ -885,132 +1027,28 @@ document.head.appendChild(styleSheet);
 // ============================================
 
 function initDateFilters() {
-    // Populate year dropdown (current year - 5 to current year + 1)
     const yearSelect = document.getElementById('yearFilter');
     const currentYear = new Date().getFullYear();
     yearSelect.innerHTML = '<option value="">-- Select Year --</option>';
     for (let y = currentYear - 5; y <= currentYear + 1; y++) {
         yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
     }
-    // Set current year as default
     yearSelect.value = currentYear;
 
-    // Populate day dropdown (1-31)
     const daySelect = document.getElementById('dayFilter');
     daySelect.innerHTML = '<option value="">-- Select Day --</option>';
     for (let d = 1; d <= 31; d++) {
         daySelect.innerHTML += `<option value="${String(d).padStart(2, '0')}">${d}</option>`;
     }
-    // Set current day as default
-    const currentDay = String(new Date().getDate()).padStart(2, '0');
-    daySelect.value = currentDay;
+    daySelect.value = String(new Date().getDate()).padStart(2, '0');
 
-    // Set current month as default
     const monthSelect = document.getElementById('monthFilter');
-    const currentMonth = MONTHS[new Date().getMonth()];
-    monthSelect.value = currentMonth;
+    monthSelect.value = MONTHS[new Date().getMonth()];
 
-    // Set current time period (AM/PM)
     const timeSelect = document.getElementById('timeFilter');
-    const currentHour = new Date().getHours();
-    timeSelect.value = currentHour >= 12 ? 'PM' : 'AM';
-}
-
-// ============================================
-// SEARCH & SYNC FILES
-// ============================================
-
-async function searchAndSync() {
-    // Validate required fields
-    const year = document.getElementById('yearFilter').value;
-    const month = document.getElementById('monthFilter').value;
-    const day = document.getElementById('dayFilter').value;
-    const time = document.getElementById('timeFilter').value;
-
-    if (!year || !month || !day || !time) {
-        showNotification('⚠️ Please select Year, Month, Day, and Time (AM/PM)', 'warning');
-        return;
-    }
-
-    // Show secondary filters
-    document.getElementById('secondaryFilters').classList.add('active');
-
-    showLoading('🔍 Searching Files', `Looking for ${month} ${day}, ${year} (${time})...`);
-
-    try {
-        // Get all files from Apps Script
-        const response = await fetch(`${APPS_SCRIPT_URL}?action=listFiles`);
-        const data = await response.json();
-
-        if (!data.success || !data.files) {
-            showNotification('❌ Error loading files from Drive', 'error');
-            hideLoading();
-            return;
-        }
-
-        // Filter files by year, month, day, and time (AM/PM)
-        const filteredFiles = data.files.filter(file => {
-            // Check year
-            if (file.year !== year) return false;
-            
-            // Check month
-            if (file.month.toUpperCase() !== month) return false;
-            
-            // Check day
-            if (file.day !== day) return false;
-            
-            // Check time (AM/PM) - extract from filename
-            const filename = file.name.toUpperCase();
-            if (time === 'AM') {
-                // Must contain AM and NOT contain PM
-                return filename.includes('AM') && !filename.includes('PM');
-            } else {
-                // Must contain PM and NOT contain AM
-                return filename.includes('PM') && !filename.includes('AM');
-            }
-        });
-
-        availableFiles = filteredFiles;
-        selectedFiles = filteredFiles.map(f => f.id);
-
-        if (filteredFiles.length === 0) {
-            // No files found
-            document.getElementById('fileBrowser').classList.remove('active');
-            document.getElementById('fileList').innerHTML = '';
-            document.getElementById('totalFileCount').textContent = '0';
-            document.getElementById('fileSelectionCount').textContent = '0 selected';
-            document.getElementById('compileBtn').disabled = true;
-            document.getElementById('downloadBtn').disabled = true;
-            
-            showStatus(`📭 No files found for ${month} ${day}, ${year} (${time})`, 'warning');
-            showNotification(`📭 No files found for ${month} ${day}, ${year} (${time})`, 'warning');
-            hideLoading();
-            return;
-        }
-
-        // Show file browser
-        document.getElementById('fileBrowser').classList.add('active');
-        renderFileList(filteredFiles);
-        
-        // Extract sections
-        updateLoading('📊 Extracting sections from files...', 30);
-        const sections = await extractAllSections(filteredFiles);
-        allSections = sections;
-        updateSectionFilter(sections);
-
-        // Enable compile button
-        document.getElementById('compileBtn').disabled = false;
-        hasSearched = true;
-
-        showStatus(`✅ Found ${filteredFiles.length} file(s) for ${month} ${day}, ${year} (${time})`, 'success');
-        showNotification(`✅ Found ${filteredFiles.length} file(s) for ${month} ${day}, ${year} (${time})`, 'success');
-
-    } catch (error) {
-        console.error('Error searching files:', error);
-        showNotification('❌ Error: ' + error.message, 'error');
-    }
-
-    hideLoading();
+    timeSelect.value = new Date().getHours() >= 12 ? 'PM' : 'AM';
+    
+    debugLog('📅 Date filters initialized', 'info');
 }
 
 // ============================================
@@ -1038,17 +1076,133 @@ function updateSectionFilter(sections) {
         select.value = currentValue;
     }
     
-    // Update section chips
     const chipsContainer = document.getElementById('sectionChips');
     if (sections.size > 0) {
         chipsContainer.innerHTML = [...sections].sort().map(s => 
             `<span class="section-chip">📚 ${s}</span>`
         ).join('');
+        debugLog(`📚 Found ${sections.size} sections: ${[...sections].sort().join(', ')}`, 'success');
     } else {
         chipsContainer.innerHTML = '';
+        debugLog('📚 No sections found', 'warning');
     }
 }
 
+// ============================================
+// SEARCH & SYNC FILES
+// ============================================
+
+async function searchAndSync() {
+    const year = document.getElementById('yearFilter').value;
+    const month = document.getElementById('monthFilter').value;
+    const day = document.getElementById('dayFilter').value;
+    const time = document.getElementById('timeFilter').value;
+
+    if (!year || !month || !day || !time) {
+        showStatus('⚠️ Please select Year, Month, Day, and Time (AM/PM)', 'warning');
+        showNotification('⚠️ Please select all required fields', 'warning');
+        return;
+    }
+
+    document.getElementById('secondaryFilters').style.display = 'grid';
+    showLoading('🔍 Searching Files', `Looking for ${month} ${day}, ${year} (${time})...`);
+    debugLog(`🔍 Searching: ${month} ${day}, ${year} (${time})`, 'info');
+
+    try {
+        const url = `${APPS_SCRIPT_URL}?action=listFiles`;
+        debugLog(`📡 Fetching: ${url}`, 'info');
+        
+        const response = await fetch(url);
+        debugLog(`📡 Response status: ${response.status}`, 'info');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        debugLog(`📥 Received ${data.files ? data.files.length : 0} total files`, 'info');
+
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to list files');
+        }
+
+        // Filter files
+        const filteredFiles = data.files.filter(file => {
+            const matchesYear = file.year === year;
+            const matchesMonth = file.month.toUpperCase() === month.toUpperCase();
+            const matchesDay = file.day === day;
+            const matchesTime = file.name.toUpperCase().includes(time.toUpperCase());
+            return matchesYear && matchesMonth && matchesDay && matchesTime;
+        });
+
+        availableFiles = filteredFiles;
+        selectedFiles = filteredFiles.map(f => f.id);
+        
+        debugLog(`📁 Found ${filteredFiles.length} matching files`, filteredFiles.length > 0 ? 'success' : 'warning');
+
+        if (filteredFiles.length === 0) {
+            showStatus(`📭 No files found for ${month} ${day}, ${year} (${time})`, 'warning');
+            showNotification(`📭 No files found for ${month} ${day}, ${year} (${time})`, 'warning');
+            document.getElementById('fileBrowser').classList.remove('active');
+            hideLoading();
+            return;
+        }
+
+        // Show file browser
+        document.getElementById('fileBrowser').classList.add('active');
+        renderFileList(filteredFiles);
+        
+        showStatus(`✅ Found ${filteredFiles.length} file(s) for ${month} ${day}, ${year} (${time})`, 'success');
+        showNotification(`✅ Found ${filteredFiles.length} file(s)`, 'success');
+
+        // Extract sections
+        updateLoading('📊 Extracting sections from files...', 30);
+        debugLog('📊 Extracting sections...', 'info');
+        
+        const sections = await extractAllSections(filteredFiles);
+        allSections = sections;
+        updateSectionFilter(sections);
+        
+        hasSearched = true;
+        debugLog(`✅ Search complete. Found ${filteredFiles.length} files, ${sections.size} sections`, 'success');
+
+    } catch(error) {
+        console.error('Error searching:', error);
+        debugLog(`❌ Error: ${error.message}`, 'error');
+        showStatus(`❌ Error: ${error.message}`, 'error');
+        showNotification(`❌ Error: ${error.message}`, 'error');
+    }
+
+    hideLoading();
+}
+
+async function searchSyncAndCompile() {
+
+    // STEP 1: Search files
+    await searchAndSync();
+
+    // STEP 2: Wait a little to ensure files loaded
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // STEP 3: If files found, auto compile
+    if (selectedFiles.length > 0) {
+
+        showNotification(
+            `📊 Auto compiling ${selectedFiles.length} files...`,
+            'info'
+        );
+
+        await compileAttendance();
+
+    } else {
+
+        showNotification(
+            '📭 No files found to compile',
+            'warning'
+        );
+    }
+}
+    
 async function extractAllSections(files) {
     const sections = new Set();
     let processed = 0;
@@ -1072,7 +1226,7 @@ async function extractAllSections(files) {
             updateLoading(`Processing file ${processed}/${files.length}...`, progress);
             
         } catch (e) {
-            console.error('Error extracting from file:', file.id, e);
+            debugLog(`⚠️ Error extracting from ${file.name}: ${e.message}`, 'warning');
         }
     }
     
@@ -1101,31 +1255,19 @@ function extractSectionsFromHTML(html) {
         }
         
         if (sections.size === 0) {
-            const sectionRegex = /<td[^>]*>([\s\S]*?)<\/td>/g;
-            let allCells = [];
-            let m;
-            while ((m = sectionRegex.exec(html)) !== null) {
-                allCells.push(m[1].trim());
-            }
-            
-            if (allCells.length > 0) {
-                const sectionPattern = /\b([A-Z])\b|Section\s*([A-Z])|Grade\s*\d+\s*-\s*([A-Z])/gi;
-                allCells.forEach(cell => {
-                    const match = cell.match(sectionPattern);
-                    if (match) {
-                        match.forEach(m => {
-                            const clean = m.replace(/Section\s*/i, '').trim();
-                            if (clean && clean.length <= 2) {
-                                sections.add(clean);
-                            }
-                        });
-                    }
-                });
+            const sectionPattern = /\b([A-Z])\b|Section\s*([A-Z])|Grade\s*\d+\s*-\s*([A-Z])/gi;
+            const allText = html.replace(/<[^>]*>/g, ' ');
+            let match;
+            while ((match = sectionPattern.exec(allText)) !== null) {
+                const section = match[1] || match[2] || match[3];
+                if (section && section.length <= 2) {
+                    sections.add(section);
+                }
             }
         }
         
     } catch (e) {
-        console.error('Error extracting sections:', e);
+        debugLog(`⚠️ Error extracting sections: ${e.message}`, 'warning');
     }
     
     return sections;
@@ -1178,17 +1320,19 @@ function deselectAllFiles() {
 }
 
 // ============================================
-// COMPILE ATTENDANCE - WITH BETTER ERROR HANDLING
+// COMPILE ATTENDANCE
 // ============================================
 
 async function compileAttendance() {
     if (selectedFiles.length === 0) {
-        showNotification('⚠️ Please select at least one file to compile', 'warning');
+        showStatus('⚠️ Please select at least one file to compile', 'warning');
+        showNotification('⚠️ Please select files first', 'warning');
         return;
     }
     
     showLoading('📊 Compiling Attendance', `Processing ${selectedFiles.length} files...`);
-    
+    debugLog(`📊 Compiling ${selectedFiles.length} files...`, 'info');
+
     try {
         const filters = {
             grade: document.getElementById('gradeFilter').value || 'all',
@@ -1199,85 +1343,72 @@ async function compileAttendance() {
             time: document.getElementById('timeFilter').value
         };
         
-        console.log('📤 Sending request:', {
+        debugLog(`📤 Sending compilation request with ${selectedFiles.length} files`, 'info');
+        debugLog(`📤 Filters: ${JSON.stringify(filters)}`, 'info');
+
+        const formData = new FormData();
+
+        formData.append('data', JSON.stringify({
+            action: 'compileAttendance',
             fileIds: selectedFiles,
             filters: filters
-        });
+        }));
         
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            mode: 'cors',
-            body: JSON.stringify({
-                action: 'compileAttendance',
-                fileIds: selectedFiles,
-                filters: filters
-            })
+            body: formData
         });
-        
-        // Check if response is ok
+
+        debugLog(`📡 Response status: ${response.status}`, 'info');
+
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
-        console.log('📥 Response received:', data);
-        
-        if (data.success && data.data) {
-            compiledData = data.data;
-            allRecords = compiledData;
-            
-            if (compiledData.length === 0) {
-                showStatus('📭 No records found in the selected files', 'warning');
-                document.getElementById('results').classList.remove('active');
-                document.getElementById('downloadBtn').disabled = true;
-                showNotification('📭 No records found in the selected files', 'warning');
-                hideLoading();
-                return;
+        debugLog(`📥 Response received, success: ${data.success}`, data.success ? 'success' : 'error');
+
+        if (!data.success) {
+            throw new Error(data.error || 'Compilation failed');
+        }
+
+        compiledData = data.data || [];
+        debugLog(`📊 Extracted ${compiledData.length} records`, compiledData.length > 0 ? 'success' : 'warning');
+
+        if (compiledData.length === 0) {
+            showStatus('📭 No records found in the selected files', 'warning');
+            showNotification('📭 No records found', 'warning');
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('downloadBtn').disabled = true;
+            hideLoading();
+            return;
+        }
+
+        // Extract sections from compiled data
+        const sections = new Set();
+        compiledData.forEach(r => {
+            if (r.section && r.section !== 'N/A' && r.section !== 'Unknown') {
+                sections.add(r.section);
             }
-            
-            const sections = new Set();
-            compiledData.forEach(r => {
-                if (r.section && r.section !== 'N/A' && r.section !== 'Unknown') {
-                    sections.add(r.section);
-                }
-            });
-            allSections = sections;
-            updateSectionFilter(sections);
-            
-            displayCompiledData(compiledData, filters);
-            document.getElementById('results').classList.add('active');
-            document.getElementById('downloadBtn').disabled = false;
-            
-            showStatus(`✅ Compiled ${compiledData.length} records from ${selectedFiles.length} files`, 'success');
-            showNotification(`✅ Compiled ${compiledData.length} records from ${selectedFiles.length} files`, 'success');
-        } else {
-            const errorMsg = data.error || 'Unknown error';
-            console.error('❌ Compilation error:', errorMsg);
-            showNotification('❌ Error compiling: ' + errorMsg, 'error');
-        }
-    } catch (error) {
-        console.error('❌ Fetch error:', error);
-        
-        // More specific error messages
-        let errorMsg = error.message;
-        if (error.message.includes('Failed to fetch')) {
-            errorMsg = 'Failed to connect to the server. Please check:\n' +
-                      '1. The Apps Script URL is correct\n' +
-                      '2. The Apps Script is deployed properly\n' +
-                      '3. You have internet connection\n' +
-                      '4. CORS is enabled on the Apps Script';
-        } else if (error.message.includes('HTTP error')) {
-            errorMsg = 'Server returned an error: ' + error.message;
-        }
-        
-        showNotification('❌ Error: ' + errorMsg, 'error');
-        showStatus('❌ ' + errorMsg, 'danger');
+        });
+        allSections = sections;
+        updateSectionFilter(sections);
+
+        displayCompiledData(compiledData, filters);
+        document.getElementById('results').classList.add('active');
+        document.getElementById('downloadBtn').disabled = false;
+
+        showStatus(`✅ Compiled ${compiledData.length} records from ${selectedFiles.length} files`, 'success');
+        showNotification(`✅ ${compiledData.length} records compiled`, 'success');
+        debugLog(`✅ Compilation complete: ${compiledData.length} records`, 'success');
+
+    } catch(error) {
+        console.error('Compilation error:', error);
+        debugLog(`❌ Compilation error: ${error.message}`, 'error');
+        showStatus(`❌ Error: ${error.message}`, 'error');
+        showNotification(`❌ Error: ${error.message}`, 'error');
     }
-    
+
     hideLoading();
 }
 
@@ -1335,6 +1466,7 @@ function displayCompiledData(data, filters) {
                         <thead>
                             <tr>
                                 <th>#</th>
+                                <th>Photo</th>
                                 <th>Name</th>
                                 <th>LRN</th>
                                 <th>Grade</th>
@@ -1346,13 +1478,54 @@ function displayCompiledData(data, filters) {
                         <tbody>
                             ${records.map((record, index) => `
                                 <tr>
+
                                     <td>${index + 1}</td>
+                                
+                                    <td>
+                                        ${
+                                            record.photo
+                                            ? `
+                                                <img 
+                                                    src="${record.photo}" 
+                                                    width="45"
+                                                    height="45"
+                                                    class="student-photo"
+                                                    onclick="openImageModal('${record.photo}')"
+                                                    style="
+                                                        border-radius:50%;
+                                                        object-fit:cover;
+                                                        border:2px solid #ddd;
+                                                        cursor:pointer;
+                                                        transition:0.2s;
+                                                    "
+                                                    onmouseover="this.style.transform='scale(1.1)'"
+                                                    onmouseout="this.style.transform='scale(1)'"
+                                                >
+                                            `
+                                            : 'N/A'
+                                        }
+                                    </td>
+                                
                                     <td>${record.name || 'N/A'}</td>
+                                
                                     <td>${record.lrn || 'N/A'}</td>
+                                
                                     <td>${record.grade || 'N/A'}</td>
-                                    <td><span class="action-badge ${record.action === 'Log in' ? 'login' : 'logout'}">${record.action}</span></td>
-                                    <td>${record.timestamp ? new Date(record.timestamp).toLocaleString() : 'N/A'}</td>
-                                    <td style="font-size:0.75rem;color:#7f8c8d;">${record.sourceFile || 'N/A'}</td>
+                                
+                                    <td>
+                                        <span class="action-badge ${record.action === 'Log in' ? 'login' : 'logout'}">
+                                            ${record.action}
+                                        </span>
+                                    </td>
+                                
+                                    <td>
+                                        ${record.timestamp ? new Date(record.timestamp).toLocaleString() : 'N/A'}
+                                    </td>
+                                
+                                    <td style="font-size:0.75rem;color:#7f8c8d;">
+                                        ${record.sourceFile || 'N/A'}
+                                    </td>
+                                
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -1397,6 +1570,7 @@ function downloadCompiled() {
     URL.revokeObjectURL(url);
     
     showNotification('✅ Report downloaded successfully', 'success');
+    debugLog(`⬇️ Downloaded report: ${a.download}`, 'success');
 }
 
 function generateCompiledHTML(data) {
@@ -1505,6 +1679,19 @@ function generateCompiledHTML(data) {
         <p>Generated by ASLS Attendance Compiler © ${now.getFullYear()}</p>
         <p>TCSHS - Automated Student Log System</p>
     </div>
+
+        <!-- IMAGE MODAL -->
+    
+    <div id="imageModal" class="image-modal">
+    
+        <span class="close-modal" onclick="closeImageModal()">
+            &times;
+        </span>
+    
+        <img id="modalImage" class="modal-content">
+    
+    </div>
+
 </body>
 </html>
     `;
@@ -1532,6 +1719,41 @@ function copyTableToClipboard() {
 }
 
 // ============================================
+// TEST CONNECTION
+// ============================================
+
+async function testConnection() {
+    showStatus('🔍 Testing connection...', 'info');
+    debugLog('🔧 Testing connection to Apps Script...', 'info');
+    
+    try {
+        const response = await fetch(`${APPS_SCRIPT_URL}?action=listFiles`);
+        const data = await response.json();
+        
+        debugLog(`📡 Response status: ${response.status}`, 'info');
+        
+        if (data.success) {
+            const fileCount = data.files ? data.files.length : 0;
+            showStatus(`✅ Connection successful! Found ${fileCount} files.`, 'success');
+            showNotification(`✅ Connected! ${fileCount} files available`, 'success');
+            debugLog(`✅ Connection successful! ${fileCount} files found`, 'success');
+            
+            // Show some sample files in debug
+            if (data.files && data.files.length > 0) {
+                const sample = data.files.slice(0, 3);
+                debugLog(`📁 Sample files: ${sample.map(f => f.name).join(', ')}`, 'info');
+            }
+        } else {
+            throw new Error(data.error || 'Unknown error');
+        }
+    } catch(error) {
+        debugLog(`❌ Connection failed: ${error.message}`, 'error');
+        showStatus(`❌ Connection failed: ${error.message}`, 'error');
+        showNotification(`❌ Connection failed`, 'error');
+    }
+}
+
+// ============================================
 // CLEAR RESULTS
 // ============================================
 
@@ -1550,12 +1772,11 @@ function clearResults() {
     document.getElementById('fileList').innerHTML = '';
     document.getElementById('totalFileCount').textContent = '0';
     document.getElementById('fileSelectionCount').textContent = '0 selected';
-    document.getElementById('compileBtn').disabled = true;
     document.getElementById('downloadBtn').disabled = true;
     document.getElementById('sectionChips').innerHTML = '';
-    document.getElementById('secondaryFilters').classList.remove('active');
+    document.getElementById('secondaryFilters').style.display = 'none';
     clearStatus();
-    
+    debugLog('🗑️ All cleared', 'info');
     showNotification('🗑️ All cleared', 'info');
 }
 
@@ -1567,17 +1788,21 @@ window.onload = function() {
     console.log('📊 ASLS Attendance Compiler loaded');
     console.log('🔗 Apps Script URL:', APPS_SCRIPT_URL);
     
-    // Initialize date filters with current date
     initDateFilters();
     
-    // Check if URL is set
-    if (APPS_SCRIPT_URL === 'YOUR_NEW_APPS_SCRIPT_URL_HERE') {
-        showStatus('⚠️ Please update the APPS_SCRIPT_URL in the code with your deployed Apps Script URL', 'warning');
+    if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+        showStatus('⚠️ Please update the APPS_SCRIPT_URL with your deployed URL', 'warning');
+        debugLog('⚠️ APPS_SCRIPT_URL not configured', 'warning');
+    } else {
+        debugLog('✅ APPS_SCRIPT_URL configured', 'success');
+        // Auto-test connection on load
+        setTimeout(testConnection, 1000);
     }
 };
 
 // Expose functions globally
 window.searchAndSync = searchAndSync;
+window.searchSyncAndCompile = searchSyncAndCompile;
 window.compileAttendance = compileAttendance;
 window.downloadCompiled = downloadCompiled;
 window.printReport = printReport;
@@ -1586,6 +1811,8 @@ window.selectAllFiles = selectAllFiles;
 window.deselectAllFiles = deselectAllFiles;
 window.toggleFile = toggleFile;
 window.copyTableToClipboard = copyTableToClipboard;
+window.testConnection = testConnection;
+window.toggleDebug = toggleDebug;
 </script>
 
 </body>
