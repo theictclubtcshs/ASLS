@@ -1178,7 +1178,7 @@ function deselectAllFiles() {
 }
 
 // ============================================
-// COMPILE ATTENDANCE
+// COMPILE ATTENDANCE - WITH BETTER ERROR HANDLING
 // ============================================
 
 async function compileAttendance() {
@@ -1199,9 +1199,18 @@ async function compileAttendance() {
             time: document.getElementById('timeFilter').value
         };
         
+        console.log('📤 Sending request:', {
+            fileIds: selectedFiles,
+            filters: filters
+        });
+        
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            mode: 'cors',
             body: JSON.stringify({
                 action: 'compileAttendance',
                 fileIds: selectedFiles,
@@ -1209,7 +1218,13 @@ async function compileAttendance() {
             })
         });
         
+        // Check if response is ok
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log('📥 Response received:', data);
         
         if (data.success && data.data) {
             compiledData = data.data;
@@ -1240,11 +1255,27 @@ async function compileAttendance() {
             showStatus(`✅ Compiled ${compiledData.length} records from ${selectedFiles.length} files`, 'success');
             showNotification(`✅ Compiled ${compiledData.length} records from ${selectedFiles.length} files`, 'success');
         } else {
-            showNotification('❌ Error compiling: ' + (data.error || 'Unknown error'), 'error');
+            const errorMsg = data.error || 'Unknown error';
+            console.error('❌ Compilation error:', errorMsg);
+            showNotification('❌ Error compiling: ' + errorMsg, 'error');
         }
     } catch (error) {
-        console.error('Error compiling:', error);
-        showNotification('❌ Error compiling: ' + error.message, 'error');
+        console.error('❌ Fetch error:', error);
+        
+        // More specific error messages
+        let errorMsg = error.message;
+        if (error.message.includes('Failed to fetch')) {
+            errorMsg = 'Failed to connect to the server. Please check:\n' +
+                      '1. The Apps Script URL is correct\n' +
+                      '2. The Apps Script is deployed properly\n' +
+                      '3. You have internet connection\n' +
+                      '4. CORS is enabled on the Apps Script';
+        } else if (error.message.includes('HTTP error')) {
+            errorMsg = 'Server returned an error: ' + error.message;
+        }
+        
+        showNotification('❌ Error: ' + errorMsg, 'error');
+        showStatus('❌ ' + errorMsg, 'danger');
     }
     
     hideLoading();
