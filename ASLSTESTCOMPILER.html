@@ -1553,7 +1553,6 @@ function displayCompiledData(data, filters) {
 function downloadCompiled() {
 
     const compiledTable = document.getElementById('compiledTable').innerHTML;
-
     const stats = document.getElementById('stats').innerHTML;
 
     const year = document.getElementById('yearFilter').value;
@@ -1620,10 +1619,14 @@ body{
     padding:15px 20px;
     font-size:1.2rem;
     font-weight:bold;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
 
 .section-body{
     padding:20px;
+    overflow-x:auto;
 }
 
 table{
@@ -1649,6 +1652,12 @@ td{
     border-radius:50%;
     object-fit:cover;
     border:2px solid #ddd;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.student-photo:hover{
+    transform:scale(1.1);
 }
 
 .action-badge{
@@ -1668,8 +1677,56 @@ td{
     color:#721c24;
 }
 
-</style>
+/* IMAGE MODAL */
 
+.image-modal{
+    display:none;
+    position:fixed;
+    z-index:99999;
+    padding-top:50px;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    overflow:auto;
+    background-color:rgba(0,0,0,0.9);
+}
+
+.modal-content{
+    display:block;
+    margin:auto;
+    max-width:90%;
+    max-height:85vh;
+    border-radius:10px;
+    animation:zoomIn 0.3s ease;
+}
+
+.close-modal{
+    position:absolute;
+    top:20px;
+    right:35px;
+    color:white;
+    font-size:40px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.close-modal:hover{
+    color:#ccc;
+}
+
+@keyframes zoomIn{
+    from{
+        transform:scale(0.7);
+        opacity:0;
+    }
+    to{
+        transform:scale(1);
+        opacity:1;
+    }
+}
+
+</style>
 </head>
 
 <body>
@@ -1685,10 +1742,41 @@ td{
 
 ${compiledTable}
 
+<!-- IMAGE MODAL -->
 <div id="imageModal" class="image-modal">
-    <span class="close-modal" onclick="closeImageModal()">&times;</span>
+
+    <span class="close-modal" onclick="closeImageModal()">
+        &times;
+    </span>
+
     <img id="modalImage" class="modal-content">
+
 </div>
+
+<script>
+
+function openImageModal(imageSrc){
+
+    document.getElementById('imageModal').style.display = 'block';
+
+    document.getElementById('modalImage').src = imageSrc;
+}
+
+function closeImageModal(){
+
+    document.getElementById('imageModal').style.display = 'none';
+}
+
+window.onclick = function(event){
+
+    const modal = document.getElementById('imageModal');
+
+    if(event.target === modal){
+        closeImageModal();
+    }
+}
+
+</script>
 
 </body>
 </html>
@@ -1702,7 +1790,7 @@ ${compiledTable}
 
     a.href = url;
 
-    a.download = `ASLS_Attendance_${year}_${month}_${day}_${time}.html`;
+    a.download = \`ASLS_Attendance_\${year}_\${month}_\${day}_\${time}.html\`;
 
     document.body.appendChild(a);
 
@@ -1712,7 +1800,7 @@ ${compiledTable}
 
     URL.revokeObjectURL(url);
 
-    showNotification('✅ Beautiful report downloaded!', 'success');
+    showNotification('✅ Beautiful interactive report downloaded!', 'success');
 }
 
 function generateCompiledHTML(data) {
