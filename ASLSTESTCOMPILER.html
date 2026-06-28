@@ -1145,7 +1145,6 @@ async function searchAndSync() {
             showStatus(`📭 No files found for ${month} ${day}, ${year} (${time})`, 'warning');
             showNotification(`📭 No files found for ${month} ${day}, ${year} (${time})`, 'warning');
             document.getElementById('fileBrowser').classList.remove('active');
-            document.getElementById('compileBtn').disabled = true;
             hideLoading();
             return;
         }
@@ -1153,7 +1152,6 @@ async function searchAndSync() {
         // Show file browser
         document.getElementById('fileBrowser').classList.add('active');
         renderFileList(filteredFiles);
-        document.getElementById('compileBtn').disabled = false;
         
         showStatus(`✅ Found ${filteredFiles.length} file(s) for ${month} ${day}, ${year} (${time})`, 'success');
         showNotification(`✅ Found ${filteredFiles.length} file(s)`, 'success');
@@ -1775,7 +1773,6 @@ function clearResults() {
     document.getElementById('fileList').innerHTML = '';
     document.getElementById('totalFileCount').textContent = '0';
     document.getElementById('fileSelectionCount').textContent = '0 selected';
-    document.getElementById('compileBtn').disabled = true;
     document.getElementById('downloadBtn').disabled = true;
     document.getElementById('sectionChips').innerHTML = '';
     document.getElementById('secondaryFilters').style.display = 'none';
