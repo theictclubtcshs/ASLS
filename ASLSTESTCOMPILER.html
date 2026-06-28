@@ -1553,6 +1553,7 @@ function displayCompiledData(data, filters) {
 function downloadCompiled() {
 
     const compiledTable = document.getElementById('compiledTable').innerHTML;
+
     const stats = document.getElementById('stats').innerHTML;
 
     const year = document.getElementById('yearFilter').value;
@@ -1726,7 +1727,9 @@ td{
     }
 }
 
+
 </style>
+
 </head>
 
 <body>
@@ -1775,9 +1778,7 @@ window.onclick = function(event){
         closeImageModal();
     }
 }
-
-</script>
-
+    
 </body>
 </html>
 `;
@@ -1790,7 +1791,7 @@ window.onclick = function(event){
 
     a.href = url;
 
-    a.download = \`ASLS_Attendance_\${year}_\${month}_\${day}_\${time}.html\`;
+    a.download = `ASLS_Attendance_${year}_${month}_${day}_${time}.html`;
 
     document.body.appendChild(a);
 
@@ -1800,9 +1801,13 @@ window.onclick = function(event){
 
     URL.revokeObjectURL(url);
 
-    showNotification('✅ Beautiful interactive report downloaded!', 'success');
+    showNotification('✅ Beautiful interactive report downloaded!', 'success')
 }
 
+    
+
+
+    
 function generateCompiledHTML(data) {
     const now = new Date();
     const totalStudents = new Set(data.map(r => r.lrn)).size;
