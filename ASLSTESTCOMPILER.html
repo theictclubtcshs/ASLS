@@ -1,51 +1,178 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Test ASLS Compiler</title>
-</head>
-<body>
-    <h1>ASLS Compiler Test</h1>
-    <button onclick="testFetch()">Test Fetch</button>
-    <div id="result" style="margin-top:20px;padding:20px;background:#f0f0f0;border-radius:10px;"></div>
+// ============================================
+// COMPILER HTML - IMPROVED VERSION
+// ============================================
 
-    <script>
-    // UPDATE THIS WITH YOUR URL
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyyTV8gBNionkuCkjcbdzOlo-N7oXrA4gamdh5QtRwogWhRGzczdr5pXc62xWbzTDSwPw/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxJWquTncBKZFN_vc2DJVn_t-dJ3-NC1g_KYUpDiRdrri-4itGYd88oZGGnKSqxHDx-WA/exec';
+
+async function searchAndSync() {
+    const year = document.getElementById('yearFilter').value;
+    const month = document.getElementById('monthFilter').value;
+    const day = document.getElementById('dayFilter').value;
+    const time = document.getElementById('timeFilter').value;
     
-    async function testFetch() {
-        const resultDiv = document.getElementById('result');
-        resultDiv.innerHTML = '⏳ Testing connection...';
-        
-        try {
-            // Test GET request
-            const response = await fetch(`${APPS_SCRIPT_URL}?action=listFiles`);
-            const data = await response.json();
-            
-            if (data.success) {
-                resultDiv.innerHTML = `
-                    ✅ Connection successful!
-                    <br><br>
-                    Found ${data.files.length} files
-                    <br><br>
-                    <pre style="background:white;padding:10px;border-radius:5px;overflow:auto;max-height:300px;">
-                        ${JSON.stringify(data.files.slice(0, 5), null, 2)}
-                    </pre>
-                `;
-            } else {
-                resultDiv.innerHTML = `❌ Error: ${data.error}`;
-            }
-        } catch(error) {
-            resultDiv.innerHTML = `
-                ❌ Failed to connect<br><br>
-                Error: ${error.message}<br><br>
-                <b>Checklist:</b><br>
-                1. Apps Script deployed with "Anyone" access<br>
-                2. URL is correct: ${APPS_SCRIPT_URL}<br>
-                3. Run authorizeDrive() in Apps Script<br>
-                4. At least one file exists in AttendanceASLS
-            `;
-        }
+    if (!year || !month || !day || !time) {
+        showNotification('⚠️ Please select Year, Month, Day, and Time (AM/PM)', 'warning');
+        return;
     }
-    </script>
-</body>
-</html>
+    
+    showLoading('🔍 Searching Files', `Looking for ${month} ${day}, ${year} (${time})...`);
+    
+    try {
+        // Use GET for listFiles
+        const response = await fetch(`${APPS_SCRIPT_URL}?action=listFiles`);
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to list files');
+        }
+        
+        // Filter files by date and time
+        const filteredFiles = data.files.filter(file => {
+            const matchesYear = file.year === year;
+            const matchesMonth = file.month.toUpperCase() === month.toUpperCase();
+            const matchesDay = file.day === day;
+            const matchesTime = file.name.toUpperCase().includes(time.toUpperCase());
+            
+            return matchesYear && matchesMonth && matchesDay && matchesTime;
+        });
+        
+        availableFiles = filteredFiles;
+        selectedFiles = filteredFiles.map(f => f.id);
+        
+        if (filteredFiles.length === 0) {
+            showStatus(`📭 No files found for ${month} ${day}, ${year} (${time})`, 'warning');
+            showNotification(`No files found`, 'warning');
+            hideLoading();
+            return;
+        }
+        
+        // Show file browser
+        document.getElementById('fileBrowser').classList.add('active');
+        renderFileList(filteredFiles);
+        document.getElementById('compileBtn').disabled = false;
+        
+        showStatus(`✅ Found ${filteredFiles.length} file(s) for ${month} ${day}, ${year} (${time})`, 'success');
+        showNotification(`✅ Found ${filteredFiles.length} files`, 'success');
+        
+        // Extract sections
+        updateLoading('📊 Extracting sections...', 30);
+        const sections = await extractAllSections(filteredFiles);
+        allSections = sections;
+        updateSectionFilter(sections);
+        
+    } catch(error) {
+        console.error('Error searching:', error);
+        showNotification('❌ Error: ' + error.message, 'error');
+    }
+    
+    hideLoading();
+}
+
+async function compileAttendance() {
+    if (selectedFiles.length === 0) {
+        showNotification('⚠️ Please select at least one file to compile', 'warning');
+        return;
+    }
+    
+    showLoading('📊 Compiling Attendance', `Processing ${selectedFiles.length} files...`);
+    
+    try {
+        const filters = {
+            grade: document.getElementById('gradeFilter').value || 'all',
+            section: document.getElementById('sectionFilter').value || 'all',
+            year: document.getElementById('yearFilter').value,
+            month: document.getElementById('monthFilter').value,
+            day: document.getElementById('dayFilter').value,
+            time: document.getElementById('timeFilter').value
+        };
+        
+        console.log('📤 Sending compilation request:', {
+            fileCount: selectedFiles.length,
+            filters: filters,
+            fileIds: selectedFiles.slice(0, 5) // Log first 5 only
+        });
+        
+        const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'compileAttendance',
+                fileIds: selectedFiles,
+                filters: filters
+            })
+        });
+        
+        // Check if response is ok
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('📥 Response received:', data);
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Compilation failed');
+        }
+        
+        compiledData = data.data || [];
+        
+        if (compiledData.length === 0) {
+            showStatus('📭 No records found in the selected files', 'warning');
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('downloadBtn').disabled = true;
+            showNotification('📭 No records found in the selected files', 'warning');
+            hideLoading();
+            return;
+        }
+        
+        // Extract sections from compiled data
+        const sections = new Set();
+        compiledData.forEach(r => {
+            if (r.section && r.section !== 'N/A' && r.section !== 'Unknown') {
+                sections.add(r.section);
+            }
+        });
+        allSections = sections;
+        updateSectionFilter(sections);
+        
+        displayCompiledData(compiledData, filters);
+        document.getElementById('results').classList.add('active');
+        document.getElementById('downloadBtn').disabled = false;
+        
+        showStatus(`✅ Compiled ${compiledData.length} records from ${selectedFiles.length} files`, 'success');
+        showNotification(`✅ ${compiledData.length} records compiled`, 'success');
+        
+    } catch(error) {
+        console.error('❌ Compilation error:', error);
+        showNotification('❌ Error: ' + error.message, 'error');
+        showStatus('❌ ' + error.message, 'danger');
+    }
+    
+    hideLoading();
+}
+
+// ============================================
+// TEST A SINGLE FILE - For Debugging
+// ============================================
+
+async function testFile(fileId) {
+    try {
+        const response = await fetch(`${APPS_SCRIPT_URL}?action=testSingleFile&fileId=${fileId}`);
+        const data = await response.json();
+        
+        console.log('Test result:', data);
+        
+        if (data.success) {
+            alert(`✅ File: ${data.fileName}\nRecords: ${data.recordCount}\nSample: ${JSON.stringify(data.sampleRecords, null, 2)}`);
+        } else {
+            alert(`❌ Error: ${data.error}`);
+        }
+        
+        return data;
+    } catch(error) {
+        console.error('Test error:', error);
+        alert('❌ Test failed: ' + error.message);
+    }
+}
