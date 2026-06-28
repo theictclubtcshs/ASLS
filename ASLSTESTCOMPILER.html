@@ -226,15 +226,25 @@
         .section-chip {
             background: #186E00;
             color: #fff;
-            padding: 4px 14px;
+            padding: 6px 16px;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
             opacity: 0.9;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
         .section-chip:hover {
             opacity: 1;
             transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(24, 110, 0, 0.3);
+        }
+        .section-chip:active {
+            transform: scale(0.95);
         }
 
         /* ─── ACTION BUTTONS ─── */
@@ -357,19 +367,57 @@
             color: #fff;
         }
 
-        /* ─── FILE BROWSER ─── */
+        /* ─── FILE BROWSER (COLLAPSIBLE) ─── */
         .file-browser {
             margin-top: 20px;
-            padding: 20px;
-            background: #f8f9fa;
             border-radius: 15px;
+            border: 2px solid #a5d6a7;
+            overflow: hidden;
+            background: #f8f9fa;
             display: none;
         }
         .file-browser.active {
             display: block;
         }
+
+        .file-browser-header {
+            background: linear-gradient(135deg, #186E00, #2ecc71);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .file-browser-header:hover {
+            background: linear-gradient(135deg, #1a7a00, #3dd684);
+        }
+        .file-browser-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        .file-browser-header .toggle-icon {
+            font-size: 1.4rem;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+        .file-browser-header .toggle-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .file-browser-body {
+            padding: 15px 20px 20px 20px;
+            display: block;
+        }
+        .file-browser-body.hidden {
+            display: none;
+        }
+
         .file-list {
-            max-height: 400px;
+            max-height: 350px;
             overflow-y: auto;
             margin-top: 10px;
         }
@@ -408,7 +456,6 @@
         .file-browser-controls {
             display: flex;
             gap: 10px;
-            margin: 15px 0;
             flex-wrap: wrap;
             align-items: center;
         }
@@ -483,6 +530,11 @@
             margin-bottom: 20px;
             overflow: hidden;
             border: 1px solid #e0e0e0;
+            scroll-margin-top: 20px;
+        }
+        .section-group:target {
+            border-color: #186E00;
+            box-shadow: 0 0 0 3px rgba(24, 110, 0, 0.2);
         }
         .section-header {
             background: linear-gradient(135deg, #186E00, #2ecc71);
@@ -699,10 +751,30 @@
             .result-actions .label {
                 text-align: center;
             }
+            .file-browser-header h3 {
+                font-size: 0.95rem;
+            }
         }
         @media (max-width: 480px) {
             .filters-primary {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        /* ─── SCROLL TO SECTION HIGHLIGHT ─── */
+        .section-highlight-flash {
+            animation: flashHighlight 1.2s ease;
+        }
+        @keyframes flashHighlight {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(24, 110, 0, 0);
+            }
+            30% {
+                box-shadow: 0 0 0 6px rgba(24, 110, 0, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 3px rgba(24, 110, 0, 0.2);
             }
         }
     </style>
@@ -784,7 +856,7 @@
             </div>
         </div>
 
-        <!-- SECTION CHIPS -->
+        <!-- SECTION CHIPS (clickable to scroll) -->
         <div class="section-chips" id="sectionChips"></div>
 
         <!-- ACTION BUTTONS -->
@@ -800,32 +872,34 @@
             </button>
         </div>
 
-        <!-- FILE BROWSER -->
+        <!-- FILE BROWSER (COLLAPSIBLE) -->
         <div class="file-browser" id="fileBrowser">
-            <h3>📁 Found Files (<span id="totalFileCount">0</span>)</h3>
-            <p style="color:#7f8c8d;margin-bottom:10px;font-size:0.9rem;">
-                Select which files to compile. All selected files will be merged into one report.
-            </p>
-            <div class="file-browser-controls">
-                <button class="btn-small btn-select-all" onclick="selectAllFiles()">✅ Select All</button>
-                <button class="btn-small btn-deselect-all" onclick="deselectAllFiles()">❌ Deselect All</button>
-                <span style="margin-left:auto;color:#7f8c8d;font-size:0.9rem;" id="fileSelectionCount">0 selected</span>
+            <div class="file-browser-header" onclick="toggleFileBrowser()">
+                <h3>📁 Found Files (<span id="totalFileCount">0</span>)</h3>
+                <span class="toggle-icon" id="fileBrowserToggleIcon">▼</span>
             </div>
-            <div class="file-list" id="fileList"></div>
+            <div class="file-browser-body" id="fileBrowserBody">
+                <p style="color:#7f8c8d;margin-bottom:10px;font-size:0.9rem;">
+                    Select which files to compile. All selected files will be merged into one report.
+                </p>
+                <div class="file-browser-controls">
+                    <button class="btn-small btn-select-all" onclick="selectAllFiles()">✅ Select All</button>
+                    <button class="btn-small btn-deselect-all" onclick="deselectAllFiles()">❌ Deselect All</button>
+                    <span style="margin-left:auto;color:#7f8c8d;font-size:0.9rem;" id="fileSelectionCount">0 selected</span>
+                </div>
+                <div class="file-list" id="fileList"></div>
+            </div>
         </div>
 
         <!-- RESULTS -->
         <div class="results" id="results">
             <div class="stats" id="stats"></div>
 
-            <!-- Result action bar: Download + Print (NO COPY TABLE) -->
+            <!-- Result action bar: Download ONLY (no Print, no Copy) -->
             <div class="result-actions">
                 <span class="label">📊 Report actions:</span>
                 <button class="btn-success" onclick="downloadCompiled()" id="downloadBtn" disabled>
                     ⬇️ Download Report
-                </button>
-                <button class="btn-secondary" onclick="printReport()">
-                    🖨️ Print Report
                 </button>
             </div>
 
@@ -883,11 +957,13 @@
         let compiledData = [];
         let allSections = new Set();
         let hasSearched = false;
+        let fileBrowserCollapsed = false;
 
         // ============================================================
         //  DEBUG
         // ============================================================
-        function debugLog(message, type = 'info') {
+        function debugLog(message, type) {
+            type = type || 'info';
             const panel = document.getElementById('debugContent');
             const time = new Date().toLocaleTimeString();
             const line = document.createElement('div');
@@ -964,7 +1040,6 @@
             }, 5000);
         }
 
-        // slide keyframes
         (function() {
             const s = document.createElement('style');
             s.textContent = '\
@@ -1016,7 +1091,25 @@
         }
 
         // ============================================================
-        //  SECTION AUTO-SYNC
+        //  FILE BROWSER TOGGLE
+        // ============================================================
+        function toggleFileBrowser() {
+            const body = document.getElementById('fileBrowserBody');
+            const icon = document.getElementById('fileBrowserToggleIcon');
+            fileBrowserCollapsed = !fileBrowserCollapsed;
+            if (fileBrowserCollapsed) {
+                body.classList.add('hidden');
+                icon.textContent = '▶';
+                icon.classList.add('collapsed');
+            } else {
+                body.classList.remove('hidden');
+                icon.textContent = '▼';
+                icon.classList.remove('collapsed');
+            }
+        }
+
+        // ============================================================
+        //  SECTION AUTO-SYNC & CLICKABLE CHIPS
         // ============================================================
         function updateSectionFilter(sections) {
             const sel = document.getElementById('sectionFilter');
@@ -1032,15 +1125,47 @@
             });
             if (current && sections.has(current)) sel.value = current;
 
+            // Build clickable chips (no emoji)
             const chips = document.getElementById('sectionChips');
             if (sections.size > 0) {
                 chips.innerHTML = [...sections].sort().map(function(s) {
-                    return '<span class="section-chip">📚 ' + s + '</span>';
+                    return '<button class="section-chip" onclick="scrollToSection(\'' + s.replace(/'/g, "\\'") +
+                        '\')">' + s + '</button>';
                 }).join('');
-                debugLog('📚 ' + sections.size + ' sections found', 'success');
+                debugLog('📚 ' + sections.size + ' sections found (chips clickable)', 'success');
             } else {
                 chips.innerHTML = '';
                 debugLog('📚 No sections found', 'warning');
+            }
+        }
+
+        // ============================================================
+        //  SCROLL TO SECTION
+        // ============================================================
+        function scrollToSection(sectionName) {
+            const sectionGroups = document.querySelectorAll('.section-group');
+            let target = null;
+            for (var i = 0; i < sectionGroups.length; i++) {
+                const header = sectionGroups[i].querySelector('.section-header span:first-child');
+                if (header && header.textContent.trim() === sectionName) {
+                    target = sectionGroups[i];
+                    break;
+                }
+            }
+            if (target) {
+                // Remove previous highlights
+                document.querySelectorAll('.section-highlight-flash').forEach(function(el) {
+                    el.classList.remove('section-highlight-flash');
+                });
+                target.classList.add('section-highlight-flash');
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Remove highlight after animation
+                setTimeout(function() {
+                    target.classList.remove('section-highlight-flash');
+                }, 1500);
+                showNotification('Scrolled to: ' + sectionName, 'info');
+            } else {
+                showNotification('Section "' + sectionName + '" not found in current report', 'warning');
             }
         }
 
@@ -1094,6 +1219,15 @@
                 }
 
                 document.getElementById('fileBrowser').classList.add('active');
+                // Expand file browser by default when files appear
+                const body = document.getElementById('fileBrowserBody');
+                const icon = document.getElementById('fileBrowserToggleIcon');
+                if (body.classList.contains('hidden')) {
+                    body.classList.remove('hidden');
+                    icon.textContent = '▼';
+                    icon.classList.remove('collapsed');
+                    fileBrowserCollapsed = false;
+                }
                 renderFileList(filtered);
                 showStatus('✅ Found ' + filtered.length + ' file(s)', 'success');
                 showNotification('✅ Found ' + filtered.length + ' file(s)', 'success');
@@ -1276,7 +1410,6 @@
                     return;
                 }
 
-                // update sections
                 var secs = new Set();
                 compiledData.forEach(function(r) {
                     if (r.section && r.section !== 'N/A' && r.section !== 'Unknown') secs.add(r.section);
@@ -1284,7 +1417,7 @@
                 allSections = secs;
                 updateSectionFilter(secs);
 
-                displayCompiledData(compiledData, filters);
+                displayCompiledData(compiledData);
                 document.getElementById('results').classList.add('active');
                 document.getElementById('downloadBtn').disabled = false;
 
@@ -1331,9 +1464,9 @@
                 var records = sections[section];
                 records.sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); });
 
-                html += '<div class="section-group">\
+                html += '<div class="section-group" id="section-' + section.replace(/\s+/g, '-') + '">\
                     <div class="section-header">\
-                        <span>📚 ' + section + '</span>\
+                        <span>' + section + '</span>\
                         <span class="student-count">' + records.length + ' students</span>\
                     </div>\
                     <div class="section-body">\
@@ -1371,10 +1504,13 @@
             }
 
             document.getElementById('compiledTable').innerHTML = html;
+
+            // Re-bind chips to use scrollToSection after new sections are rendered
+            // The chips are already bound via onclick in updateSectionFilter
         }
 
         // ============================================================
-        //  DOWNLOAD REPORT
+        //  DOWNLOAD REPORT (no emoji in output)
         // ============================================================
         function downloadCompiled() {
             if (!compiledData || compiledData.length === 0) {
@@ -1420,7 +1556,7 @@
                 records.sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); });
                 tableHTML += '\
                     <h2 style="color:#186E00;border-bottom:2px solid #186E00;padding-bottom:10px;margin-top:30px;">\
-                        📚 ' + section + ' (' + records.length + ' students)\
+                        ' + section + ' (' + records.length + ' students)\
                     </h2>\
                     <table>\
                         <thead><tr><th>#</th><th>Photo</th><th>Name</th><th>LRN</th><th>Grade</th><th>Action</th><th>Date/Time</th></tr></thead>\
@@ -1457,7 +1593,7 @@
                     .close-modal{position:absolute;top:20px;right:35px;color:#fff;font-size:40px;cursor:pointer;}\
                 </style>\
             </head><body>\
-                <h1>📊 ASLS Attendance Report</h1>\
+                <h1>ASLS Attendance Report</h1>\
                 <p>' + month + ' ' + day + ', ' + year + ' (' + time + ')</p>\
                 <p>Generated: ' + now.toLocaleString() + '</p>\
                 <p>Total Records: ' + data.length + '</p>\
@@ -1473,11 +1609,6 @@
                 <\/script>\
             </body></html>';
         }
-
-        // ============================================================
-        //  PRINT
-        // ============================================================
-        function printReport() { window.print(); }
 
         // ============================================================
         //  TEST CONNECTION
@@ -1553,7 +1684,6 @@
         window.searchSyncAndCompile = searchSyncAndCompile;
         window.compileAttendance = compileAttendance;
         window.downloadCompiled = downloadCompiled;
-        window.printReport = printReport;
         window.clearResults = clearResults;
         window.selectAllFiles = selectAllFiles;
         window.deselectAllFiles = deselectAllFiles;
@@ -1562,6 +1692,8 @@
         window.toggleDebug = toggleDebug;
         window.openImageModal = openImageModal;
         window.closeImageModal = closeImageModal;
+        window.toggleFileBrowser = toggleFileBrowser;
+        window.scrollToSection = scrollToSection;
     </script>
 
 </body>
