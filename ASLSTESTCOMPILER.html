@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>ASLS - Attendance Compiler</title>
-    <link rel="icon" type="image/png" href="Logo.png">
-    
-    <style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>ASLS – Attendance Compiler</title>
+    <link rel="icon" type="image/png" href="Logo.png" />
 
+    <style>
+        /* ─── IMAGE MODAL ─── */
         .image-modal {
             display: none;
             position: fixed;
@@ -18,9 +18,8 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.9);
+            background-color: rgba(0, 0, 0, 0.9);
         }
-        
         .modal-content {
             display: block;
             margin: auto;
@@ -29,21 +28,18 @@
             border-radius: 10px;
             animation: zoomIn 0.3s ease;
         }
-        
         .close-modal {
             position: absolute;
             top: 20px;
             right: 35px;
-            color: white;
+            color: #fff;
             font-size: 40px;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
         }
-        
         .close-modal:hover {
             color: #ccc;
         }
-        
         @keyframes zoomIn {
             from {
                 transform: scale(0.7);
@@ -54,7 +50,8 @@
                 opacity: 1;
             }
         }
-        
+
+        /* ─── RESET / BASE ─── */
         * {
             margin: 0;
             padding: 0;
@@ -73,52 +70,55 @@
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 30px;
             animation: slideUp 0.5s ease-out;
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
+        /* ─── HEADER ─── */
         .header {
             background: linear-gradient(135deg, #186E00, #2ecc71);
-            color: white;
+            color: #fff;
             padding: 30px;
             border-radius: 20px;
             margin-bottom: 30px;
             text-align: center;
         }
-
         .header h1 {
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 10px;
         }
-
         .header p {
             font-size: 1.2rem;
             opacity: 0.9;
         }
-
         .header .sub-info {
             margin-top: 15px;
             padding: 15px;
-            background: rgba(255,255,255,0.15);
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 12px;
             display: flex;
             justify-content: center;
             gap: 30px;
             flex-wrap: wrap;
         }
-
         .header .sub-info span {
             font-weight: 600;
         }
 
-        /* Debug Panel */
+        /* ─── DEBUG PANEL ─── */
         .debug-panel {
             background: #2c3e50;
             color: #ecf0f1;
@@ -131,50 +131,43 @@
             overflow-y: auto;
             display: none;
         }
-
         .debug-panel.active {
             display: block;
         }
-
         .debug-panel .debug-line {
             padding: 3px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-
         .debug-panel .debug-line.error {
             color: #e74c3c;
         }
-
         .debug-panel .debug-line.success {
             color: #2ecc71;
         }
-
         .debug-panel .debug-line.info {
             color: #3498db;
         }
-
         .debug-toggle {
             position: fixed;
             bottom: 20px;
             right: 20px;
             background: #2c3e50;
-            color: white;
+            color: #fff;
             border: none;
             border-radius: 50%;
             width: 50px;
             height: 50px;
             font-size: 1.5rem;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             z-index: 100;
             transition: all 0.3s ease;
         }
-
         .debug-toggle:hover {
             transform: scale(1.1);
         }
 
-        /* Filter Section - Primary */
+        /* ─── FILTERS ─── */
         .filters-primary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -185,46 +178,39 @@
             border-radius: 15px;
             border: 2px solid #a5d6a7;
         }
-
         .filters-primary .filter-group label {
             color: #1b5e20;
             font-weight: 700;
         }
-
         .filter-group {
             display: flex;
             flex-direction: column;
         }
-
         .filter-group label {
             font-weight: 600;
             color: #2c3e50;
             margin-bottom: 5px;
             font-size: 0.85rem;
         }
-
         .filter-group select,
         .filter-group input {
             padding: 10px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-size: 0.95rem;
-            background: white;
+            background: #fff;
             transition: all 0.3s ease;
             min-height: 45px;
         }
-
         .filter-group select:focus,
         .filter-group input:focus {
             border-color: #186E00;
             outline: none;
             box-shadow: 0 0 0 3px rgba(24, 110, 0, 0.1);
         }
-
         .filter-group select option:disabled {
             color: #999;
         }
-
         .filter-group .hint {
             font-size: 0.7rem;
             color: #999;
@@ -237,34 +223,32 @@
             gap: 8px;
             margin: 10px 0 5px 0;
         }
-
         .section-chip {
             background: #186E00;
-            color: white;
+            color: #fff;
             padding: 4px 14px;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
             opacity: 0.9;
         }
-
         .section-chip:hover {
             opacity: 1;
             transform: scale(1.05);
         }
 
-        /* Action Buttons */
+        /* ─── ACTION BUTTONS ─── */
         .filter-actions {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
             margin-bottom: 20px;
+            align-items: center;
         }
-
         .btn-primary {
             padding: 15px 30px;
             background: linear-gradient(135deg, #186E00, #2ecc71);
-            color: white;
+            color: #fff;
             border: none;
             border-radius: 15px;
             font-size: 1.1rem;
@@ -275,16 +259,13 @@
             letter-spacing: 1px;
             box-shadow: 0 5px 15px rgba(24, 110, 0, 0.3);
         }
-
         .btn-primary:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(24, 110, 0, 0.4);
         }
-
         .btn-primary:active {
             transform: translateY(0);
         }
-
         .btn-primary:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -294,7 +275,7 @@
         .btn-secondary {
             padding: 15px 25px;
             background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
+            color: #fff;
             border: none;
             border-radius: 15px;
             font-size: 1rem;
@@ -302,7 +283,6 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
         .btn-secondary:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
@@ -311,7 +291,7 @@
         .btn-danger {
             padding: 15px 25px;
             background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
+            color: #fff;
             border: none;
             border-radius: 15px;
             font-size: 1rem;
@@ -319,7 +299,6 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
         .btn-danger:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
@@ -328,7 +307,7 @@
         .btn-success {
             padding: 15px 25px;
             background: linear-gradient(135deg, #27ae60, #2ecc71);
-            color: white;
+            color: #fff;
             border: none;
             border-radius: 15px;
             font-size: 1rem;
@@ -336,7 +315,6 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
         .btn-success:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
@@ -345,7 +323,7 @@
         .btn-warning {
             padding: 15px 25px;
             background: linear-gradient(135deg, #f39c12, #e67e22);
-            color: white;
+            color: #fff;
             border: none;
             border-radius: 15px;
             font-size: 1rem;
@@ -353,7 +331,6 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
         .btn-warning:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
@@ -368,22 +345,19 @@
             transition: all 0.2s ease;
             font-size: 0.9rem;
         }
-
         .btn-small:hover {
             transform: translateY(-2px);
         }
-
         .btn-select-all {
             background: #186E00;
-            color: white;
+            color: #fff;
         }
-
         .btn-deselect-all {
             background: #95a5a6;
-            color: white;
+            color: #fff;
         }
 
-        /* File Browser */
+        /* ─── FILE BROWSER ─── */
         .file-browser {
             margin-top: 20px;
             padding: 20px;
@@ -391,20 +365,17 @@
             border-radius: 15px;
             display: none;
         }
-
         .file-browser.active {
             display: block;
         }
-
         .file-list {
             max-height: 400px;
             overflow-y: auto;
             margin-top: 10px;
         }
-
         .file-item {
             padding: 10px 15px;
-            background: white;
+            background: #fff;
             margin: 5px 0;
             border-radius: 8px;
             display: flex;
@@ -414,32 +385,26 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-
         .file-item:hover {
             transform: translateX(5px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
-
         .file-item.selected {
             border-left-color: #27ae60;
             background: #f0fff4;
         }
-
         .file-item .file-name {
             font-weight: 500;
             font-size: 0.9rem;
         }
-
         .file-item .file-info {
             color: #7f8c8d;
             font-size: 0.8rem;
         }
-
         .file-item .file-check {
             color: #186E00;
             font-weight: 700;
         }
-
         .file-browser-controls {
             display: flex;
             gap: 10px;
@@ -448,7 +413,7 @@
             align-items: center;
         }
 
-        /* Status Message */
+        /* ─── STATUS ─── */
         .status-message {
             padding: 15px 20px;
             border-radius: 12px;
@@ -456,41 +421,35 @@
             display: none;
             font-weight: 500;
         }
-
         .status-message.active {
             display: block;
         }
-
         .status-message.info {
             background: #d1ecf1;
             color: #0c5460;
             border-left: 4px solid #3498db;
         }
-
         .status-message.success {
             background: #d4edda;
             color: #155724;
             border-left: 4px solid #27ae60;
         }
-
         .status-message.warning {
             background: #fff3cd;
             color: #856404;
             border-left: 4px solid #f39c12;
         }
-
         .status-message.error {
             background: #f8d7da;
             color: #721c24;
             border-left: 4px solid #e74c3c;
         }
 
-        /* Results */
+        /* ─── RESULTS ─── */
         .results {
             margin-top: 30px;
             display: none;
         }
-
         .results.active {
             display: block;
         }
@@ -501,21 +460,18 @@
             gap: 15px;
             margin-bottom: 20px;
         }
-
         .stat-card {
-            background: white;
+            background: #fff;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-
         .stat-card .number {
             font-size: 2rem;
             font-weight: 700;
             color: #186E00;
         }
-
         .stat-card .label {
             color: #7f8c8d;
             font-size: 0.9rem;
@@ -528,61 +484,53 @@
             overflow: hidden;
             border: 1px solid #e0e0e0;
         }
-
         .section-header {
             background: linear-gradient(135deg, #186E00, #2ecc71);
-            color: white;
+            color: #fff;
             padding: 15px 20px;
             font-size: 1.2rem;
             font-weight: 700;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            cursor: default;
         }
-
         .section-header .student-count {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             padding: 4px 15px;
             border-radius: 20px;
             font-size: 0.9rem;
         }
-
         .section-body {
             padding: 15px;
             overflow-x: auto;
-            background: white;
+            background: #fff;
         }
 
         .table-container {
             overflow-x: auto;
-            background: white;
+            background: #fff;
             border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9rem;
         }
-
         th {
             background: #2c3e50;
-            color: white;
+            color: #fff;
             padding: 12px;
             text-align: left;
             position: sticky;
             top: 0;
             z-index: 10;
         }
-
         td {
             padding: 12px;
             border-bottom: 1px solid #ecf0f1;
         }
-
         tr:hover {
             background: #f8f9fa;
         }
@@ -594,12 +542,10 @@
             font-size: 0.8rem;
             display: inline-block;
         }
-
         .action-badge.login {
             background: #d4edda;
             color: #155724;
         }
-
         .action-badge.logout {
             background: #f8d7da;
             color: #721c24;
@@ -610,41 +556,50 @@
             padding: 60px 20px;
             color: #95a5a6;
         }
-
         .no-data .icon {
             font-size: 4rem;
             margin-bottom: 15px;
         }
-
         .no-data h3 {
             color: #2c3e50;
             margin-bottom: 10px;
         }
 
-        /* Loading Overlay */
+        .student-photo {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ddd;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .student-photo:hover {
+            transform: scale(1.1);
+        }
+
+        /* ─── LOADING OVERLAY ─── */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.8);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 9999;
             backdrop-filter: blur(5px);
         }
-
         .loading-content {
-            background: white;
+            background: #fff;
             padding: 50px;
             border-radius: 30px;
             text-align: center;
             max-width: 500px;
             width: 90%;
         }
-
         .loading-spinner {
             width: 60px;
             height: 60px;
@@ -654,12 +609,14 @@
             animation: spin 1s linear infinite;
             margin: 20px auto;
         }
-
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
-
         .progress-bar {
             width: 100%;
             height: 8px;
@@ -668,7 +625,6 @@
             margin: 15px 0;
             overflow: hidden;
         }
-
         .progress-bar .fill {
             height: 100%;
             background: linear-gradient(90deg, #186E00, #2ecc71);
@@ -677,1380 +633,936 @@
             width: 0%;
         }
 
-        /* Responsive */
+        /* ─── RESULT ACTION BAR ─── */
+        .result-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f0f7f0;
+            border-radius: 14px;
+            border: 1px solid #c8e6c9;
+        }
+        .result-actions .label {
+            font-weight: 600;
+            color: #1b5e20;
+            margin-right: 10px;
+        }
+
+        /* ─── RESPONSIVE ─── */
         @media (max-width: 768px) {
-            .container { padding: 15px; }
-            .header h1 { font-size: 1.8rem; }
-            .filters-primary { grid-template-columns: 1fr 1fr; }
-            .filter-actions { flex-direction: column; }
-            .filter-actions button { width: 100%; }
-            .stats { grid-template-columns: 1fr 1fr; }
-            table { font-size: 0.75rem; }
-            th, td { padding: 8px; }
-            .file-item { flex-wrap: wrap; }
-            .file-item .file-info { width: 100%; margin-top: 5px; }
-            .debug-toggle { bottom: 10px; right: 10px; width: 40px; height: 40px; font-size: 1.2rem; }
+            .container {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .filters-primary {
+                grid-template-columns: 1fr 1fr;
+            }
+            .filter-actions {
+                flex-direction: column;
+            }
+            .filter-actions button {
+                width: 100%;
+            }
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            table {
+                font-size: 0.75rem;
+            }
+            th,
+            td {
+                padding: 8px;
+            }
+            .file-item {
+                flex-wrap: wrap;
+            }
+            .file-item .file-info {
+                width: 100%;
+                margin-top: 5px;
+            }
+            .debug-toggle {
+                bottom: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            .result-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .result-actions .label {
+                text-align: center;
+            }
         }
-
         @media (max-width: 480px) {
-            .filters-primary { grid-template-columns: 1fr; }
+            .filters-primary {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- Header -->
-    <div class="header">
-        <h1>ASLS Attendance Compiler</h1>
-        <p>Select date and time, then Generate Attendance Sheet </p>
-        <div class="sub-info">
-            <span>ICT Club</span>
-            <span>Tuguegarao City Science High School</span>
-        </div>
-    </div>
-
-    <!-- Status Message -->
-    <div class="status-message" id="statusMessage"></div>
-
-    <!-- PRIMARY FILTERS -->
-    <div class="filters-primary">
-        <div class="filter-group">
-            <label for="yearFilter">📅 Year <span style="color:#c0392b;font-weight:700;">*</span></label>
-            <select id="yearFilter">
-                <option value="">-- Select Year --</option>
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label for="monthFilter">📆 Month <span style="color:#c0392b;font-weight:700;">*</span></label>
-            <select id="monthFilter">
-                <option value="">-- Select Month --</option>
-                <option value="JANUARY">January</option>
-                <option value="FEBRUARY">February</option>
-                <option value="MARCH">March</option>
-                <option value="APRIL">April</option>
-                <option value="MAY">May</option>
-                <option value="JUNE">June</option>
-                <option value="JULY">July</option>
-                <option value="AUGUST">August</option>
-                <option value="SEPTEMBER">September</option>
-                <option value="OCTOBER">October</option>
-                <option value="NOVEMBER">November</option>
-                <option value="DECEMBER">December</option>
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label for="dayFilter">📋 Day <span style="color:#c0392b;font-weight:700;">*</span></label>
-            <select id="dayFilter">
-                <option value="">-- Select Day --</option>
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label for="timeFilter">🕐 Time (AM/PM) <span style="color:#c0392b;font-weight:700;">*</span></label>
-            <select id="timeFilter">
-                <option value="">-- Select Time --</option>
-                <option value="AM">AM</option>
-                <option value="PM">PM</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- SECONDARY FILTERS -->
-    <div class="filters-primary" style="background:#f8f9fa;border-color:#e0e0e0;display:none;" id="secondaryFilters">
-        <div class="filter-group">
-            <label for="gradeFilter">📚 Grade Level</label>
-            <select id="gradeFilter">
-                <option value="all">All Grades</option>
-                <option value="7">Grade 7</option>
-                <option value="8">Grade 8</option>
-                <option value="9">Grade 9</option>
-                <option value="10">Grade 10</option>
-                <option value="11">Grade 11</option>
-                <option value="12">Grade 12</option>
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label for="sectionFilter">🏫 Section <span style="color:#186E00;font-size:0.7rem;">(Auto-synced)</span></label>
-            <select id="sectionFilter">
-                <option value="all">All Sections</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- Section Chips -->
-    <div class="section-chips" id="sectionChips"></div>
-
-    <!-- Action Buttons -->
-    <div class="filter-actions">
-        <button class="btn-primary" onclick="searchSyncAndCompile()">
-            Generate Attendance Report
-        </button>
-        <button class="btn-secondary" onclick="downloadCompiled()" id="downloadBtn" disabled>
-             Download Report
-        </button>
-        <button class="btn-danger" onclick="clearResults()">
-             Clear
-        </button>
-        <button class="btn-warning" onclick="testConnection()">
-             Test Connection 
-        </button>
-    </div>
-
-    <!-- File Browser -->
-    <div class="file-browser" id="fileBrowser">
-        <h3>📁 Found Files (<span id="totalFileCount">0</span>)</h3>
-        <p style="color: #7f8c8d; margin-bottom: 10px; font-size: 0.9rem;">
-            Select which files to compile. All selected files will be merged into one report.
-        </p>
-        
-        <div class="file-browser-controls">
-            <button class="btn-small btn-select-all" onclick="selectAllFiles()">✅ Select All</button>
-            <button class="btn-small btn-deselect-all" onclick="deselectAllFiles()">❌ Deselect All</button>
-            <span style="margin-left: auto; color: #7f8c8d; font-size: 0.9rem;" id="fileSelectionCount">0 selected</span>
-        </div>
-        
-        <div class="file-list" id="fileList">
-            <!-- Populated dynamically -->
-        </div>
-    </div>
-
-    <!-- Results -->
-    <div class="results" id="results">
-        <div class="stats" id="stats">
-            <!-- Populated dynamically -->
-        </div>
-                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-        
-            <button class="btn-secondary" onclick="printReport()">
-                🖨️ Print Report
-            </button>
-        
-            <button class="btn-secondary" onclick="copyTableToClipboard()">
-                📋 Copy Table
-            </button>
-        
-        </div>
-        <div class="table-container" id="compiledTable">
-            <!-- Populated dynamically -->
-        </div>
-    </div>
-</div>
-
-<!-- Debug Panel -->
-<div class="debug-panel" id="debugPanel">
-    <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
-        <strong>🔍 Debug Console</strong>
-        <span onclick="document.getElementById('debugPanel').classList.remove('active')" style="cursor:pointer;">✕</span>
-    </div>
-    <div id="debugContent"></div>
-</div>
-
-<!-- Debug Toggle Button -->
-<button class="debug-toggle" onclick="toggleDebug()">🐛</button>
-
-<!-- Loading Overlay -->
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-content">
-        <h2 id="loadingTitle">Loading...</h2>
-        <div class="loading-spinner"></div>
-        <p id="loadingMessage">Please wait...</p>
-        <div class="progress-bar">
-            <div class="fill" id="progressFill"></div>
-        </div>
-        <p id="loadingProgress" style="color: #7f8c8d; font-size: 0.9rem;">0%</p>
-    </div>
-</div>
-
-<!-- IMAGE MODAL -->
-<div id="imageModal" class="image-modal">
-
-    <span class="close-modal" onclick="closeImageModal()">
-        &times;
-    </span>
-
-    <img id="modalImage" class="modal-content">
-
-</div>
-    
-<script>
-// ============================================
-// CONFIGURATION - UPDATE WITH YOUR URL!
-// ============================================
-    
-function openImageModal(imageSrc) {
-
-    document.getElementById('imageModal').style.display = 'block';
-
-    document.getElementById('modalImage').src = imageSrc;
-}
-
-function closeImageModal() {
-
-    document.getElementById('imageModal').style.display = 'none';
-}
-
-// Close when clicking outside image
-window.onclick = function(event) {
-
-    const modal = document.getElementById('imageModal');
-
-    if (event.target === modal) {
-        closeImageModal();
-    }
-}
-    
-// REPLACE THIS WITH YOUR DEPLOYED APPS SCRIPT URL
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-FfH5jH4dyCvuzDn4ZRGgVHGrKo7jHKPgKmbOEx2XaHy3zPrw8gKrPXXbcUV-KQVnIg/exec';
-
-const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 
-                'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
-
-// ============================================
-// STATE
-// ============================================
-
-let availableFiles = [];
-let selectedFiles = [];
-let compiledData = [];
-let allSections = new Set();
-let allRecords = [];
-let hasSearched = false;
-
-// ============================================
-// DEBUG HELPER
-// ============================================
-
-function debugLog(message, type = 'info') {
-    const panel = document.getElementById('debugContent');
-    const time = new Date().toLocaleTimeString();
-    const line = document.createElement('div');
-    line.className = `debug-line ${type}`;
-    line.textContent = `[${time}] ${message}`;
-    panel.appendChild(line);
-    panel.scrollTop = panel.scrollHeight;
-    console.log(`[${type.toUpperCase()}]`, message);
-}
-
-function toggleDebug() {
-    const panel = document.getElementById('debugPanel');
-    panel.classList.toggle('active');
-    if (panel.classList.contains('active')) {
-        debugLog('🔍 Debug panel opened');
-    }
-}
-
-// ============================================
-// UI HELPERS
-// ============================================
-
-function showLoading(title, message) {
-    document.getElementById('loadingOverlay').style.display = 'flex';
-    document.getElementById('loadingTitle').textContent = title || 'Loading...';
-    document.getElementById('loadingMessage').textContent = message || 'Please wait...';
-    document.getElementById('progressFill').style.width = '0%';
-    document.getElementById('loadingProgress').textContent = '0%';
-}
-
-function updateLoading(message, progress) {
-    document.getElementById('loadingMessage').textContent = message;
-    const pct = Math.min(progress || 0, 100);
-    document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('loadingProgress').textContent = Math.round(pct) + '%';
-}
-
-function hideLoading() {
-    document.getElementById('loadingOverlay').style.display = 'none';
-}
-
-function showStatus(message, type = 'info') {
-    const container = document.getElementById('statusMessage');
-    container.className = `status-message active ${type}`;
-    container.textContent = message;
-    debugLog(message, type);
-}
-
-function clearStatus() {
-    const container = document.getElementById('statusMessage');
-    container.className = 'status-message';
-    container.textContent = '';
-}
-
-function showNotification(message, type = 'info') {
-    const colors = {
-        info: '#186E00',
-        error: '#e74c3c',
-        warning: '#f39c12',
-        success: '#27ae60'
-    };
-    
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${colors[type] || colors.info};
-        color: white;
-        padding: 15px 25px;
-        border-radius: 12px;
-        font-weight: 600;
-        z-index: 10000;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        animation: slideIn 0.5s ease-out;
-        max-width: 400px;
-        font-size: 0.95rem;
-    `;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.5s ease-out';
-        setTimeout(() => notification.remove(), 500);
-    }, 5000);
-}
-
-// Add keyframe animations
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-`;
-document.head.appendChild(styleSheet);
-
-// ============================================
-// INITIALIZE DATE FILTERS
-// ============================================
-
-function initDateFilters() {
-    const yearSelect = document.getElementById('yearFilter');
-    const currentYear = new Date().getFullYear();
-    yearSelect.innerHTML = '<option value="">-- Select Year --</option>';
-    for (let y = currentYear - 5; y <= currentYear + 1; y++) {
-        yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
-    }
-    yearSelect.value = currentYear;
-
-    const daySelect = document.getElementById('dayFilter');
-    daySelect.innerHTML = '<option value="">-- Select Day --</option>';
-    for (let d = 1; d <= 31; d++) {
-        daySelect.innerHTML += `<option value="${String(d).padStart(2, '0')}">${d}</option>`;
-    }
-    daySelect.value = String(new Date().getDate()).padStart(2, '0');
-
-    const monthSelect = document.getElementById('monthFilter');
-    monthSelect.value = MONTHS[new Date().getMonth()];
-
-    const timeSelect = document.getElementById('timeFilter');
-    timeSelect.value = new Date().getHours() >= 12 ? 'PM' : 'AM';
-    
-    debugLog('📅 Date filters initialized', 'info');
-}
-
-// ============================================
-// SECTION AUTO-SYNC
-// ============================================
-
-function updateSectionFilter(sections) {
-    const select = document.getElementById('sectionFilter');
-    const currentValue = select.value;
-    
-    select.innerHTML = '<option value="all">All Sections</option>';
-    
-    const sortedSections = [...sections].sort();
-    
-    sortedSections.forEach(section => {
-        if (section && section !== 'N/A' && section !== 'Unknown') {
-            const option = document.createElement('option');
-            option.value = section;
-            option.textContent = section;
-            select.appendChild(option);
-        }
-    });
-    
-    if (currentValue && sections.has(currentValue)) {
-        select.value = currentValue;
-    }
-    
-    const chipsContainer = document.getElementById('sectionChips');
-    if (sections.size > 0) {
-        chipsContainer.innerHTML = [...sections].sort().map(s => 
-            `<span class="section-chip">📚 ${s}</span>`
-        ).join('');
-        debugLog(`📚 Found ${sections.size} sections: ${[...sections].sort().join(', ')}`, 'success');
-    } else {
-        chipsContainer.innerHTML = '';
-        debugLog('📚 No sections found', 'warning');
-    }
-}
-
-// ============================================
-// SEARCH & SYNC FILES
-// ============================================
-
-async function searchAndSync() {
-    const year = document.getElementById('yearFilter').value;
-    const month = document.getElementById('monthFilter').value;
-    const day = document.getElementById('dayFilter').value;
-    const time = document.getElementById('timeFilter').value;
-
-    if (!year || !month || !day || !time) {
-        showStatus('⚠️ Please select Year, Month, Day, and Time (AM/PM)', 'warning');
-        showNotification('⚠️ Please select all required fields', 'warning');
-        return;
-    }
-
-    document.getElementById('secondaryFilters').style.display = 'grid';
-    showLoading('🔍 Searching Files', `Looking for ${month} ${day}, ${year} (${time})...`);
-    debugLog(`🔍 Searching: ${month} ${day}, ${year} (${time})`, 'info');
-
-    try {
-        const url = `${APPS_SCRIPT_URL}?action=listFiles`;
-        debugLog(`📡 Fetching: ${url}`, 'info');
-        
-        const response = await fetch(url);
-        debugLog(`📡 Response status: ${response.status}`, 'info');
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        debugLog(`📥 Received ${data.files ? data.files.length : 0} total files`, 'info');
-
-        if (!data.success) {
-            throw new Error(data.error || 'Failed to list files');
-        }
-
-        // Filter files
-        const filteredFiles = data.files.filter(file => {
-            const matchesYear = file.year === year;
-            const matchesMonth = file.month.toUpperCase() === month.toUpperCase();
-            const matchesDay = file.day === day;
-            const matchesTime = file.name.toUpperCase().includes(time.toUpperCase());
-            return matchesYear && matchesMonth && matchesDay && matchesTime;
-        });
-
-        availableFiles = filteredFiles;
-        selectedFiles = filteredFiles.map(f => f.id);
-        
-        debugLog(`📁 Found ${filteredFiles.length} matching files`, filteredFiles.length > 0 ? 'success' : 'warning');
-
-        if (filteredFiles.length === 0) {
-            showStatus(`📭 No files found for ${month} ${day}, ${year} (${time})`, 'warning');
-            showNotification(`📭 No files found for ${month} ${day}, ${year} (${time})`, 'warning');
-            document.getElementById('fileBrowser').classList.remove('active');
-            hideLoading();
-            return;
-        }
-
-        // Show file browser
-        document.getElementById('fileBrowser').classList.add('active');
-        renderFileList(filteredFiles);
-        
-        showStatus(`✅ Found ${filteredFiles.length} file(s) for ${month} ${day}, ${year} (${time})`, 'success');
-        showNotification(`✅ Found ${filteredFiles.length} file(s)`, 'success');
-
-        // Extract sections
-        updateLoading('📊 Extracting sections from files...', 30);
-        debugLog('📊 Extracting sections...', 'info');
-        
-        const sections = await extractAllSections(filteredFiles);
-        allSections = sections;
-        updateSectionFilter(sections);
-        
-        hasSearched = true;
-        debugLog(`✅ Search complete. Found ${filteredFiles.length} files, ${sections.size} sections`, 'success');
-
-    } catch(error) {
-        console.error('Error searching:', error);
-        debugLog(`❌ Error: ${error.message}`, 'error');
-        showStatus(`❌ Error: ${error.message}`, 'error');
-        showNotification(`❌ Error: ${error.message}`, 'error');
-    }
-
-    hideLoading();
-}
-
-async function searchSyncAndCompile() {
-
-    // STEP 1: Search files
-    await searchAndSync();
-
-    // STEP 2: Wait a little to ensure files loaded
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // STEP 3: If files found, auto compile
-    if (selectedFiles.length > 0) {
-
-        showNotification(
-            `📊 Auto compiling ${selectedFiles.length} files...`,
-            'info'
-        );
-
-        await compileAttendance();
-
-    } else {
-
-        showNotification(
-            '📭 No files found to compile',
-            'warning'
-        );
-    }
-}
-    
-async function extractAllSections(files) {
-    const sections = new Set();
-    let processed = 0;
-    
-    for (const file of files) {
-        try {
-            const response = await fetch(`${APPS_SCRIPT_URL}?action=getFileContent&fileId=${file.id}`);
-            const data = await response.json();
-            
-            if (data.success && data.content) {
-                const fileSections = extractSectionsFromHTML(data.content);
-                fileSections.forEach(s => {
-                    if (s && s !== 'N/A' && s !== 'Unknown') {
-                        sections.add(s);
-                    }
-                });
-            }
-            
-            processed++;
-            const progress = 30 + (processed / files.length) * 60;
-            updateLoading(`Processing file ${processed}/${files.length}...`, progress);
-            
-        } catch (e) {
-            debugLog(`⚠️ Error extracting from ${file.name}: ${e.message}`, 'warning');
-        }
-    }
-    
-    return sections;
-}
-
-function extractSectionsFromHTML(html) {
-    const sections = new Set();
-    
-    try {
-        const tdRegex = /<td>([^<]*)<\/td>/g;
-        let match;
-        let cells = [];
-        
-        while ((match = tdRegex.exec(html)) !== null) {
-            cells.push(match[1].trim());
-        }
-        
-        for (let i = 0; i < cells.length; i += 8) {
-            if (i + 6 < cells.length) {
-                const section = cells[i + 6].trim();
-                if (section && section !== 'N/A' && section !== 'Unknown' && section !== 'Section') {
-                    sections.add(section);
-                }
-            }
-        }
-        
-        if (sections.size === 0) {
-            const sectionPattern = /\b([A-Z])\b|Section\s*([A-Z])|Grade\s*\d+\s*-\s*([A-Z])/gi;
-            const allText = html.replace(/<[^>]*>/g, ' ');
-            let match;
-            while ((match = sectionPattern.exec(allText)) !== null) {
-                const section = match[1] || match[2] || match[3];
-                if (section && section.length <= 2) {
-                    sections.add(section);
-                }
-            }
-        }
-        
-    } catch (e) {
-        debugLog(`⚠️ Error extracting sections: ${e.message}`, 'warning');
-    }
-    
-    return sections;
-}
-
-// ============================================
-// FILE BROWSER FUNCTIONS
-// ============================================
-
-function renderFileList(files) {
-    const container = document.getElementById('fileList');
-    document.getElementById('totalFileCount').textContent = files.length;
-    document.getElementById('fileSelectionCount').textContent = `${selectedFiles.length} selected`;
-    
-    if (files.length === 0) {
-        container.innerHTML = '<div class="no-data"><div class="icon">📭</div><p>No files found</p></div>';
-        return;
-    }
-    
-    files.sort((a, b) => a.path.localeCompare(b.path));
-    
-    container.innerHTML = files.map(file => `
-        <div class="file-item ${selectedFiles.includes(file.id) ? 'selected' : ''}" 
-             onclick="toggleFile('${file.id}')">
-            <span class="file-name">📄 ${file.name}</span>
-            <span class="file-info">${file.path}</span>
-            <span class="file-check">${selectedFiles.includes(file.id) ? '✅ Selected' : '⬜'}</span>
-        </div>
-    `).join('');
-}
-
-function toggleFile(fileId) {
-    const index = selectedFiles.indexOf(fileId);
-    if (index >= 0) {
-        selectedFiles.splice(index, 1);
-    } else {
-        selectedFiles.push(fileId);
-    }
-    renderFileList(availableFiles);
-}
-
-function selectAllFiles() {
-    selectedFiles = availableFiles.map(f => f.id);
-    renderFileList(availableFiles);
-}
-
-function deselectAllFiles() {
-    selectedFiles = [];
-    renderFileList(availableFiles);
-}
-
-// ============================================
-// COMPILE ATTENDANCE
-// ============================================
-
-async function compileAttendance() {
-    if (selectedFiles.length === 0) {
-        showStatus('⚠️ Please select at least one file to compile', 'warning');
-        showNotification('⚠️ Please select files first', 'warning');
-        return;
-    }
-    
-    showLoading('📊 Compiling Attendance', `Processing ${selectedFiles.length} files...`);
-    debugLog(`📊 Compiling ${selectedFiles.length} files...`, 'info');
-
-    try {
-        const filters = {
-            grade: document.getElementById('gradeFilter').value || 'all',
-            section: document.getElementById('sectionFilter').value || 'all',
-            year: document.getElementById('yearFilter').value,
-            month: document.getElementById('monthFilter').value,
-            day: document.getElementById('dayFilter').value,
-            time: document.getElementById('timeFilter').value
-        };
-        
-        debugLog(`📤 Sending compilation request with ${selectedFiles.length} files`, 'info');
-        debugLog(`📤 Filters: ${JSON.stringify(filters)}`, 'info');
-
-        const formData = new FormData();
-
-        formData.append('data', JSON.stringify({
-            action: 'compileAttendance',
-            fileIds: selectedFiles,
-            filters: filters
-        }));
-        
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: formData
-        });
-
-        debugLog(`📡 Response status: ${response.status}`, 'info');
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        debugLog(`📥 Response received, success: ${data.success}`, data.success ? 'success' : 'error');
-
-        if (!data.success) {
-            throw new Error(data.error || 'Compilation failed');
-        }
-
-        compiledData = data.data || [];
-        debugLog(`📊 Extracted ${compiledData.length} records`, compiledData.length > 0 ? 'success' : 'warning');
-
-        if (compiledData.length === 0) {
-            showStatus('📭 No records found in the selected files', 'warning');
-            showNotification('📭 No records found', 'warning');
-            document.getElementById('results').classList.remove('active');
-            document.getElementById('downloadBtn').disabled = true;
-            hideLoading();
-            return;
-        }
-
-        // Extract sections from compiled data
-        const sections = new Set();
-        compiledData.forEach(r => {
-            if (r.section && r.section !== 'N/A' && r.section !== 'Unknown') {
-                sections.add(r.section);
-            }
-        });
-        allSections = sections;
-        updateSectionFilter(sections);
-
-        displayCompiledData(compiledData, filters);
-        document.getElementById('results').classList.add('active');
-        document.getElementById('downloadBtn').disabled = false;
-
-        showStatus(`✅ Compiled ${compiledData.length} records from ${selectedFiles.length} files`, 'success');
-        showNotification(`✅ ${compiledData.length} records compiled`, 'success');
-        debugLog(`✅ Compilation complete: ${compiledData.length} records`, 'success');
-
-    } catch(error) {
-        console.error('Compilation error:', error);
-        debugLog(`❌ Compilation error: ${error.message}`, 'error');
-        showStatus(`❌ Error: ${error.message}`, 'error');
-        showNotification(`❌ Error: ${error.message}`, 'error');
-    }
-
-    hideLoading();
-}
-
-function displayCompiledData(data, filters) {
-    const statsContainer = document.getElementById('stats');
-    const totalStudents = new Set(data.map(r => r.lrn)).size;
-    const totalLogins = data.filter(r => r.action === 'Log in').length;
-    const totalLogouts = data.filter(r => r.action === 'Log out').length;
-    
-    statsContainer.innerHTML = `
-        <div class="stat-card">
-            <div class="number">${data.length}</div>
-            <div class="label">Total Records</div>
-        </div>
-        <div class="stat-card">
-            <div class="number">${totalStudents}</div>
-            <div class="label">Unique Students</div>
-        </div>
-        <div class="stat-card">
-            <div class="number">${totalLogins}</div>
-            <div class="label">Logins</div>
-        </div>
-        <div class="stat-card">
-            <div class="number">${totalLogouts}</div>
-            <div class="label">Logouts</div>
-        </div>
-        <div class="stat-card" style="background: #e8f5e9;">
-            <div class="number">${allSections.size}</div>
-            <div class="label">Sections Found</div>
-        </div>
-    `;
-    
-    const sections = {};
-    data.forEach(record => {
-        const key = record.section || 'Unknown';
-        if (!sections[key]) sections[key] = [];
-        sections[key].push(record);
-    });
-    
-    const sortedSections = Object.keys(sections).sort();
-    let html = '';
-    
-    sortedSections.forEach(section => {
-        const records = sections[section];
-        records.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-        
-        html += `
-            <div class="section-group">
-                <div class="section-header">
-                    <span>📚 ${section}</span>
-                    <span class="student-count">${records.length} students</span>
-                </div>
-                <div class="section-body">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Photo</th>
-                                <th>Name</th>
-                                <th>LRN</th>
-                                <th>Grade</th>
-                                <th>Action</th>
-                                <th>Date/Time</th>
-                                <th>Source File</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${records.map((record, index) => `
-                                <tr>
-
-                                    <td>${index + 1}</td>
-                                
-                                    <td>
-                                        ${
-                                            record.photo
-                                            ? `
-                                                <img 
-                                                    src="${record.photo}" 
-                                                    width="45"
-                                                    height="45"
-                                                    class="student-photo"
-                                                    onclick="openImageModal('${record.photo}')"
-                                                    style="
-                                                        border-radius:50%;
-                                                        object-fit:cover;
-                                                        border:2px solid #ddd;
-                                                        cursor:pointer;
-                                                        transition:0.2s;
-                                                    "
-                                                    onmouseover="this.style.transform='scale(1.1)'"
-                                                    onmouseout="this.style.transform='scale(1)'"
-                                                >
-                                            `
-                                            : 'N/A'
-                                        }
-                                    </td>
-                                
-                                    <td>${record.name || 'N/A'}</td>
-                                
-                                    <td>${record.lrn || 'N/A'}</td>
-                                
-                                    <td>${record.grade || 'N/A'}</td>
-                                
-                                    <td>
-                                        <span class="action-badge ${record.action === 'Log in' ? 'login' : 'logout'}">
-                                            ${record.action}
-                                        </span>
-                                    </td>
-                                
-                                    <td>
-                                        ${record.timestamp ? new Date(record.timestamp).toLocaleString() : 'N/A'}
-                                    </td>
-                                
-                                    <td style="font-size:0.75rem;color:#7f8c8d;">
-                                        ${record.sourceFile || 'N/A'}
-                                    </td>
-                                
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <h1>ASLS Attendance Compiler</h1>
+            <p>Select date &amp; time, then generate an attendance report</p>
+            <div class="sub-info">
+                <span>ICT Club</span>
+                <span>Tuguegarao City Science High School</span>
             </div>
-        `;
-    });
-    
-    if (sortedSections.length === 0) {
-        html = `<div class="no-data"><div class="icon">📭</div><h3>No Records Found</h3><p>No records match the selected filters</p></div>`;
-    }
-    
-    document.getElementById('compiledTable').innerHTML = html;
-}
-
-// ============================================
-// DOWNLOAD REPORT
-// ============================================
-
-function downloadCompiled() {
-
-    const compiledTable = document.getElementById('compiledTable').innerHTML;
-
-    const stats = document.getElementById('stats').innerHTML;
-
-    const year = document.getElementById('yearFilter').value;
-    const month = document.getElementById('monthFilter').value;
-    const day = document.getElementById('dayFilter').value;
-    const time = document.getElementById('timeFilter').value;
-
-    const html = `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>ASLS Attendance Report</title>
-
-<style>
-
-body{
-    font-family:Arial,sans-serif;
-    background:#f5f5f5;
-    padding:20px;
-}
-
-.header{
-    background:linear-gradient(135deg,#186E00,#2ecc71);
-    color:white;
-    padding:25px;
-    border-radius:20px;
-    text-align:center;
-    margin-bottom:20px;
-}
-
-.stats{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-    gap:15px;
-    margin-bottom:25px;
-}
-
-.stat-card{
-    background:white;
-    padding:20px;
-    border-radius:15px;
-    text-align:center;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-}
-
-.stat-card .number{
-    font-size:2rem;
-    font-weight:bold;
-    color:#186E00;
-}
-
-.section-group{
-    background:white;
-    border-radius:15px;
-    margin-bottom:25px;
-    overflow:hidden;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-}
-
-.section-header{
-    background:linear-gradient(135deg,#186E00,#2ecc71);
-    color:white;
-    padding:15px 20px;
-    font-size:1.2rem;
-    font-weight:bold;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-.section-body{
-    padding:20px;
-    overflow-x:auto;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-}
-
-th{
-    background:#2c3e50;
-    color:white;
-    padding:12px;
-    text-align:left;
-}
-
-td{
-    padding:12px;
-    border-bottom:1px solid #ddd;
-}
-
-.student-photo{
-    width:45px;
-    height:45px;
-    border-radius:50%;
-    object-fit:cover;
-    border:2px solid #ddd;
-    cursor:pointer;
-    transition:0.2s;
-}
-
-.student-photo:hover{
-    transform:scale(1.1);
-}
-
-.action-badge{
-    padding:4px 12px;
-    border-radius:20px;
-    font-size:0.8rem;
-    font-weight:bold;
-}
-
-.login{
-    background:#d4edda;
-    color:#155724;
-}
-
-.logout{
-    background:#f8d7da;
-    color:#721c24;
-}
-
-/* IMAGE MODAL */
-
-.image-modal{
-    display:none;
-    position:fixed;
-    z-index:99999;
-    padding-top:50px;
-    left:0;
-    top:0;
-    width:100%;
-    height:100%;
-    overflow:auto;
-    background-color:rgba(0,0,0,0.9);
-}
-
-.modal-content{
-    display:block;
-    margin:auto;
-    max-width:90%;
-    max-height:85vh;
-    border-radius:10px;
-    animation:zoomIn 0.3s ease;
-}
-
-.close-modal{
-    position:absolute;
-    top:20px;
-    right:35px;
-    color:white;
-    font-size:40px;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-.close-modal:hover{
-    color:#ccc;
-}
-
-@keyframes zoomIn{
-    from{
-        transform:scale(0.7);
-        opacity:0;
-    }
-    to{
-        transform:scale(1);
-        opacity:1;
-    }
-}
-
-
-</style>
-
-</head>
-
-<body>
-
-<div class="header">
-    <h1>📊 ASLS Attendance Report</h1>
-    <p>${month} ${day}, ${year} (${time})</p>
-</div>
-
-<div class="stats">
-    ${stats}
-</div>
-
-${compiledTable}
-
-<!-- IMAGE MODAL -->
-<div id="imageModal" class="image-modal">
-
-    <span class="close-modal" onclick="closeImageModal()">
-        &times;
-    </span>
-
-    <img id="modalImage" class="modal-content">
-
-</div>
-
-<script>
-
-function openImageModal(imageSrc){
-
-    document.getElementById('imageModal').style.display = 'block';
-
-    document.getElementById('modalImage').src = imageSrc;
-}
-
-function closeImageModal(){
-
-    document.getElementById('imageModal').style.display = 'none';
-}
-
-window.onclick = function(event){
-
-    const modal = document.getElementById('imageModal');
-
-    if(event.target === modal){
-        closeImageModal();
-    }
-}
-
-</script>
-
-</body>
-</html>
-`;
-
-    const blob = new Blob([html], { type: 'text/html' });
-
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-
-    a.href = url;
-
-    a.download = `ASLS_Attendance_${year}_${month}_${day}_${time}.html`;
-
-    document.body.appendChild(a);
-
-    a.click();
-
-    document.body.removeChild(a);
-
-    URL.revokeObjectURL(url);
-
-    showNotification('✅ Beautiful interactive report downloaded!', 'success')
-}
-
-    
-
-
-    
-function generateCompiledHTML(data) {
-    const now = new Date();
-    const totalStudents = new Set(data.map(r => r.lrn)).size;
-    const totalLogins = data.filter(r => r.action === 'Log in').length;
-    const totalLogouts = data.filter(r => r.action === 'Log out').length;
-    
-    const year = document.getElementById('yearFilter').value;
-    const month = document.getElementById('monthFilter').value;
-    const day = document.getElementById('dayFilter').value;
-    const time = document.getElementById('timeFilter').value;
-    
-    const sections = {};
-    data.forEach(record => {
-        const key = record.section || 'Unknown';
-        if (!sections[key]) sections[key] = [];
-        sections[key].push(record);
-    });
-    
-    const sortedSections = Object.keys(sections).sort();
-    let tableHTML = '';
-    
-    sortedSections.forEach(section => {
-        const records = sections[section];
-        records.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-        
-        tableHTML += `
-            <h2 style="color: #186E00; border-bottom: 2px solid #186E00; padding-bottom: 10px; margin-top: 30px;">
-                📚 ${section} (${records.length} students)
-            </h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>LRN</th>
-                        <th>Grade</th>
-                        <th>Action</th>
-                        <th>Date/Time</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${records.map((record, index) => `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${record.name || 'N/A'}</td>
-                            <td>${record.lrn || 'N/A'}</td>
-                            <td>${record.grade || 'N/A'}</td>
-                            <td>${record.action}</td>
-                            <td>${record.timestamp ? new Date(record.timestamp).toLocaleString() : 'N/A'}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-    });
-    
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>ASLS Attendance - ${month} ${day}, ${year} (${time})</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 30px; background: white; }
-        h1 { color: #186E00; border-bottom: 3px solid #186E00; padding-bottom: 15px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { font-size: 2.5rem; }
-        .header p { color: #666; font-size: 1.1rem; }
-        .header .date-info { background: #e8f5e9; padding: 15px; border-radius: 10px; margin: 10px 0; }
-        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 20px 0; }
-        .stat-card { background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center; }
-        .stat-card .number { font-size: 2rem; font-weight: bold; color: #186E00; }
-        .stat-card .label { color: #666; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        th { background: #186E00; color: white; padding: 12px; text-align: left; }
-        td { padding: 10px; border-bottom: 1px solid #ddd; }
-        tr:hover { background: #f5f5f5; }
-        .login { color: green; font-weight: bold; }
-        .logout { color: red; font-weight: bold; }
-        .footer { margin-top: 30px; text-align: center; color: #666; border-top: 1px solid #ddd; padding-top: 20px; }
-        @media print { .no-print { display: none; } }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>📊 ASLS Attendance Report</h1>
-        <div class="date-info">
-            <strong>${month} ${day}, ${year}</strong> — <strong>${time}</strong> Session
         </div>
-        <p>Generated: ${now.toLocaleString()}</p>
-        <p style="color: #666;">Total Records: ${data.length} | Unique Students: ${totalStudents} | Sections: ${sortedSections.length}</p>
-    </div>
-    
-    <div class="stats">
-        <div class="stat-card"><div class="number">${data.length}</div><div class="label">Total Records</div></div>
-        <div class="stat-card"><div class="number">${totalStudents}</div><div class="label">Unique Students</div></div>
-        <div class="stat-card"><div class="number">${totalLogins}</div><div class="label">Logins</div></div>
-        <div class="stat-card"><div class="number">${totalLogouts}</div><div class="label">Logouts</div></div>
-    </div>
-    
-    ${tableHTML}
-    
-    <div class="footer">
-        <p>Generated by ASLS Attendance Compiler © ${now.getFullYear()}</p>
-        <p>TCSHS - Automated Student Log System</p>
+
+        <!-- STATUS -->
+        <div class="status-message" id="statusMessage"></div>
+
+        <!-- PRIMARY FILTERS -->
+        <div class="filters-primary">
+            <div class="filter-group">
+                <label for="yearFilter">📅 Year <span style="color:#c0392b;font-weight:700;">*</span></label>
+                <select id="yearFilter"></select>
+            </div>
+            <div class="filter-group">
+                <label for="monthFilter">📆 Month <span style="color:#c0392b;font-weight:700;">*</span></label>
+                <select id="monthFilter">
+                    <option value="">-- Select Month --</option>
+                    <option value="JANUARY">January</option>
+                    <option value="FEBRUARY">February</option>
+                    <option value="MARCH">March</option>
+                    <option value="APRIL">April</option>
+                    <option value="MAY">May</option>
+                    <option value="JUNE">June</option>
+                    <option value="JULY">July</option>
+                    <option value="AUGUST">August</option>
+                    <option value="SEPTEMBER">September</option>
+                    <option value="OCTOBER">October</option>
+                    <option value="NOVEMBER">November</option>
+                    <option value="DECEMBER">December</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="dayFilter">📋 Day <span style="color:#c0392b;font-weight:700;">*</span></label>
+                <select id="dayFilter"></select>
+            </div>
+            <div class="filter-group">
+                <label for="timeFilter">🕐 Time (AM/PM) <span style="color:#c0392b;font-weight:700;">*</span></label>
+                <select id="timeFilter">
+                    <option value="">-- Select Time --</option>
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- SECONDARY FILTERS -->
+        <div class="filters-primary" style="background:#f8f9fa;border-color:#e0e0e0;display:none;" id="secondaryFilters">
+            <div class="filter-group">
+                <label for="gradeFilter">📚 Grade Level</label>
+                <select id="gradeFilter">
+                    <option value="all">All Grades</option>
+                    <option value="7">Grade 7</option>
+                    <option value="8">Grade 8</option>
+                    <option value="9">Grade 9</option>
+                    <option value="10">Grade 10</option>
+                    <option value="11">Grade 11</option>
+                    <option value="12">Grade 12</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="sectionFilter">🏫 Section <span style="color:#186E00;font-size:0.7rem;">(auto-synced)</span></label>
+                <select id="sectionFilter">
+                    <option value="all">All Sections</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- SECTION CHIPS -->
+        <div class="section-chips" id="sectionChips"></div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="filter-actions">
+            <button class="btn-primary" onclick="searchSyncAndCompile()">
+                Generate Attendance Report
+            </button>
+            <button class="btn-secondary" onclick="testConnection()">
+                Test Connection
+            </button>
+            <button class="btn-danger" onclick="clearResults()">
+                Clear
+            </button>
+        </div>
+
+        <!-- FILE BROWSER -->
+        <div class="file-browser" id="fileBrowser">
+            <h3>📁 Found Files (<span id="totalFileCount">0</span>)</h3>
+            <p style="color:#7f8c8d;margin-bottom:10px;font-size:0.9rem;">
+                Select which files to compile. All selected files will be merged into one report.
+            </p>
+            <div class="file-browser-controls">
+                <button class="btn-small btn-select-all" onclick="selectAllFiles()">✅ Select All</button>
+                <button class="btn-small btn-deselect-all" onclick="deselectAllFiles()">❌ Deselect All</button>
+                <span style="margin-left:auto;color:#7f8c8d;font-size:0.9rem;" id="fileSelectionCount">0 selected</span>
+            </div>
+            <div class="file-list" id="fileList"></div>
+        </div>
+
+        <!-- RESULTS -->
+        <div class="results" id="results">
+            <div class="stats" id="stats"></div>
+
+            <!-- Result action bar: Download + Print (NO COPY TABLE) -->
+            <div class="result-actions">
+                <span class="label">📊 Report actions:</span>
+                <button class="btn-success" onclick="downloadCompiled()" id="downloadBtn" disabled>
+                    ⬇️ Download Report
+                </button>
+                <button class="btn-secondary" onclick="printReport()">
+                    🖨️ Print Report
+                </button>
+            </div>
+
+            <div class="table-container" id="compiledTable"></div>
+        </div>
+
     </div>
 
-        <!-- IMAGE MODAL -->
-    
+    <!-- DEBUG PANEL -->
+    <div class="debug-panel" id="debugPanel">
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+            <strong>🔍 Debug Console</strong>
+            <span onclick="document.getElementById('debugPanel').classList.remove('active')" style="cursor:pointer;">✕</span>
+        </div>
+        <div id="debugContent"></div>
+    </div>
+
+    <!-- DEBUG TOGGLE -->
+    <button class="debug-toggle" onclick="toggleDebug()">🐛</button>
+
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <h2 id="loadingTitle">Loading…</h2>
+            <div class="loading-spinner"></div>
+            <p id="loadingMessage">Please wait…</p>
+            <div class="progress-bar">
+                <div class="fill" id="progressFill"></div>
+            </div>
+            <p id="loadingProgress" style="color:#7f8c8d;font-size:0.9rem;">0%</p>
+        </div>
+    </div>
+
+    <!-- IMAGE MODAL -->
     <div id="imageModal" class="image-modal">
-    
-        <span class="close-modal" onclick="closeImageModal()">
-            &times;
-        </span>
-    
-        <img id="modalImage" class="modal-content">
-    
+        <span class="close-modal" onclick="closeImageModal()">&times;</span>
+        <img id="modalImage" class="modal-content" />
     </div>
 
-</body>
-</html>
-    `;
-}
+    <script>
+        // ============================================================
+        //  CONFIGURATION  –  CHANGE THIS TO YOUR DEPLOYED APPS SCRIPT URL
+        // ============================================================
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-FfH5jH4dyCvuzDn4ZRGgVHGrKo7jHKPgKmbOEx2XaHy3zPrw8gKrPXXbcUV-KQVnIg/exec';
 
-function printReport() {
-    window.print();
-}
+        const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+            'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+        ];
 
-function copyTableToClipboard() {
-    const table = document.querySelector('#compiledTable table');
-    if (!table) {
-        showNotification('⚠️ No table to copy', 'warning');
-        return;
-    }
-    
-    const range = document.createRange();
-    range.selectNode(table);
-    window.getSelection().removeAllRanges();
-    window.getSelection().addRange(range);
-    document.execCommand('copy');
-    window.getSelection().removeAllRanges();
-    
-    showNotification('✅ Table copied to clipboard', 'success');
-}
+        // ============================================================
+        //  STATE
+        // ============================================================
+        let availableFiles = [];
+        let selectedFiles = [];
+        let compiledData = [];
+        let allSections = new Set();
+        let hasSearched = false;
 
-// ============================================
-// TEST CONNECTION
-// ============================================
-
-async function testConnection() {
-    showStatus('🔍 Testing connection...', 'info');
-    debugLog('🔧 Testing connection to Apps Script...', 'info');
-    
-    try {
-        const response = await fetch(`${APPS_SCRIPT_URL}?action=listFiles`);
-        const data = await response.json();
-        
-        debugLog(`📡 Response status: ${response.status}`, 'info');
-        
-        if (data.success) {
-            const fileCount = data.files ? data.files.length : 0;
-            showStatus(`✅ Connection successful! Found ${fileCount} files.`, 'success');
-            showNotification(`✅ Connected! ${fileCount} files available`, 'success');
-            debugLog(`✅ Connection successful! ${fileCount} files found`, 'success');
-            
-            // Show some sample files in debug
-            if (data.files && data.files.length > 0) {
-                const sample = data.files.slice(0, 3);
-                debugLog(`📁 Sample files: ${sample.map(f => f.name).join(', ')}`, 'info');
-            }
-        } else {
-            throw new Error(data.error || 'Unknown error');
+        // ============================================================
+        //  DEBUG
+        // ============================================================
+        function debugLog(message, type = 'info') {
+            const panel = document.getElementById('debugContent');
+            const time = new Date().toLocaleTimeString();
+            const line = document.createElement('div');
+            line.className = 'debug-line ' + type;
+            line.textContent = '[' + time + '] ' + message;
+            panel.appendChild(line);
+            panel.scrollTop = panel.scrollHeight;
+            console.log('[' + type.toUpperCase() + ']', message);
         }
-    } catch(error) {
-        debugLog(`❌ Connection failed: ${error.message}`, 'error');
-        showStatus(`❌ Connection failed: ${error.message}`, 'error');
-        showNotification(`❌ Connection failed`, 'error');
-    }
-}
 
-// ============================================
-// CLEAR RESULTS
-// ============================================
+        function toggleDebug() {
+            const panel = document.getElementById('debugPanel');
+            panel.classList.toggle('active');
+            if (panel.classList.contains('active')) debugLog('🔍 Debug panel opened');
+        }
 
-function clearResults() {
-    compiledData = [];
-    allRecords = [];
-    allSections = new Set();
-    availableFiles = [];
-    selectedFiles = [];
-    hasSearched = false;
-    
-    document.getElementById('results').classList.remove('active');
-    document.getElementById('compiledTable').innerHTML = '';
-    document.getElementById('stats').innerHTML = '';
-    document.getElementById('fileBrowser').classList.remove('active');
-    document.getElementById('fileList').innerHTML = '';
-    document.getElementById('totalFileCount').textContent = '0';
-    document.getElementById('fileSelectionCount').textContent = '0 selected';
-    document.getElementById('downloadBtn').disabled = true;
-    document.getElementById('sectionChips').innerHTML = '';
-    document.getElementById('secondaryFilters').style.display = 'none';
-    clearStatus();
-    debugLog('🗑️ All cleared', 'info');
-    showNotification('🗑️ All cleared', 'info');
-}
+        // ============================================================
+        //  UI HELPERS
+        // ============================================================
+        function showLoading(title, message) {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('loadingTitle').textContent = title || 'Loading…';
+            document.getElementById('loadingMessage').textContent = message || 'Please wait…';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('loadingProgress').textContent = '0%';
+        }
 
-// ============================================
-// INITIALIZATION
-// ============================================
+        function updateLoading(message, progress) {
+            document.getElementById('loadingMessage').textContent = message;
+            const pct = Math.min(progress || 0, 100);
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('loadingProgress').textContent = Math.round(pct) + '%';
+        }
 
-window.onload = function() {
-    console.log('📊 ASLS Attendance Compiler loaded');
-    console.log('🔗 Apps Script URL:', APPS_SCRIPT_URL);
-    
-    initDateFilters();
-    
-    if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
-        showStatus('⚠️ Please update the APPS_SCRIPT_URL with your deployed URL', 'warning');
-        debugLog('⚠️ APPS_SCRIPT_URL not configured', 'warning');
-    } else {
-        debugLog('✅ APPS_SCRIPT_URL configured', 'success');
-        // Auto-test connection on load
-        setTimeout(testConnection, 1000);
-    }
-};
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
 
-// Expose functions globally
-window.searchAndSync = searchAndSync;
-window.searchSyncAndCompile = searchSyncAndCompile;
-window.compileAttendance = compileAttendance;
-window.downloadCompiled = downloadCompiled;
-window.printReport = printReport;
-window.clearResults = clearResults;
-window.selectAllFiles = selectAllFiles;
-window.deselectAllFiles = deselectAllFiles;
-window.toggleFile = toggleFile;
-window.copyTableToClipboard = copyTableToClipboard;
-window.testConnection = testConnection;
-window.toggleDebug = toggleDebug;
-</script>
+        function showStatus(message, type) {
+            type = type || 'info';
+            const el = document.getElementById('statusMessage');
+            el.className = 'status-message active ' + type;
+            el.textContent = message;
+            debugLog(message, type);
+        }
+
+        function clearStatus() {
+            const el = document.getElementById('statusMessage');
+            el.className = 'status-message';
+            el.textContent = '';
+        }
+
+        function showNotification(message, type) {
+            type = type || 'info';
+            const colors = {
+                info: '#186E00',
+                error: '#e74c3c',
+                warning: '#f39c12',
+                success: '#27ae60'
+            };
+            const div = document.createElement('div');
+            div.style.cssText = '\
+                position: fixed; top: 20px; right: 20px; \
+                background: ' + (colors[type] || colors.info) + '; color: #fff; \
+                padding: 15px 25px; border-radius: 12px; font-weight: 600; \
+                z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); \
+                animation: slideIn 0.5s ease-out; max-width: 400px; font-size: 0.95rem; \
+            ';
+            div.textContent = message;
+            document.body.appendChild(div);
+            setTimeout(function() {
+                div.style.animation = 'slideOut 0.5s ease-out';
+                setTimeout(function() { div.remove(); }, 500);
+            }, 5000);
+        }
+
+        // slide keyframes
+        (function() {
+            const s = document.createElement('style');
+            s.textContent = '\
+                @keyframes slideIn { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } } \
+                @keyframes slideOut { from { transform: translateX(0); opacity:1; } to { transform: translateX(100%); opacity:0; } } \
+            ';
+            document.head.appendChild(s);
+        })();
+
+        // ============================================================
+        //  IMAGE MODAL
+        // ============================================================
+        function openImageModal(src) {
+            document.getElementById('imageModal').style.display = 'block';
+            document.getElementById('modalImage').src = src;
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+        window.onclick = function(e) {
+            if (e.target === document.getElementById('imageModal')) closeImageModal();
+        };
+
+        // ============================================================
+        //  INIT DATE FILTERS
+        // ============================================================
+        function initDateFilters() {
+            const yearSel = document.getElementById('yearFilter');
+            const curYear = new Date().getFullYear();
+            yearSel.innerHTML = '<option value="">-- Select Year --</option>';
+            for (var y = curYear - 5; y <= curYear + 1; y++) {
+                yearSel.innerHTML += '<option value="' + y + '">' + y + '</option>';
+            }
+            yearSel.value = curYear;
+
+            const daySel = document.getElementById('dayFilter');
+            daySel.innerHTML = '<option value="">-- Select Day --</option>';
+            for (var d = 1; d <= 31; d++) {
+                var pad = String(d).padStart(2, '0');
+                daySel.innerHTML += '<option value="' + pad + '">' + d + '</option>';
+            }
+            daySel.value = String(new Date().getDate()).padStart(2, '0');
+
+            document.getElementById('monthFilter').value = MONTHS[new Date().getMonth()];
+            document.getElementById('timeFilter').value = (new Date().getHours() >= 12) ? 'PM' : 'AM';
+
+            debugLog('📅 Date filters initialized');
+        }
+
+        // ============================================================
+        //  SECTION AUTO-SYNC
+        // ============================================================
+        function updateSectionFilter(sections) {
+            const sel = document.getElementById('sectionFilter');
+            const current = sel.value;
+            sel.innerHTML = '<option value="all">All Sections</option>';
+            [...sections].sort().forEach(function(s) {
+                if (s && s !== 'N/A' && s !== 'Unknown') {
+                    var opt = document.createElement('option');
+                    opt.value = s;
+                    opt.textContent = s;
+                    sel.appendChild(opt);
+                }
+            });
+            if (current && sections.has(current)) sel.value = current;
+
+            const chips = document.getElementById('sectionChips');
+            if (sections.size > 0) {
+                chips.innerHTML = [...sections].sort().map(function(s) {
+                    return '<span class="section-chip">📚 ' + s + '</span>';
+                }).join('');
+                debugLog('📚 ' + sections.size + ' sections found', 'success');
+            } else {
+                chips.innerHTML = '';
+                debugLog('📚 No sections found', 'warning');
+            }
+        }
+
+        // ============================================================
+        //  SEARCH & SYNC
+        // ============================================================
+        async function searchAndSync() {
+            const year = document.getElementById('yearFilter').value;
+            const month = document.getElementById('monthFilter').value;
+            const day = document.getElementById('dayFilter').value;
+            const time = document.getElementById('timeFilter').value;
+
+            if (!year || !month || !day || !time) {
+                showStatus('⚠️ Please select Year, Month, Day, and Time (AM/PM)', 'warning');
+                showNotification('⚠️ Please select all required fields', 'warning');
+                return;
+            }
+
+            document.getElementById('secondaryFilters').style.display = 'grid';
+            showLoading('🔍 Searching Files', 'Looking for ' + month + ' ' + day + ', ' + year + ' (' + time + ')…');
+            debugLog('🔍 Searching: ' + month + ' ' + day + ', ' + year + ' (' + time + ')');
+
+            try {
+                var url = APPS_SCRIPT_URL + '?action=listFiles';
+                debugLog('📡 Fetching: ' + url);
+                var resp = await fetch(url);
+                if (!resp.ok) throw new Error('HTTP ' + resp.status + ': ' + resp.statusText);
+                var data = await resp.json();
+                debugLog('📥 Received ' + (data.files ? data.files.length : 0) + ' total files');
+
+                if (!data.success) throw new Error(data.error || 'Failed to list files');
+
+                var filtered = data.files.filter(function(f) {
+                    return f.year === year &&
+                        f.month.toUpperCase() === month.toUpperCase() &&
+                        f.day === day &&
+                        f.name.toUpperCase().includes(time.toUpperCase());
+                });
+
+                availableFiles = filtered;
+                selectedFiles = filtered.map(function(f) { return f.id; });
+
+                debugLog('📁 Found ' + filtered.length + ' matching files', filtered.length > 0 ? 'success' : 'warning');
+
+                if (filtered.length === 0) {
+                    showStatus('📭 No files found for ' + month + ' ' + day + ', ' + year + ' (' + time + ')', 'warning');
+                    showNotification('📭 No files found', 'warning');
+                    document.getElementById('fileBrowser').classList.remove('active');
+                    hideLoading();
+                    return;
+                }
+
+                document.getElementById('fileBrowser').classList.add('active');
+                renderFileList(filtered);
+                showStatus('✅ Found ' + filtered.length + ' file(s)', 'success');
+                showNotification('✅ Found ' + filtered.length + ' file(s)', 'success');
+
+                updateLoading('📊 Extracting sections from files…', 30);
+                var sections = await extractAllSections(filtered);
+                allSections = sections;
+                updateSectionFilter(sections);
+                hasSearched = true;
+                debugLog('✅ Search complete. ' + filtered.length + ' files, ' + sections.size + ' sections', 'success');
+
+            } catch (err) {
+                console.error('Search error:', err);
+                debugLog('❌ Error: ' + err.message, 'error');
+                showStatus('❌ Error: ' + err.message, 'error');
+                showNotification('❌ Error: ' + err.message, 'error');
+            }
+            hideLoading();
+        }
+
+        async function extractAllSections(files) {
+            var sections = new Set();
+            var processed = 0;
+            for (var i = 0; i < files.length; i++) {
+                var f = files[i];
+                try {
+                    var resp = await fetch(APPS_SCRIPT_URL + '?action=getFileContent&fileId=' + f.id);
+                    var data = await resp.json();
+                    if (data.success && data.content) {
+                        var fileSections = extractSectionsFromHTML(data.content);
+                        fileSections.forEach(function(s) {
+                            if (s && s !== 'N/A' && s !== 'Unknown') sections.add(s);
+                        });
+                    }
+                } catch (e) {
+                    debugLog('⚠️ Error extracting from ' + f.name + ': ' + e.message, 'warning');
+                }
+                processed++;
+                var pct = 30 + (processed / files.length) * 60;
+                updateLoading('Processing file ' + processed + '/' + files.length + '…', pct);
+            }
+            return sections;
+        }
+
+        function extractSectionsFromHTML(html) {
+            var sections = new Set();
+            try {
+                var tdRegex = /<td>([^<]*)<\/td>/g;
+                var cells = [];
+                var m;
+                while ((m = tdRegex.exec(html)) !== null) {
+                    cells.push(m[1].trim());
+                }
+                for (var i = 0; i < cells.length; i += 8) {
+                    if (i + 6 < cells.length) {
+                        var sec = cells[i + 6].trim();
+                        if (sec && sec !== 'N/A' && sec !== 'Unknown' && sec !== 'Section') {
+                            sections.add(sec);
+                        }
+                    }
+                }
+                if (sections.size === 0) {
+                    var text = html.replace(/<[^>]*>/g, ' ');
+                    var pat = /\b([A-Z])\b|Section\s*([A-Z])|Grade\s*\d+\s*-\s*([A-Z])/gi;
+                    var m2;
+                    while ((m2 = pat.exec(text)) !== null) {
+                        var sec2 = m2[1] || m2[2] || m2[3];
+                        if (sec2 && sec2.length <= 2) sections.add(sec2);
+                    }
+                }
+            } catch (e) {
+                debugLog('⚠️ Error extracting sections: ' + e.message, 'warning');
+            }
+            return sections;
+        }
+
+        // ============================================================
+        //  FILE BROWSER
+        // ============================================================
+        function renderFileList(files) {
+            var container = document.getElementById('fileList');
+            document.getElementById('totalFileCount').textContent = files.length;
+            document.getElementById('fileSelectionCount').textContent = selectedFiles.length + ' selected';
+
+            if (!files || files.length === 0) {
+                container.innerHTML = '<div class="no-data"><div class="icon">📭</div><p>No files found</p></div>';
+                return;
+            }
+
+            files.sort(function(a, b) { return a.path.localeCompare(b.path); });
+
+            container.innerHTML = files.map(function(f) {
+                var sel = selectedFiles.indexOf(f.id) >= 0 ? 'selected' : '';
+                var check = selectedFiles.indexOf(f.id) >= 0 ? '✅ Selected' : '⬜';
+                return '<div class="file-item ' + sel + '" onclick="toggleFile(\'' + f.id + '\')">\
+                    <span class="file-name">📄 ' + f.name + '</span>\
+                    <span class="file-info">' + f.path + '</span>\
+                    <span class="file-check">' + check + '</span>\
+                </div>';
+            }).join('');
+        }
+
+        function toggleFile(id) {
+            var idx = selectedFiles.indexOf(id);
+            if (idx >= 0) {
+                selectedFiles.splice(idx, 1);
+            } else {
+                selectedFiles.push(id);
+            }
+            renderFileList(availableFiles);
+        }
+
+        function selectAllFiles() {
+            selectedFiles = availableFiles.map(function(f) { return f.id; });
+            renderFileList(availableFiles);
+        }
+
+        function deselectAllFiles() {
+            selectedFiles = [];
+            renderFileList(availableFiles);
+        }
+
+        // ============================================================
+        //  COMPILE
+        // ============================================================
+        async function searchSyncAndCompile() {
+            await searchAndSync();
+            await new Promise(function(r) { setTimeout(r, 400); });
+            if (selectedFiles.length > 0) {
+                showNotification('📊 Auto-compiling ' + selectedFiles.length + ' files…', 'info');
+                await compileAttendance();
+            } else {
+                showNotification('📭 No files found to compile', 'warning');
+            }
+        }
+
+        async function compileAttendance() {
+            if (selectedFiles.length === 0) {
+                showStatus('⚠️ Please select at least one file to compile', 'warning');
+                showNotification('⚠️ Please select files first', 'warning');
+                return;
+            }
+
+            showLoading('📊 Compiling Attendance', 'Processing ' + selectedFiles.length + ' files…');
+            debugLog('📊 Compiling ' + selectedFiles.length + ' files…');
+
+            try {
+                var filters = {
+                    grade: document.getElementById('gradeFilter').value || 'all',
+                    section: document.getElementById('sectionFilter').value || 'all',
+                    year: document.getElementById('yearFilter').value,
+                    month: document.getElementById('monthFilter').value,
+                    day: document.getElementById('dayFilter').value,
+                    time: document.getElementById('timeFilter').value
+                };
+
+                var formData = new FormData();
+                formData.append('data', JSON.stringify({
+                    action: 'compileAttendance',
+                    fileIds: selectedFiles,
+                    filters: filters
+                }));
+
+                var resp = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: formData });
+                if (!resp.ok) throw new Error('HTTP ' + resp.status + ': ' + resp.statusText);
+                var data = await resp.json();
+
+                if (!data.success) throw new Error(data.error || 'Compilation failed');
+
+                compiledData = data.data || [];
+                debugLog('📊 Extracted ' + compiledData.length + ' records', compiledData.length > 0 ? 'success' :
+                'warning');
+
+                if (compiledData.length === 0) {
+                    showStatus('📭 No records found in the selected files', 'warning');
+                    showNotification('📭 No records found', 'warning');
+                    document.getElementById('results').classList.remove('active');
+                    document.getElementById('downloadBtn').disabled = true;
+                    hideLoading();
+                    return;
+                }
+
+                // update sections
+                var secs = new Set();
+                compiledData.forEach(function(r) {
+                    if (r.section && r.section !== 'N/A' && r.section !== 'Unknown') secs.add(r.section);
+                });
+                allSections = secs;
+                updateSectionFilter(secs);
+
+                displayCompiledData(compiledData, filters);
+                document.getElementById('results').classList.add('active');
+                document.getElementById('downloadBtn').disabled = false;
+
+                showStatus('✅ Compiled ' + compiledData.length + ' records from ' + selectedFiles.length + ' files',
+                    'success');
+                showNotification('✅ ' + compiledData.length + ' records compiled', 'success');
+                debugLog('✅ Compilation complete: ' + compiledData.length + ' records', 'success');
+
+            } catch (err) {
+                console.error('Compilation error:', err);
+                debugLog('❌ Compilation error: ' + err.message, 'error');
+                showStatus('❌ Error: ' + err.message, 'error');
+                showNotification('❌ Error: ' + err.message, 'error');
+            }
+            hideLoading();
+        }
+
+        function displayCompiledData(data) {
+            var stats = document.getElementById('stats');
+            var unique = new Set(data.map(function(r) { return r.lrn; }));
+            var logins = data.filter(function(r) { return r.action === 'Log in'; }).length;
+            var logouts = data.filter(function(r) { return r.action === 'Log out'; }).length;
+
+            stats.innerHTML = '\
+                <div class="stat-card"><div class="number">' + data.length + '</div><div class="label">Total Records</div></div>\
+                <div class="stat-card"><div class="number">' + unique.size + '</div><div class="label">Unique Students</div></div>\
+                <div class="stat-card"><div class="number">' + logins + '</div><div class="label">Logins</div></div>\
+                <div class="stat-card"><div class="number">' + logouts + '</div><div class="label">Logouts</div></div>\
+                <div class="stat-card" style="background:#e8f5e9;"><div class="number">' + allSections.size +
+                '</div><div class="label">Sections Found</div></div>\
+            ';
+
+            var sections = {};
+            data.forEach(function(r) {
+                var key = r.section || 'Unknown';
+                if (!sections[key]) sections[key] = [];
+                sections[key].push(r);
+            });
+
+            var sorted = Object.keys(sections).sort();
+            var html = '';
+
+            sorted.forEach(function(section) {
+                var records = sections[section];
+                records.sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); });
+
+                html += '<div class="section-group">\
+                    <div class="section-header">\
+                        <span>📚 ' + section + '</span>\
+                        <span class="student-count">' + records.length + ' students</span>\
+                    </div>\
+                    <div class="section-body">\
+                        <table>\
+                            <thead><tr>\
+                                <th>#</th><th>Photo</th><th>Name</th><th>LRN</th>\
+                                <th>Grade</th><th>Action</th><th>Date/Time</th><th>Source File</th>\
+                            </tr></thead>\
+                            <tbody>';
+
+                records.forEach(function(rec, idx) {
+                    var photoHtml = rec.photo ?
+                        '<img src="' + rec.photo + '" class="student-photo" onclick="openImageModal(\'' + rec
+                        .photo + '\')" />' :
+                        'N/A';
+                    var actionClass = rec.action === 'Log in' ? 'login' : 'logout';
+                    var ts = rec.timestamp ? new Date(rec.timestamp).toLocaleString() : 'N/A';
+                    html += '<tr>\
+                        <td>' + (idx + 1) + '</td>\
+                        <td>' + photoHtml + '</td>\
+                        <td>' + (rec.name || 'N/A') + '</td>\
+                        <td>' + (rec.lrn || 'N/A') + '</td>\
+                        <td>' + (rec.grade || 'N/A') + '</td>\
+                        <td><span class="action-badge ' + actionClass + '">' + rec.action + '</span></td>\
+                        <td>' + ts + '</td>\
+                        <td style="font-size:0.75rem;color:#7f8c8d;">' + (rec.sourceFile || 'N/A') + '</td>\
+                    </tr>';
+                });
+
+                html += '</tbody></table></div></div>';
+            });
+
+            if (sorted.length === 0) {
+                html = '<div class="no-data"><div class="icon">📭</div><h3>No Records Found</h3></div>';
+            }
+
+            document.getElementById('compiledTable').innerHTML = html;
+        }
+
+        // ============================================================
+        //  DOWNLOAD REPORT
+        // ============================================================
+        function downloadCompiled() {
+            if (!compiledData || compiledData.length === 0) {
+                showNotification('⚠️ No compiled data to download', 'warning');
+                return;
+            }
+            var html = generateCompiledHTML(compiledData);
+            var blob = new Blob([html], { type: 'text/html' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            var year = document.getElementById('yearFilter').value;
+            var month = document.getElementById('monthFilter').value;
+            var day = document.getElementById('dayFilter').value;
+            var time = document.getElementById('timeFilter').value;
+            a.href = url;
+            a.download = 'ASLS_Attendance_' + month + '_' + day + '_' + year + '_' + time + '.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showNotification('✅ Report downloaded', 'success');
+        }
+
+        function generateCompiledHTML(data) {
+            var now = new Date();
+            var year = document.getElementById('yearFilter').value;
+            var month = document.getElementById('monthFilter').value;
+            var day = document.getElementById('dayFilter').value;
+            var time = document.getElementById('timeFilter').value;
+
+            var sections = {};
+            data.forEach(function(r) {
+                var key = r.section || 'Unknown';
+                if (!sections[key]) sections[key] = [];
+                sections[key].push(r);
+            });
+
+            var sorted = Object.keys(sections).sort();
+            var tableHTML = '';
+
+            sorted.forEach(function(section) {
+                var records = sections[section];
+                records.sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); });
+                tableHTML += '\
+                    <h2 style="color:#186E00;border-bottom:2px solid #186E00;padding-bottom:10px;margin-top:30px;">\
+                        📚 ' + section + ' (' + records.length + ' students)\
+                    </h2>\
+                    <table>\
+                        <thead><tr><th>#</th><th>Photo</th><th>Name</th><th>LRN</th><th>Grade</th><th>Action</th><th>Date/Time</th></tr></thead>\
+                        <tbody>';
+                records.forEach(function(rec, idx) {
+                    var photoHtml = rec.photo ?
+                        '<img src="' + rec.photo + '" class="student-photo" onclick="openImageModal(\'' + rec
+                        .photo + '\')" />' :
+                        'N/A';
+                    var ts = rec.timestamp ? new Date(rec.timestamp).toLocaleString() : 'N/A';
+                    tableHTML += '<tr>\
+                        <td>' + (idx + 1) + '</td>\
+                        <td>' + photoHtml + '</td>\
+                        <td>' + (rec.name || 'N/A') + '</td>\
+                        <td>' + (rec.lrn || 'N/A') + '</td>\
+                        <td>' + (rec.grade || 'N/A') + '</td>\
+                        <td>' + rec.action + '</td>\
+                        <td>' + ts + '</td>\
+                    </tr>';
+                });
+                tableHTML += '</tbody></table>';
+            });
+
+            return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ASLS Attendance Report</title>\
+                <style>\
+                    body{font-family:Arial,sans-serif;padding:30px;background:#f5f5f5;}\
+                    table{width:100%;border-collapse:collapse;margin-top:15px;background:#fff;}\
+                    th{background:#186E00;color:#fff;padding:12px;}\
+                    td{padding:10px;border-bottom:1px solid #ddd;}\
+                    .student-photo{width:50px;height:50px;border-radius:50%;object-fit:cover;cursor:pointer;transition:0.2s;}\
+                    .student-photo:hover{transform:scale(1.1);}\
+                    .image-modal{display:none;position:fixed;z-index:99999;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.9);padding-top:40px;}\
+                    .modal-content{display:block;margin:auto;max-width:90%;max-height:85vh;}\
+                    .close-modal{position:absolute;top:20px;right:35px;color:#fff;font-size:40px;cursor:pointer;}\
+                </style>\
+            </head><body>\
+                <h1>📊 ASLS Attendance Report</h1>\
+                <p>' + month + ' ' + day + ', ' + year + ' (' + time + ')</p>\
+                <p>Generated: ' + now.toLocaleString() + '</p>\
+                <p>Total Records: ' + data.length + '</p>\
+                ' + tableHTML + '\
+                <div id="imageModal" class="image-modal">\
+                    <span class="close-modal" onclick="closeImageModal()">&times;</span>\
+                    <img id="modalImage" class="modal-content">\
+                </div>\
+                <script>\
+                    function openImageModal(src){document.getElementById("imageModal").style.display="block";document.getElementById("modalImage").src=src;}\
+                    function closeImageModal(){document.getElementById("imageModal").style.display="none";}\
+                    window.onclick=function(e){if(e.target===document.getElementById("imageModal"))closeImageModal();};\
+                <\/script>\
+            </body></html>';
+        }
+
+        // ============================================================
+        //  PRINT
+        // ============================================================
+        function printReport() { window.print(); }
+
+        // ============================================================
+        //  TEST CONNECTION
+        // ============================================================
+        async function testConnection() {
+            showStatus('🔍 Testing connection…', 'info');
+            debugLog('🔧 Testing connection…');
+            try {
+                var resp = await fetch(APPS_SCRIPT_URL + '?action=listFiles');
+                var data = await resp.json();
+                if (data.success) {
+                    var count = data.files ? data.files.length : 0;
+                    showStatus('✅ Connection successful! Found ' + count + ' files.', 'success');
+                    showNotification('✅ Connected! ' + count + ' files available', 'success');
+                    debugLog('✅ Connection successful! ' + count + ' files found', 'success');
+                    if (data.files && data.files.length > 0) {
+                        var sample = data.files.slice(0, 3).map(function(f) { return f.name; }).join(', ');
+                        debugLog('📁 Sample files: ' + sample, 'info');
+                    }
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (err) {
+                debugLog('❌ Connection failed: ' + err.message, 'error');
+                showStatus('❌ Connection failed: ' + err.message, 'error');
+                showNotification('❌ Connection failed', 'error');
+            }
+        }
+
+        // ============================================================
+        //  CLEAR
+        // ============================================================
+        function clearResults() {
+            compiledData = [];
+            allSections = new Set();
+            availableFiles = [];
+            selectedFiles = [];
+            hasSearched = false;
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('compiledTable').innerHTML = '';
+            document.getElementById('stats').innerHTML = '';
+            document.getElementById('fileBrowser').classList.remove('active');
+            document.getElementById('fileList').innerHTML = '';
+            document.getElementById('totalFileCount').textContent = '0';
+            document.getElementById('fileSelectionCount').textContent = '0 selected';
+            document.getElementById('downloadBtn').disabled = true;
+            document.getElementById('sectionChips').innerHTML = '';
+            document.getElementById('secondaryFilters').style.display = 'none';
+            clearStatus();
+            debugLog('🗑️ All cleared', 'info');
+            showNotification('🗑️ All cleared', 'info');
+        }
+
+        // ============================================================
+        //  INIT
+        // ============================================================
+        window.onload = function() {
+            console.log('📊 ASLS Attendance Compiler loaded');
+            console.log('🔗 Apps Script URL:', APPS_SCRIPT_URL);
+            initDateFilters();
+
+            if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+                showStatus('⚠️ Please update APPS_SCRIPT_URL with your deployed URL', 'warning');
+                debugLog('⚠️ APPS_SCRIPT_URL not configured', 'warning');
+            } else {
+                debugLog('✅ APPS_SCRIPT_URL configured', 'success');
+                setTimeout(testConnection, 1000);
+            }
+        };
+
+        // expose globals
+        window.searchAndSync = searchAndSync;
+        window.searchSyncAndCompile = searchSyncAndCompile;
+        window.compileAttendance = compileAttendance;
+        window.downloadCompiled = downloadCompiled;
+        window.printReport = printReport;
+        window.clearResults = clearResults;
+        window.selectAllFiles = selectAllFiles;
+        window.deselectAllFiles = deselectAllFiles;
+        window.toggleFile = toggleFile;
+        window.testConnection = testConnection;
+        window.toggleDebug = toggleDebug;
+        window.openImageModal = openImageModal;
+        window.closeImageModal = closeImageModal;
+    </script>
 
 </body>
 </html>
