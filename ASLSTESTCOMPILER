@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test ASLS Compiler</title>
+</head>
+<body>
+    <h1>ASLS Compiler Test</h1>
+    <button onclick="testFetch()">Test Fetch</button>
+    <div id="result" style="margin-top:20px;padding:20px;background:#f0f0f0;border-radius:10px;"></div>
+
+    <script>
+    // UPDATE THIS WITH YOUR URL
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyyTV8gBNionkuCkjcbdzOlo-N7oXrA4gamdh5QtRwogWhRGzczdr5pXc62xWbzTDSwPw/exec';
+    
+    async function testFetch() {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = '⏳ Testing connection...';
+        
+        try {
+            // Test GET request
+            const response = await fetch(`${APPS_SCRIPT_URL}?action=listFiles`);
+            const data = await response.json();
+            
+            if (data.success) {
+                resultDiv.innerHTML = `
+                    ✅ Connection successful!
+                    <br><br>
+                    Found ${data.files.length} files
+                    <br><br>
+                    <pre style="background:white;padding:10px;border-radius:5px;overflow:auto;max-height:300px;">
+                        ${JSON.stringify(data.files.slice(0, 5), null, 2)}
+                    </pre>
+                `;
+            } else {
+                resultDiv.innerHTML = `❌ Error: ${data.error}`;
+            }
+        } catch(error) {
+            resultDiv.innerHTML = `
+                ❌ Failed to connect<br><br>
+                Error: ${error.message}<br><br>
+                <b>Checklist:</b><br>
+                1. Apps Script deployed with "Anyone" access<br>
+                2. URL is correct: ${APPS_SCRIPT_URL}<br>
+                3. Run authorizeDrive() in Apps Script<br>
+                4. At least one file exists in AttendanceASLS
+            `;
+        }
+    }
+    </script>
+</body>
+</html>
