@@ -787,11 +787,8 @@
 
     <!-- Action Buttons -->
     <div class="filter-actions">
-        <button class="btn-primary" onclick="searchAndSync()">
-            🔍 Search & Sync Files
-        </button>
-        <button class="btn-success" onclick="compileAttendance()" id="compileBtn" disabled>
-            📊 Compile Attendance
+        <button class="btn-primary" onclick="searchSyncAndCompile()">
+            Generate Attendance Report
         </button>
         <button class="btn-secondary" onclick="downloadCompiled()" id="downloadBtn" disabled>
             ⬇️ Download Report
@@ -1182,6 +1179,33 @@ async function searchAndSync() {
     hideLoading();
 }
 
+async function searchSyncAndCompile() {
+
+    // STEP 1: Search files
+    await searchAndSync();
+
+    // STEP 2: Wait a little to ensure files loaded
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // STEP 3: If files found, auto compile
+    if (selectedFiles.length > 0) {
+
+        showNotification(
+            `📊 Auto compiling ${selectedFiles.length} files...`,
+            'info'
+        );
+
+        await compileAttendance();
+
+    } else {
+
+        showNotification(
+            '📭 No files found to compile',
+            'warning'
+        );
+    }
+}
+    
 async function extractAllSections(files) {
     const sections = new Set();
     let processed = 0;
@@ -1782,6 +1806,7 @@ window.onload = function() {
 
 // Expose functions globally
 window.searchAndSync = searchAndSync;
+window.searchSyncAndCompile = searchSyncAndCompile;
 window.compileAttendance = compileAttendance;
 window.downloadCompiled = downloadCompiled;
 window.printReport = printReport;
