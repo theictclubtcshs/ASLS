@@ -823,7 +823,7 @@
 // ============================================
 
 // REPLACE THIS WITH YOUR DEPLOYED APPS SCRIPT URL
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIKdfffJFQwULuIHKRhpjoL_TJ5jfXgsOnI1pAEGrgbykPZjn_Mvl1F4EXpi_RtuGRHQ/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwIIoEuC1FH74rdun1wyFNm1Ypq-O2JW8X42VDZDzbBsx9iPsNDxg01AFMSJocZUtdW1Q/exec';
 
 const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 
                 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
@@ -1364,6 +1364,7 @@ function displayCompiledData(data, filters) {
                         <thead>
                             <tr>
                                 <th>#</th>
+                                <th>Photo</th>
                                 <th>Name</th>
                                 <th>LRN</th>
                                 <th>Grade</th>
@@ -1375,13 +1376,48 @@ function displayCompiledData(data, filters) {
                         <tbody>
                             ${records.map((record, index) => `
                                 <tr>
+
                                     <td>${index + 1}</td>
+                                
+                                    <td>
+                                        ${
+                                            record.photo
+                                            ? `
+                                                <img 
+                                                    src="${record.photo}" 
+                                                    width="45"
+                                                    height="45"
+                                                    style="
+                                                        border-radius:50%;
+                                                        object-fit:cover;
+                                                        border:2px solid #ddd;
+                                                    "
+                                                >
+                                            `
+                                            : 'N/A'
+                                        }
+                                    </td>
+                                
                                     <td>${record.name || 'N/A'}</td>
+                                
                                     <td>${record.lrn || 'N/A'}</td>
+                                
                                     <td>${record.grade || 'N/A'}</td>
-                                    <td><span class="action-badge ${record.action === 'Log in' ? 'login' : 'logout'}">${record.action}</span></td>
-                                    <td>${record.timestamp ? new Date(record.timestamp).toLocaleString() : 'N/A'}</td>
-                                    <td style="font-size:0.75rem;color:#7f8c8d;">${record.sourceFile || 'N/A'}</td>
+                                
+                                    <td>
+                                        <span class="action-badge ${record.action === 'Log in' ? 'login' : 'logout'}">
+                                            ${record.action}
+                                        </span>
+                                    </td>
+                                
+                                    <td>
+                                        ${record.timestamp ? new Date(record.timestamp).toLocaleString() : 'N/A'}
+                                    </td>
+                                
+                                    <td style="font-size:0.75rem;color:#7f8c8d;">
+                                        ${record.sourceFile || 'N/A'}
+                                    </td>
+                                
                                 </tr>
                             `).join('')}
                         </tbody>
