@@ -1244,16 +1244,17 @@ async function compileAttendance() {
         debugLog(`📤 Sending compilation request with ${selectedFiles.length} files`, 'info');
         debugLog(`📤 Filters: ${JSON.stringify(filters)}`, 'info');
 
+        const formData = new FormData();
+
+        formData.append('data', JSON.stringify({
+            action: 'compileAttendance',
+            fileIds: selectedFiles,
+            filters: filters
+        }));
+        
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'compileAttendance',
-                fileIds: selectedFiles,
-                filters: filters
-            })
+            body: formData
         });
 
         debugLog(`📡 Response status: ${response.status}`, 'info');
