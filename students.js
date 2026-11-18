@@ -1,7 +1,7 @@
 // ============================================
 // ASLS STUDENT DATABASE
 // Auto-generated from Google Sheets (Multiple Grades)
-// Last updated: 8/13/2026, 10:59:46 AM
+// Last updated: 11/18/2026, 10:42:32 AM
 // Total students: 933
 // ============================================
 
@@ -581,7 +581,6 @@ const STUDENTS_DATA = [
     { lrn: '400555160003', name: 'CARAG, LUKE CLARENCE N.', sex: 'MALE', grade: '8', section: 'PYTHAGORAS' },
     { lrn: '400555160007', name: 'SALVATIERRA, REELAIAH BRYLLE', sex: 'FEMALE', grade: '7', section: 'ARCHIMEDES' },
     { lrn: '400555160008', name: 'MALLILLIN, VICTOR MACKENZIE AGUILAR', sex: 'MALE', grade: '10', section: 'CURIE' },
-    { lrn: '400556115322', name: 'TUMANENG, VINCE', sex: 'MALE', grade: '10', section: 'FARADAY' },
     { lrn: '400556160007', name: 'TUMALIUAN, JOSEPH RATZ ANGELO G.', sex: 'MALE', grade: '10', section: 'EINSTEIN' },
     { lrn: '400556190009', name: 'Sibal Prince', sex: 'MALE', grade: '7', section: 'JOULE' },
     { lrn: '400557150025', name: 'BATTUNG, MARYEL AKHINA', sex: 'FEMALE', grade: '9', section: 'PASCAL' },
@@ -688,6 +687,7 @@ const STUDENTS_DATA = [
     { lrn: '400561153197', name: 'BASCO, KAYLEE ERINE D.', sex: 'FEMALE', grade: '10', section: 'NEWTON' },
     { lrn: '400561153199', name: 'CABELLO, XHANIAH GWYNETH R.', sex: 'FEMALE', grade: '10', section: 'NEWTON' },
     { lrn: '400561153217', name: 'ESCOBAR, JUAN I?IGO B.', sex: 'MALE', grade: '10', section: 'FARADAY' },
+    { lrn: '400561153227', name: 'TUMANENG, VINCE', sex: 'MALE', grade: '10', section: 'FARADAY' },
     { lrn: '400561153228', name: 'ARAO, ADHIE QUETZALOCHI C.', sex: 'FEMALE', grade: '10', section: 'EINSTEIN' },
     { lrn: '400561153230', name: 'BINGCANG, GEELIA FRANCESKA T.', sex: 'FEMALE', grade: '10', section: 'FARADAY' },
     { lrn: '400561153235', name: 'GUIQUING, AUI XYZYG.', sex: 'FEMALE', grade: '10', section: 'FARADAY' },
